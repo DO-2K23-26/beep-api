@@ -1,9 +1,11 @@
 import { defineConfig } from '@adonisjs/auth'
 import {InferAuthEvents, Authenticators, InferAuthenticators} from '@adonisjs/auth/types'
 import { sessionGuard, sessionUserProvider } from '@adonisjs/auth/session'
+import {jwtGuard} from '#apps/authentication/providers/jwt'
+
 
 const authConfig = defineConfig({
-  default: 'web',
+  default: 'jwt',
   guards: {
     web: sessionGuard({
       useRememberMeTokens: false,
@@ -11,6 +13,13 @@ const authConfig = defineConfig({
         model: () => import('#apps/users/models/user')
       }),
     }),
+    jwt: jwtGuard({
+      provider: {
+        model: () => import('#apps/users/models/user'),
+        tokens: 'accessTokens',
+        uids: ['email']
+      }
+    })
   },
 })
 
