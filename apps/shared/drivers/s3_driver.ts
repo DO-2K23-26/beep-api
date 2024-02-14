@@ -1,27 +1,22 @@
 import { GetObjectCommand, PutObjectCommand, S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { s3Config, S3Config } from '#config/s3_config'
 
-class MyS3Config implements S3ClientConfig {
+export class MyS3Config implements S3ClientConfig {
   region: string
   credentials: { accessKeyId: string; secretAccessKey: string }
 
-  constructor(region: string, accessKeyId: string, secretAccessKey: string) {
-    this.region = region
-    this.credentials = { accessKeyId, secretAccessKey }
+  constructor(config: S3Config) {
+    this.region = config.region
+    this.credentials = config.credentials
   }
 }
 export class S3Driver {
   private static instance: S3Driver
-  private s3: S3Client
+  private readonly s3: S3Client
 
   constructor() {
-    this.s3 = new S3Client([
-      new MyS3Config(
-        process.env.AWS_REGION ?? '',
-        process.env.AWS_ACCESS_KEY_ID ?? '',
-        process.env.AWS_SECRET_ACCESS_KEY ?? ''
-      ),
-    ])
+    this.s3 = new S3Client([new MyS3Config(s3Config)])
   }
 
   static getInstance(): S3Driver {
@@ -38,9 +33,7 @@ export class S3Driver {
       Body: body,
     })
 
-    const response = await this.s3.send(command)
-
-    return response
+    return await this.s3.send(command)
   }
 
   async downloadFile(bucket: string, key: string) {
@@ -49,8 +42,7 @@ export class S3Driver {
       Key: key,
     })
 
-    const response = await this.s3.send(command)
-    return response
+    return await this.s3.send(command)
   }
 
   async getSignedUrl(bucket: string, key: string) {
