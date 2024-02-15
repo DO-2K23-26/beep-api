@@ -1,0 +1,13 @@
+import { middleware } from '#start/kernel'
+import router from '@adonisjs/core/services/router'
+
+const ChannelsController = () => import('#apps/channels/controllers/channels_controller')
+
+router.group(() => {
+    router.get("/", [ChannelsController, 'index'])
+    router.get("/:id", [ChannelsController, 'show'])
+    router.post('/', [ChannelsController, 'store'])
+    router.patch('/', [ChannelsController, 'update'])
+    router.delete('/:id', [ChannelsController, 'destroy'])
+}).prefix('channels')
+  // .use(middleware.auth())
