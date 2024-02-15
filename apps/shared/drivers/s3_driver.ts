@@ -1,13 +1,25 @@
-import { GetObjectCommand, PutObjectCommand, S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  S3Client,
+  S3ClientConfig,
+} from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { s3Config, S3Config } from '#config/s3_config'
+import { s3Config } from '#config/s3_config'
 
 export class MyS3Config implements S3ClientConfig {
   region: string
+  endpoint: string
   credentials: { accessKeyId: string; secretAccessKey: string }
 
-  constructor(config: S3Config) {
+  constructor(config: {
+    endpoint: string
+    credentials: { accessKeyId: string; secretAccessKey: string }
+    region: string
+  }) {
     this.region = config.region
+    this.endpoint = config.endpoint
     this.credentials = config.credentials
   }
 }
@@ -16,7 +28,7 @@ export class S3Driver {
   private readonly s3: S3Client
 
   constructor() {
-    this.s3 = new S3Client([new MyS3Config(s3Config)])
+    this.s3 = new S3Client(new MyS3Config(s3Config))
   }
 
   static getInstance(): S3Driver {
@@ -26,11 +38,12 @@ export class S3Driver {
     return S3Driver.instance
   }
 
-  async uploadFile(bucket: string, key: string, body: any) {
+  async uploadFile(bucket: string, key: string, body: any, length: number) {
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: key,
       Body: body,
+      ContentLength: length,
     })
 
     return await this.s3.send(command)
@@ -54,6 +67,13 @@ export class S3Driver {
     // Expires in 1 hour (3600 seconds)
     return await getSignedUrl(this.s3, command, { expiresIn: 3600 })
   }
+
+  async deleteFile(bucket: string, key: string) {
+    const command = new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    })
+
+    return await this.s3.send(command)
+  }
 }
-
-

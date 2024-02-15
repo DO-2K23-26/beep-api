@@ -49,6 +49,7 @@ export default defineConfig({
     () => import('#start/kernel'),
     () => import('#apps/users/routes'),
     () => import('#apps/authentication/routes'),
+    () => import('#apps/storage/routes')
   ],
 
   /*
