@@ -1,4 +1,3 @@
-import User from "#apps/users/models/user";
 import {errors} from "@adonisjs/auth";
 import jwt from "jsonwebtoken";
 import env from "#start/env";

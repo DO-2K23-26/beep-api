@@ -2,6 +2,7 @@ import { defineConfig } from '@adonisjs/auth'
 import {InferAuthEvents, Authenticators, InferAuthenticators} from '@adonisjs/auth/types'
 import { sessionGuard, sessionUserProvider } from '@adonisjs/auth/session'
 import {jwtGuard} from '#apps/authentication/providers/jwt'
+import env from "#start/env";
 
 
 const authConfig = defineConfig({
@@ -14,6 +15,7 @@ const authConfig = defineConfig({
       }),
     }),
     jwt: jwtGuard({
+      secret: env.get('APP_KEY'),
       provider: {
         model: () => import('#apps/users/models/user'),
         tokens: 'accessTokens',

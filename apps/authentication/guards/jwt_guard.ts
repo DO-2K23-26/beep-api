@@ -1,35 +1,31 @@
-import {AuthClientResponse, GuardContract} from "@adonisjs/auth/types";
-import {errors, symbols} from '@adonisjs/auth'
-import jwt from 'jsonwebtoken'
-import {HttpContext} from "@adonisjs/core/http";
-import {DateTime} from "luxon";
-import User from "#apps/users/models/user"
+import { AuthClientResponse, GuardContract } from '@adonisjs/auth/types'
+import { errors, symbols } from '@adonisjs/auth'
+import jwt, { JwtPayload } from 'jsonwebtoken'
+import { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
+import User from '#apps/users/models/user'
 //@ts-ignore
 import { UserProviderContract } from '@adonisjs/auth/types/core'
-import Role from "#apps/users/models/role";
+import Role from '#apps/users/models/role'
 
 export type JwtGuardOptions = {
   secret: string
 }
 
-export class JwtGuard<
-  UserProvider extends UserProviderContract<User>
-> implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]> {
+export class JwtGuard<UserProvider extends UserProviderContract<User>>
+  implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]>
+{
+  declare [symbols.GUARD_KNOWN_EVENTS]: {}
   #userProvider: UserProvider
   #options: JwtGuardOptions
   #ctx: HttpContext
+  payload?: JwtPayload | string
 
-  constructor(
-    ctx: HttpContext,
-    userProvider: UserProvider,
-    options: JwtGuardOptions
-  ) {
+  constructor(ctx: HttpContext, userProvider: UserProvider, options: JwtGuardOptions) {
     this.#userProvider = userProvider
     this.#options = options
     this.#ctx = ctx
   }
-
-  declare [symbols.GUARD_KNOWN_EVENTS] = {}
 
   driverName: 'jwt' = 'jwt'
 
@@ -38,25 +34,35 @@ export class JwtGuard<
 
   user?: UserProvider[typeof symbols.PROVIDER_REAL_USER]
 
-  async generate(
-    user: User
-  ) {
+  getUserProvider() {
+    return this.#userProvider
+  }
+
+  async generate(user: User) {
     const payloadAccessToken = {
       sub: user.id,
-      exp: Math.floor(DateTime.now().plus({
-        minute: 15
-      }).toMillis() / 1000),
-      "authorization_access": {
-        roles: user.roles.map((role: Role) => role.label)
-      }
+      exp: Math.floor(
+        DateTime.now()
+          .plus({
+            minute: 15,
+          })
+          .toMillis() / 1000
+      ),
+      authorization_access: {
+        roles: user.roles.map((role: Role) => role.label),
+      },
     }
 
     const payloadRefreshToken = {
       sub: user.id,
-      exp: Math.floor(DateTime.now().plus({
-        hour: 12,
-      }).toMillis() / 1000),
-      scope: 'read write'
+      exp: Math.floor(
+        DateTime.now()
+          .plus({
+            hour: 12,
+          })
+          .toMillis() / 1000
+      ),
+      scope: 'read write',
     }
 
     const accessToken = jwt.sign(payloadAccessToken, this.#options.secret)
@@ -64,28 +70,30 @@ export class JwtGuard<
 
     return {
       accessToken,
-      refreshToken
+      refreshToken,
     }
   }
 
-  async authenticate(): Promise<
-    UserProvider[typeof symbols.PROVIDER_REAL_USER]
-  > {
+  async authenticate(): Promise<UserProvider[typeof symbols.PROVIDER_REAL_USER]> {
     const authHeader = this.#ctx.request.header('authorization')
 
     if (!authHeader) {
       throw new errors.E_UNAUTHORIZED_ACCESS('Acces refusé', {
-        guardDriverName: this.driverName
+        guardDriverName: this.driverName,
       })
     }
 
     const [, token] = authHeader.split('Bearer ')
     console.log(token)
     if (!token) {
-      throw new errors.E_UNAUTHORIZED_ACCESS('Unauthorized access', { guardDriverName: this.driverName })
+      throw new errors.E_UNAUTHORIZED_ACCESS('Unauthorized access', {
+        guardDriverName: this.driverName,
+      })
     }
 
-    return await this.verifyToken(token)
+    this.payload = await this.verifyToken(token)
+
+    return this.payload
   }
 
   /**
@@ -102,11 +110,13 @@ export class JwtGuard<
 
       const algorithm = decodedToken?.header.alg as jwt.Algorithm
 
-      const verifyToken = jwt.verify(token, this.#options.secret, { algorithms: [algorithm ]})
+      const verifyToken = jwt.verify(token, this.#options.secret, { algorithms: [algorithm] })
 
       return verifyToken
     } catch (e) {
-      throw new errors.E_UNAUTHORIZED_ACCESS('Unauthorized access', { guardDriverName: this.driverName })
+      throw new errors.E_UNAUTHORIZED_ACCESS('Unauthorized access', {
+        guardDriverName: this.driverName,
+      })
     }
   }
 
@@ -117,9 +127,13 @@ export class JwtGuard<
     return null
   }
 
-  authenticateAsClient(user: UserProvider[typeof symbols.PROVIDER_REAL_USER], ...args: any[]): Promise<AuthClientResponse> {
-    console.log(user)
+  authenticateAsClient(
+    user: UserProvider[typeof symbols.PROVIDER_REAL_USER],
+    ...args: any[]
+  ): Promise<AuthClientResponse> {
+    console.log(user, args)
     return Promise.resolve({})
   }
 
+  GUARD_KNOWN_EVENTS: unknown
 }

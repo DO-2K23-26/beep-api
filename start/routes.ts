@@ -8,8 +8,11 @@
 */
 
 import router from '@adonisjs/core/services/router'
-router.get('/', async () => {
-  return {
-    hello: 'world',
-  }
-})
+import { middleware } from './kernel.js'
+
+router
+  .get('/', async ({ auth }) => {
+    const payload = auth.use('jwt').payload
+    return payload
+  })
+  .use(middleware.auth())
