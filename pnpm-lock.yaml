@@ -83,7 +83,7 @@ devDependencies:
     specifier: ^3.4.2
     version: 3.4.2
   '@types/node':
-    specifier: ^20.11.10
+    specifier: ^20.11.16
     version: 20.11.16
   eslint:
     specifier: ^8.56.0

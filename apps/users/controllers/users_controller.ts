@@ -11,4 +11,11 @@ export default class UsersController {
 
     return response.send(users)
   }
+
+  public async register({ request, response }: HttpContext) {
+    const data = request.only(['email', 'password'])
+    const user = await this.userService.create(data)
+
+    return response.send(user)
+  }
 }

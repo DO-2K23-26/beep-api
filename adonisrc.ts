@@ -50,7 +50,8 @@ export default defineConfig({
     () => import('#apps/users/routes'),
     () => import('#apps/authentication/routes'),
     () => import('#apps/storage/routes'),
-    () => import('#apps/channels/routes')
+    () => import('#apps/channels/routes'),
+    () => import('#apps/messages/routes'),
   ],
 
   /*

@@ -10,6 +10,7 @@ export default class AuthenticationController {
   async login({ request, response, auth }: HttpContext) {
     const { username, password } = request.only(['username', 'password'])
 
+    console.log(username, password)
     const user = await User.verifyCredentials(username, password)
     await user.load('roles')
 
