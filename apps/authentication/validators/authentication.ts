@@ -6,7 +6,10 @@ import { Infer } from '@vinejs/vine/types'
  * a new authentication.ts.
  */
 export const createAuthenticationValidator = vine.compile(
-  vine.object({})
+  vine.object({
+    username: vine.string(),
+    password: vine.string(),
+  })
 )
 
 /**

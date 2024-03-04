@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import User from "#apps/users/models/user"
+import { createAuthenticationValidator } from '../validators/authentication.js'
 
 @inject()
 export default class AuthenticationController {
@@ -18,8 +19,17 @@ export default class AuthenticationController {
 
     return response.send({
       user,
-      tokens
+      tokens,
     })
+  }
+
+  async register({ request, auth }: HttpContext) {
+    const schemaUser = await request.validateUsing(createAuthenticationValidator)
+
+    const user = await this.authenticationService.registerUser(schemaUser)
+    const tokens = await auth.use('jwt').generate(user)
+
+    return { user, tokens }
   }
 
   async refresh({ response, request, auth }: HttpContext) {
@@ -37,7 +47,7 @@ export default class AuthenticationController {
     const tokens = await auth.use('jwt').generate(user)
 
     return response.send({
-      ...tokens
+      ...tokens,
     })
   }
 }
