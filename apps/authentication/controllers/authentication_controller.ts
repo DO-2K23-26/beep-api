@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
-import User from "#apps/users/models/user"
+import User from '#apps/users/models/user'
 import { createAuthenticationValidator } from '../validators/authentication.js'
 
 @inject()
@@ -27,6 +27,7 @@ export default class AuthenticationController {
     const schemaUser = await request.validateUsing(createAuthenticationValidator)
 
     const user = await this.authenticationService.registerUser(schemaUser)
+    await user.load('roles')
     const tokens = await auth.use('jwt').generate(user)
 
     return { user, tokens }
