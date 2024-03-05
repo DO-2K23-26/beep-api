@@ -32,11 +32,9 @@ export default class AuthenticationController {
   }
 
   async refresh({ response, request, auth }: HttpContext) {
-    const { refresh_token } = request.only(['refresh_token'])
+    const { refreshToken } = request.only(['refreshToken'])
 
-    console.log(refresh_token)
-
-    const payload = await this.authenticationService.verifyToken(refresh_token)
+    const payload = await this.authenticationService.verifyToken(refreshToken)
 
     const user = await User.query()
       .where('id', payload.sub as string)
