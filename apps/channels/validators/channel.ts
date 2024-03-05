@@ -18,7 +18,7 @@ export const createChannelValidator = vine.compile(
  */
 export const updateChannelValidator = vine.compile(
   vine.object({
-    id: vine.string().minLength(1),
+    id: vine.string().uuid({ version: [4] }),
     name: vine.string().minLength(1).optional(), // Le nom est facultatif pour la mise à jour, mais s'il est fourni, il doit être non vide
   })
 )

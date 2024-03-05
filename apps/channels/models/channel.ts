@@ -1,22 +1,27 @@
-import { BaseModel, beforeCreate, column } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeCreate, column, hasMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
+import Message from '#apps/messages/models/message'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
 
 export default class Channel extends BaseModel {
-    @column({ isPrimary: true })
-    declare id: string
+  @column({ isPrimary: true })
+  declare id: string
 
-    @column()
-    declare name: string
+  @column()
+  declare name: string
 
-    @column.dateTime({ autoCreate: true })
-    declare createdAt: DateTime
+  @hasMany(() => Message)
+  declare messages: HasMany<typeof Message>
 
-    @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare updatedAt: DateTime | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
 
-    @beforeCreate()
-    public static async generateUuid(model: Channel) {
-        model.id = randomUUID()
-    }
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+
+  @beforeCreate()
+  static async generateUuid(model: Channel) {
+    model.id = randomUUID()
+  }
 }

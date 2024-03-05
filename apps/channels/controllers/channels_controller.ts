@@ -42,7 +42,7 @@ export default class ChannelsController {
   /**
    * Handle form submission for the edit action
    */
-  async update({ params, request, response }: HttpContext) {
+  async update({ request, response }: HttpContext) {
     const payload = await request.validateUsing(updateChannelValidator)
 
     const channel: Channel = await this.channelService.update(payload)
@@ -58,6 +58,17 @@ export default class ChannelsController {
 
     await this.channelService.deleteById(channelId)
 
-    return response.send("channel has been deleted")
+    return response.send('channel has been deleted')
+  }
+
+  /**
+   * Show messages for a channel
+   */
+  async messages({ params, response }: HttpContext) {
+    const channelId: string = params.id
+
+    const messages = await this.channelService.findMessages(channelId)
+
+    return response.send(messages)
   }
 }
