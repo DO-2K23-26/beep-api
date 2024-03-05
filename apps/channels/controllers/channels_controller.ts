@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import ChannelService from '#apps/channels/services/channel_service'
 import Channel from '../models/channel.js'
-import { createChannelValidator, updateChannelValidator } from '../validators/channel.js'
+import {createChannelValidator, showChannelValidator, updateChannelValidator} from '../validators/channel.js'
 
 @inject()
 export default class ChannelsController {
@@ -31,10 +31,11 @@ export default class ChannelsController {
   /**
    * Show individual record
    */
-  async show({ params, response }: HttpContext) {
-    const channelId: string = params.id
+  async show({ request, response }: HttpContext) {
+    const data = await request.validateUsing(showChannelValidator)
+    console.log(request)
 
-    const channel: Channel = await this.channelService.findById(channelId)
+    const channel: Channel = await this.channelService.findById(data)
 
     return response.send(channel)
   }
@@ -59,16 +60,5 @@ export default class ChannelsController {
     await this.channelService.deleteById(channelId)
 
     return response.send('channel has been deleted')
-  }
-
-  /**
-   * Show messages for a channel
-   */
-  async messages({ params, response }: HttpContext) {
-    const channelId: string = params.id
-
-    const messages = await this.channelService.findMessages(channelId)
-
-    return response.send(messages)
   }
 }

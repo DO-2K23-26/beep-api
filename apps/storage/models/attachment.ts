@@ -51,7 +51,6 @@ export default class Attachment extends BaseModel {
   @afterSave()
   @afterFind()
   static async generateUrl(model: Attachment) {
-    console.log(model)
     model.url = await S3Driver.getInstance().getSignedUrl(
       env.get('S3_BUCKET_NAME') ?? 'app',
       model.name

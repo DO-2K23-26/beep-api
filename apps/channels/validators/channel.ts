@@ -23,5 +23,18 @@ export const updateChannelValidator = vine.compile(
   })
 )
 
+/**
+ * Validator to validate the show action
+ */
+export const showChannelValidator = vine.compile(
+  vine.object({
+    messages: vine.boolean().optional(),
+    params: vine.object({
+      id: vine.string().uuid({ version: [4] }),
+    }),
+  })
+)
+
 export type CreateChannelSchema = Infer<typeof createChannelValidator>
 export type UpdateChannelSchema = Infer<typeof updateChannelValidator>
+export type ShowChannelSchema = Infer<typeof showChannelValidator>

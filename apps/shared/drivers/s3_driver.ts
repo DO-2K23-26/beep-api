@@ -63,7 +63,6 @@ export class S3Driver {
       Bucket: bucket,
       Key: key,
     })
-    console.log(key)
 
     // Expires in 1 hour (3600 seconds)
     return await getSignedUrl(this.s3, command, { expiresIn: 3600 })

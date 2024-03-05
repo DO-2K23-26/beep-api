@@ -13,10 +13,7 @@ router
     // router.group(() => {
     //   router.post('/:id/join', [ChannelsController, 'join'])
     //   router.post('/:id/leave', [ChannelsController, 'leave'])
-    // }
-    router.group(() => {
-      router.get('/:id/messages', [ChannelsController, 'messages'])
-    })
+    // })
   })
   .prefix('channels')
-.use(middleware.auth())
+  .use(middleware.auth())

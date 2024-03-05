@@ -1,14 +1,25 @@
 import Channel from '#apps/channels/models/channel'
-import { CreateChannelSchema, UpdateChannelSchema } from '../validators/channel.js'
-import Message from "#apps/messages/models/message";
+import {
+  CreateChannelSchema,
+  ShowChannelSchema,
+  UpdateChannelSchema,
+} from '../validators/channel.js'
 
 export default class ChannelService {
   async findAll(): Promise<Channel[]> {
     return Channel.query()
   }
 
-  async findById(channelId: string): Promise<Channel> {
-    return Channel.query().where('id', channelId).firstOrFail()
+  async findById(data: ShowChannelSchema): Promise<Channel> {
+    if (data.messages) {
+      return Channel.query()
+        .where('id', data.params.id)
+        .preload('messages', (query) => {
+          query.preload('attachments')
+        })
+        .firstOrFail()
+    }
+    return Channel.query().where('id', data.params.id).firstOrFail()
   }
 
   async create(payload: CreateChannelSchema): Promise<Channel> {
@@ -24,11 +35,5 @@ export default class ChannelService {
   async deleteById(channelId: string): Promise<void> {
     const channel: Channel = await Channel.findOrFail(channelId)
     await channel.delete()
-  }
-
-  async findMessages(channelId: string): Promise<Message[]> {
-    const channel = await Channel.findOrFail(channelId)
-    channel.load('messages')
-    return channel.messages
   }
 }
