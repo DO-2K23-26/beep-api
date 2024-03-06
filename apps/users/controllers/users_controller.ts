@@ -13,7 +13,7 @@ export default class UsersController {
   }
 
   public async register({ request, response }: HttpContext) {
-    const data = request.only(['email', 'password'])
+    const data = request.only(['username', 'firstName', 'lastName', 'email', 'password'])
     const user = await this.userService.create(data)
 
     return response.send(user)

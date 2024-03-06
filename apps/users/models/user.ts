@@ -8,6 +8,7 @@ import {randomUUID} from 'crypto'
 import Role from '#apps/users/models/role'
 import type {HasMany, ManyToMany} from '@adonisjs/lucid/types/relations'
 import Message from "#apps/messages/models/message";
+import Token from './token.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -19,6 +20,15 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare id: string
 
   @column()
+  declare username: string
+
+  @column()
+  declare firstName: string
+
+  @column()
+  declare lastName: string
+
+  @column()
   declare email: string
 
   @column({ serializeAs: null })
@@ -26,6 +36,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @manyToMany(() => Role)
   declare roles: ManyToMany<typeof Role>
+
+  @column()
+  declare verifiedAt: DateTime | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -37,6 +50,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare messages: HasMany<typeof Message>
 
   static accessTokens = DbAccessTokensProvider.forModel(User)
+
+  @hasMany(() => Token)
+  declare tokens: HasMany<typeof Token>
 
   @beforeCreate()
   public static async generateUuid(model: User) {

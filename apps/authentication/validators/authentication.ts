@@ -8,6 +8,9 @@ import { Infer } from '@vinejs/vine/types'
 export const createAuthenticationValidator = vine.compile(
   vine.object({
     username: vine.string(),
+    firstname: vine.string(),
+    lastname: vine.string(),
+    email: vine.string(),
     password: vine.string(),
   })
 )

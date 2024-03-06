@@ -45,4 +45,14 @@ export default await Env.create(new URL('../', import.meta.url), {
   S3_KEY: Env.schema.string(),
   S3_SECRET: Env.schema.string(),
   S3_ENDPOINT: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the mail package
+  |----------------------------------------------------------
+  */
+  SMTP_HOST: Env.schema.string(),
+  SMTP_PORT: Env.schema.string(),
+  SMTP_USERNAME: Env.schema.string(),
+  SMTP_PASSWORD: Env.schema.string(),
 })

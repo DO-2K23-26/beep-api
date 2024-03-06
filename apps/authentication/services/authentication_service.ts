@@ -4,6 +4,9 @@ import env from '#start/env'
 import logger from '@adonisjs/core/services/logger'
 import { CreateAuthenticationSchema } from '../validators/authentication.js'
 import User from '#apps/users/models/user'
+import Token from '#apps/users/models/token'
+import crypto from 'crypto';
+import { DateTime } from 'luxon'
 
 export default class AuthenticationService {
   async verifyToken(token: string) {
@@ -22,10 +25,34 @@ export default class AuthenticationService {
 
   async registerUser(schemaUser: CreateAuthenticationSchema): Promise<User> {
     const user = await User.create({
-      email: schemaUser.username,
+      username: schemaUser.username,
+      firstName: schemaUser.firstname,
+      lastName: schemaUser.lastname,
+      email: schemaUser.email,
       password: schemaUser.password,
     })
 
     return user
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    const user = await User.findBy('email', email);
+
+    return user;
+  }
+
+  async createVerificationToken(user: User): Promise<Token> {
+    const currentDate: DateTime = DateTime.now();
+
+    const token = await Token.create({
+      token: crypto.randomBytes(100).toString('hex'),
+      ownerId: user.id,
+      createdAt: currentDate,
+      desactivatedAt: currentDate.plus({
+        hour: 2,
+      })
+    });
+
+    return token;
   }
 }

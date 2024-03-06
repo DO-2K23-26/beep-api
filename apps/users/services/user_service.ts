@@ -5,7 +5,7 @@ export default class UserService {
     return User.query()
   }
 
-  public async create(data: { email: string, password: string}) {
+  public async create(data: { username: string, firstName: string, lastName: string, email: string, password: string }) {
     return User.create(data)
   }
 }
