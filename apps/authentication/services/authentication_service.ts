@@ -55,4 +55,30 @@ export default class AuthenticationService {
 
     return token;
   }
+
+  async verifyEmail(email: string, token: string): Promise<boolean> {
+    let user: User | null = await User.findBy('email', email);
+
+    if (user == null)
+      return false;
+
+    if (user.verifiedAt != null)
+      return true;
+
+    const tokenObj: Token | null = await Token.query()
+      .where('token', token)
+      .where('ownerId', user.id)
+      .first();
+
+    if (tokenObj == null)
+      return false;
+
+    if (tokenObj.desactivatedAt < DateTime.now())
+      return false;
+
+    user.verifiedAt = DateTime.now();
+    await user.save();
+
+    return true;
+  }
 }

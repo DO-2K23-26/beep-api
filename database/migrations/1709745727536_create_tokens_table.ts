@@ -8,8 +8,8 @@ export default class extends BaseSchema {
       table.increments('id')
       table.string('token').notNullable()
       table.string('owner_id').references('id').inTable('users').notNullable()
-      table.timestamp('created_at')
-      table.timestamp('desactivated_at')
+      table.timestamp('created_at').notNullable()
+      table.timestamp('desactivated_at').notNullable()
     })
   }
 

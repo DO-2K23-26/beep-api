@@ -20,5 +20,5 @@ export default class Token extends BaseModel {
     declare createdAt: DateTime
 
     @column.dateTime({ autoCreate: true, autoUpdate: true })
-    declare desactivatedAt: DateTime | null
+    declare desactivatedAt: DateTime
 }

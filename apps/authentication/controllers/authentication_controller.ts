@@ -5,6 +5,7 @@ import User from '#apps/users/models/user'
 import { createAuthenticationValidator } from '../validators/authentication.js'
 import MailService from '../services/mail_service.js'
 import Token from '#apps/users/models/token'
+import { createVerifyValidator } from '../validators/verify.js'
 
 @inject()
 export default class AuthenticationController {
@@ -59,5 +60,16 @@ export default class AuthenticationController {
     return response.send({
       ...tokens,
     })
+  }
+
+  async verifyEmail({ response, request }: HttpContext) {
+    const schematoken = await request.validateUsing(createVerifyValidator);
+
+    const verificationStatus: boolean = await this.authenticationService.verifyEmail(schematoken.email, schematoken.token);
+
+    if (verificationStatus)
+      return response.status(200).send({ message: "Votre compte a bien été vérifié." });
+    else
+      return response.status(400).send({ message: "Le token de vérification est invalide." });
   }
 }
