@@ -1,7 +1,7 @@
 import { defineConfig } from '@adonisjs/auth'
 import {InferAuthEvents, Authenticators, InferAuthenticators} from '@adonisjs/auth/types'
 import { sessionGuard, sessionUserProvider } from '@adonisjs/auth/session'
-import {jwtGuard} from '#apps/authentication/providers/jwt'
+import { jwtGuard } from '#apps/authentication/providers/jwt'
 import env from "#start/env";
 
 
