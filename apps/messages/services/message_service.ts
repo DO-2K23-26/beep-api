@@ -6,12 +6,11 @@ export default class MessageService {
     return Message.query()
   }
 
-  async create(values: CreateMessagesSchema) {
-    return await Message.create(values)
+  async create(values: { validated: CreateMessagesSchema; ownerId: string }) {
+    return await Message.create({ ...values.validated, ownerId: values.ownerId })
   }
 
   async show(id: string) {
-    console.log('id', id)
     return await Message.query().preload('attachments').where('id', id).firstOrFail()
   }
 

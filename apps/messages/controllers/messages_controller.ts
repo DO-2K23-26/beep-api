@@ -32,7 +32,7 @@ export default class MessagesController {
         ownerId: payload.sub,
       },
     })
-    const message = await this.messageService.create(data)
+    const message = await this.messageService.create({ validated: data, ownerId: payload.sub })
     if (data.attachments) {
       const storageService = new StorageService()
       for (let attachment of data.attachments) {

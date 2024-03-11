@@ -8,11 +8,6 @@ import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
  */
 export const createMessageValidator = vine.withMetaData<{ ownerId: string }>().compile(
   vine.object({
-    ownerId: vine
-      .string()
-      .uuid({ version: [4] })
-      .bail(false)
-      .transform((_, field) => field.meta.ownerId),
     channelId: vine
       .string()
       .uuid({ version: [4] })
