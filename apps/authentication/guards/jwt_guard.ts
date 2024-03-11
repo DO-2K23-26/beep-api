@@ -48,7 +48,7 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
           })
           .toMillis() / 1000
       ),
-      authorization_access: {
+      resource_access: {
         roles: user.roles.map((role: Role) => role.label),
       },
     }
