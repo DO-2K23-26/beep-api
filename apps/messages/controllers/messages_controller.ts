@@ -6,6 +6,8 @@ import StorageService from '#apps/storage/services/storage_service'
 import { CreateStorageSchema, UpdateStorageSchema } from '#apps/storage/validators/storage'
 import Attachment from '#apps/storage/models/attachment'
 import { MultipartFile } from '@adonisjs/core/bodyparser'
+import MessagePolicy from '#apps/messages/policies/message_policy'
+import Message from '#apps/messages/models/message'
 @inject()
 export default class MessagesController {
   constructor(private messageService: MessageService) {
@@ -27,11 +29,7 @@ export default class MessagesController {
     if (!(payload && typeof payload.sub === 'string')) {
       return { error: 'User not found' }
     }
-    const data = await request.validateUsing(createMessageValidator, {
-      meta: {
-        ownerId: payload.sub,
-      },
-    })
+    const data = await request.validateUsing(createMessageValidator)
     const message = await this.messageService.create({ validated: data, ownerId: payload.sub })
     if (data.attachments) {
       const storageService = new StorageService()
@@ -57,16 +55,13 @@ export default class MessagesController {
   /**
    * Handle form submission for the edit action
    */
-  async update({ auth, params, request }: HttpContext) {
+  async update({ bouncer, auth, params, request }: HttpContext) {
     const payload = auth.use('jwt').payload
     if (!(payload && typeof payload.sub === 'string')) {
       return { error: 'User not found' }
     }
-    const data = await request.validateUsing(updateMessageValidator, {
-      meta: {
-        ownerId: payload.sub,
-      },
-    })
+    const data = await request.validateUsing(updateMessageValidator)
+    await bouncer.with(MessagePolicy).authorize('edit' as never)
     await this.messageService.update(data)
     const newMessage = await this.messageService.show(params.id)
     const attachments: Attachment[] = newMessage.attachments
@@ -109,7 +104,9 @@ export default class MessagesController {
   /**
    * Delete record
    */
-  async destroy({ params }: HttpContext) {
-    return this.messageService.destroy(params.id)
+  async destroy({ bouncer, params }: HttpContext) {
+    const owner = await Message.findOrFail(params.id)
+    await bouncer.with(MessagePolicy).authorize('delete' as never)
+    return this.messageService.destroy(owner.ownerId)
   }
 }

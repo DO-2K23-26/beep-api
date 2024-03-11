@@ -6,13 +6,13 @@ import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
  * Validator to validate the payload when creating
  * a new message.ts.
  */
-export const createMessageValidator = vine.withMetaData<{ ownerId: string }>().compile(
+export const createMessageValidator = vine.compile(
   vine.object({
     channelId: vine
       .string()
       .uuid({ version: [4] })
       .exists((db, value) => {
-        return db.from('channels').where('id', value).firstOrFail() //TODO: Add right check
+        return db.from('channels').where('id', value).firstOrFail()
       }),
     content: vine.string(),
     attachments: vine.array(new VineMultipartFile()).optional(),
@@ -23,7 +23,7 @@ export const createMessageValidator = vine.withMetaData<{ ownerId: string }>().c
  * Validator to validate the payload when updating
  * an existing message.ts.
  */
-export const updateMessageValidator = vine.withMetaData<{ ownerId: string }>().compile(
+export const updateMessageValidator = vine.compile(
   vine.object({
     content: vine.string(),
     attachments: vine.array(new VineMultipartFile()),
@@ -31,12 +31,8 @@ export const updateMessageValidator = vine.withMetaData<{ ownerId: string }>().c
       id: vine
         .string()
         .uuid({ version: [4] })
-        .exists((db, value, fields) => {
-          return db
-            .from('messages')
-            .where('id', value)
-            .andWhere('owner_id', fields.meta.ownerId)
-            .firstOrFail()
+        .exists((db, value) => {
+          return db.from('messages').where('id', value).firstOrFail()
         }),
     }),
   })
