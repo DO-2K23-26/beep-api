@@ -3,6 +3,7 @@ import { inject } from '@adonisjs/core'
 import ChannelService from '#apps/channels/services/channel_service'
 import Channel from '../models/channel.js'
 import {createChannelValidator, showChannelValidator, updateChannelValidator} from '../validators/channel.js'
+import transmit from "@adonisjs/transmit/services/main";
 
 @inject()
 export default class ChannelsController {
@@ -25,6 +26,10 @@ export default class ChannelsController {
 
     const channel: Channel = await this.channelService.create(payload)
 
+    transmit.broadcast('channels/action', {
+      message: 'A new channel has been created'
+    })
+
     return response.send(channel)
   }
 
@@ -36,6 +41,8 @@ export default class ChannelsController {
     console.log(request)
 
     const channel: Channel = await this.channelService.findById(data)
+
+
 
     return response.send(channel)
   }
@@ -59,6 +66,9 @@ export default class ChannelsController {
 
     await this.channelService.deleteById(channelId)
 
+    transmit.broadcast('channels/action', {
+      message: 'A channel has been deleted'
+    })
     return response.send('channel has been deleted')
   }
 }
