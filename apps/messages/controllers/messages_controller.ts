@@ -6,18 +6,23 @@ import StorageService from '#apps/storage/services/storage_service'
 import { CreateStorageSchema, UpdateStorageSchema } from '#apps/storage/validators/storage'
 import Attachment from '#apps/storage/models/attachment'
 import { MultipartFile } from '@adonisjs/core/bodyparser'
+import transmit from "@adonisjs/transmit/services/main";
 import MessagePolicy from '#apps/messages/policies/message_policy'
 import Message from '#apps/messages/models/message'
 @inject()
 export default class MessagesController {
-  constructor(private messageService: MessageService) {
-    this.messageService = messageService
-  }
+  constructor(private messageService: MessageService) {}
 
   /**
    * Display a list of resource
    */
-  async index({}: HttpContext) {
+  async index({ params }: HttpContext) {
+    const channelId: string | undefined = params.channelId
+
+    if (channelId) {
+      return this.messageService.findAllByChannelId(channelId)
+    }
+
     return this.messageService.findAll()
   }
 
@@ -41,6 +46,10 @@ export default class MessagesController {
         await storageService.store(dataAttachments)
       }
     }
+
+    transmit.broadcast(`channels/${data.channelId}/messages`, {
+      message: 'new message'
+    })
     return this.messageService.show(message.id)
   }
 

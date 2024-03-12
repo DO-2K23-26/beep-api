@@ -7,6 +7,7 @@ router
   .group(() => {
     router.get('/', [MessageController, 'index'])
     router.post('/', [MessageController, 'store'])
+    router.get('/channel/:channelId', [MessageController, 'index'])
     router.get('/:id', [MessageController, 'show'])
     router.put('/:id', [MessageController, 'update'])
     router.delete('/:id', [MessageController, 'destroy'])

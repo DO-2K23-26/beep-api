@@ -23,4 +23,9 @@ export default class MessageService {
   async destroy(id: string) {
     return Message.query().where('id', id).delete()
   }
+
+  async findAllByChannelId(channelId: string) {
+    return Message.query().where('channelId', channelId)
+    .orderBy('created_at', 'desc')
+  }
 }
