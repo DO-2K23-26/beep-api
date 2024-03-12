@@ -36,7 +36,9 @@ export default class MessagesController {
     }
     const data = await request.validateUsing(createMessageValidator)
     const message = await this.messageService.create({ validated: data, ownerId: payload.sub })
+    console.log(request.body())
     if (data.attachments) {
+      console.log(data.attachments)
       const storageService = new StorageService()
       for (let attachment of data.attachments) {
         const dataAttachments: CreateStorageSchema = {
@@ -75,6 +77,12 @@ export default class MessagesController {
     const newMessage = await this.messageService.show(params.id)
     const attachments: Attachment[] = newMessage.attachments
     const storageService = new StorageService()
+    if (!data.attachments) {
+      for (const attachment of attachments) {
+        await storageService.destroy(attachment.id)
+      }
+      return this.messageService.show(params.id)
+    }
     for (const attachment of data.attachments) {
       const attachmentToUpdate = attachments.find(
         (a: Attachment) =>

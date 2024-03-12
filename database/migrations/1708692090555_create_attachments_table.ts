@@ -7,6 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.string('id').primary()
       table.string('name').notNullable()
+      table.string('content_type').notNullable()
       table.string('message_id').references('id').inTable('messages').onDelete('CASCADE').notNullable()
 
       table.timestamp('created_at')

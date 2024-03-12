@@ -32,6 +32,9 @@ export default class Attachment extends BaseModel {
   declare name: string
 
   @column()
+  declare contentType: string
+
+  @column()
   declare url: string
 
   @column()

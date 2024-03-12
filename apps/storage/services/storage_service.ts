@@ -15,10 +15,13 @@ export default class StorageService {
     const message = await Message.findOrFail(values.messageId)
     const key = message.channelId + '/' + message.id + '/' + values.attachment.clientName
     if (values.attachment.tmpPath) {
+      console.log(values.attachment)
       const realFile = readFileSync(values.attachment.tmpPath)
       const buffer = Buffer.from(realFile)
       await this.S3Driver.uploadFile(this.BUCKET_NAME, key, buffer, buffer.length)
-      return await message.related('attachments').create({ name: key })
+      return await message
+        .related('attachments')
+        .create({ name: key, contentType: values.attachment.headers['content-type'] })
     }
     throw new Error('File not found')
   }
@@ -36,7 +39,10 @@ export default class StorageService {
       const realFile = readFileSync(values.attachment.tmpPath)
       const buffer = Buffer.from(realFile)
       await this.S3Driver.uploadFile(this.BUCKET_NAME, key, buffer, buffer.length)
-      return Attachment.findByOrFail('name', key)
+      const newAttachment = await Attachment.findByOrFail('name', key)
+      return newAttachment
+        .merge({ name: key, contentType: values.attachment.headers['content-type'] })
+        .save()
     }
     throw new Error('File not found')
   }
