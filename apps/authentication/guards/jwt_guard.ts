@@ -84,7 +84,6 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
     }
 
     const [, token] = authHeader.split('Bearer ')
-    console.log(token)
     if (!token) {
       throw new errors.E_UNAUTHORIZED_ACCESS('Unauthorized access', {
         guardDriverName: this.driverName,
