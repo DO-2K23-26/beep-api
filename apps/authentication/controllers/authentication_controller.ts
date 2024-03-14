@@ -24,7 +24,7 @@ export default class AuthenticationController {
     })
   }
 
-  async register({ request, auth }: HttpContext) {
+  async register({ request }: HttpContext) {
     const schemaUser = await request.validateUsing(createAuthenticationValidator)
 
     const existingUser: User | null = await this.authenticationService.getUserByEmail(schemaUser.email);
@@ -34,7 +34,6 @@ export default class AuthenticationController {
 
     const user: User = await this.authenticationService.registerUser(schemaUser)
     await user.load('roles')
-    const tokens = await auth.use('jwt').generate(user)
 
     const verificationToken: Token = await this.authenticationService.createVerificationToken(user);
 
@@ -42,7 +41,7 @@ export default class AuthenticationController {
 
     this.mailService.sendMail(user.email, 'Bienvenue sur Beep', emailContent);
 
-    return { user, tokens }
+    return { user }
   }
 
   async refresh({ response, request, auth }: HttpContext) {

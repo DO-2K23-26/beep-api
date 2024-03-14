@@ -10,5 +10,6 @@ router
     router.post('/verify', [AuthenticationController, 'verifyEmail'])
 
     router.post('/refresh', [AuthenticationController, 'refresh'])
+    router.get('/allLoggedUsers', [AuthenticationController, 'getAllLoggedUsers'])
   })
   .prefix('authentication')
