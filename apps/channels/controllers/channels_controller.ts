@@ -11,6 +11,7 @@ import {
 } from '../validators/channel.js'
 import transmit from '@adonisjs/transmit/services/main'
 import ChannelPolicy from '#apps/channels/policies/channel_policy'
+import logger from "@adonisjs/core/services/logger";
 
 @inject()
 export default class ChannelsController {
@@ -22,10 +23,13 @@ export default class ChannelsController {
   async index({ bouncer, request, response, auth }: HttpContext) {
     const data = await request.validateUsing(indexChannelValidator)
     const userPayload = auth.use('jwt').payload
+    logger.info(data)
     if (!data.onlyAccess) {
       await bouncer.with(ChannelPolicy).authorize('index' as never)
-      return response.send(await this.channelService.findAll(data))
+      const channels = await this.channelService.findAll(data)
+      return response.send(channels)
     } else if (userPayload?.sub) {
+      logger.info(`Fetch channels for user ${userPayload.sub}`)
       return response.send(
         await this.channelService.findAllForUser(userPayload.sub.toString(), data)
       )

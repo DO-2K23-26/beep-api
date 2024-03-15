@@ -9,27 +9,25 @@ import {
 
 export default class ChannelService {
   async findAll(data: IndexChannelSchema): Promise<Channel[]> {
-    const channels = Channel.query()
-    if (data.messages) {
-      channels.preload('messages')
-    }
-    if (data.users) {
-      channels.preload('users')
-    }
-    return channels
+    return Channel.query()
+      .if(data.messages, (query) => {
+        query.preload('messages')
+      })
+      .if(data.users, (query) => {
+        query.preload('users')
+      })
   }
 
   async findAllForUser(userId: string, data: IndexChannelSchema): Promise<Channel[]> {
-    const channels = Channel.query().whereHas('users', (builder) => {
+    return Channel.query().whereHas('users', (builder) => {
       builder.where('user_id', userId)
     })
-    if (data.messages) {
-      channels.preload('messages')
-    }
-    if (data.users) {
-      channels.preload('users')
-    }
-    return channels
+      .if(data.messages, (query) => {
+        query.preload('messages')
+      })
+      .if(data.users, (query) => {
+        query.preload('users')
+      })
   }
 
   async findById(data: ShowChannelSchema): Promise<Channel> {

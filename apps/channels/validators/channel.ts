@@ -43,7 +43,7 @@ export const indexChannelValidator = vine.compile(
   vine.object({
     messages: vine.boolean().optional(),
     users: vine.boolean().optional(),
-    onlyAccess: vine.boolean(),
+    onlyAccess: vine.boolean().optional(),
   })
 )
 
