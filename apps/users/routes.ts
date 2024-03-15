@@ -7,5 +7,3 @@ router.group(() => {
   router.get('', [UsersController, 'index'])
 }).prefix('/users')
   .use(middleware.auth())
-
-router.post('/register', [UsersController, 'register'])
