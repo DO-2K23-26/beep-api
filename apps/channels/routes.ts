@@ -10,10 +10,10 @@ router
     router.post('/', [ChannelsController, 'store'])
     router.patch('/', [ChannelsController, 'update'])
     router.delete('/:id', [ChannelsController, 'destroy'])
-    // router.group(() => {
-    //   router.post('/:id/join', [ChannelsController, 'join'])
-    //   router.post('/:id/leave', [ChannelsController, 'leave'])
-    // })
+    router.group(() => {
+      router.post('/:id/join', [ChannelsController, 'join'])
+      router.post('/:id/leave', [ChannelsController, 'leave'])
+    })
   })
   .prefix('channels')
   .use(middleware.auth())

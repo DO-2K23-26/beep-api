@@ -1,4 +1,11 @@
-import { BaseModel, beforeCreate, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import {
+  afterFetch,
+  BaseModel,
+  beforeCreate,
+  belongsTo,
+  column,
+  hasMany,
+} from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 import User from '#apps/users/models/user'
@@ -36,5 +43,12 @@ export default class Message extends BaseModel {
   @beforeCreate()
   static async generateUuid(model: Message) {
     model.id = randomUUID()
+  }
+
+  @afterFetch()
+  static async preloadRelations(messages: Message[]) {
+    for (const message of messages) {
+      await message.load('attachments')
+    }
   }
 }
