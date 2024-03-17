@@ -11,7 +11,10 @@ import MessagePolicy from '#apps/messages/policies/message_policy'
 import Message from '#apps/messages/models/message'
 @inject()
 export default class MessagesController {
-  constructor(private messageService: MessageService) {}
+  constructor(
+    private messageService: MessageService,
+    private storageService: StorageService
+  ) {}
 
   /**
    * Display a list of resource
@@ -31,21 +34,18 @@ export default class MessagesController {
    */
   async store({ auth, request }: HttpContext) {
     const payload = auth.use('jwt').payload
-    if (!(payload && typeof payload.sub === 'string')) {
-      return { error: 'User not found' }
-    }
     const data = await request.validateUsing(createMessageValidator)
     const message = await this.messageService.create({ validated: data, ownerId: payload.sub })
+
     console.log(request.body())
     if (data.attachments) {
       console.log(data.attachments)
-      const storageService = new StorageService()
       for (let attachment of data.attachments) {
         const dataAttachments: CreateStorageSchema = {
           messageId: message.id,
           attachment: attachment,
         }
-        await storageService.store(dataAttachments)
+        await this.storageService.store(dataAttachments)
       }
     }
 
