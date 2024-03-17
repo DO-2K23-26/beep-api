@@ -31,14 +31,25 @@ export default class ChannelService {
   }
 
   async findById(data: ShowChannelSchema): Promise<Channel> {
-    const channel = await Channel.findOrFail(data.params.id)
+    /*const channel = await Channel.findOrFail(data.params.id)
     if (data.messages) {
       await channel.load('messages')
     }
     if (data.users) {
       await channel.load('users')
     }
-    return channel
+    return channel*/
+    return Channel.query()
+      .where('id', data.params.id)
+      .if(data.messages, (query) => {
+        query.preload('messages', (query) => {
+          query.preload('owner')
+        })
+      })
+      .if(data.users, (query) => {
+        query.preload('users')
+      })
+      .firstOrFail()
   }
 
   async create(payload: CreateChannelSchema): Promise<Channel> {

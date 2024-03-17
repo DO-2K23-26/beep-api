@@ -22,9 +22,7 @@ export default class ChannelsController {
    */
   async index({ bouncer, request, response, auth }: HttpContext) {
     const data = await request.validateUsing(indexChannelValidator)
-    const userPayload = auth.use('jwt').payload
-    logger.info(data)
-    if (!data.onlyAccess) {
+    /*if (!data.onlyAccess) {
       await bouncer.with(ChannelPolicy).authorize('index' as never)
       const channels = await this.channelService.findAll(data)
       return response.send(channels)
@@ -33,9 +31,13 @@ export default class ChannelsController {
       return response.send(
         await this.channelService.findAllForUser(userPayload.sub.toString(), data)
       )
-    }
+    }*/
 
-    return response.abort('A problem occurred while fetching channels')
+    return this.channelService.findAll(data)
+
+
+
+    //return response.abort('A problem occurred while fetching channels')
   }
 
   /**
@@ -93,7 +95,7 @@ export default class ChannelsController {
    */
   async show({ bouncer, request, response }: HttpContext) {
     const data = await request.validateUsing(showChannelValidator)
-    await bouncer.with(ChannelPolicy).authorize('show' as never)
+    //await bouncer.with(ChannelPolicy).authorize('show' as never)
     const channel: Channel = await this.channelService.findById(data)
     return response.send(channel)
   }
