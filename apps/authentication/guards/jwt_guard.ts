@@ -51,6 +51,9 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
       resource_access: {
         roles: user.roles.map((role: Role) => role.label),
       },
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email
     }
 
     const payloadRefreshToken = {
