@@ -23,7 +23,7 @@ export default class UsersController {
     await redis.hset('userStates', payload.sub, JSON.stringify({
       id: payload.sub,
       username: payload.username
-    }));
+    }))
 
     transmit.broadcast('users/state', {
       message: 'new user connected'
