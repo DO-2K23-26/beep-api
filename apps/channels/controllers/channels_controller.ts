@@ -10,8 +10,6 @@ import {
   updateChannelValidator,
 } from '../validators/channel.js'
 import transmit from '@adonisjs/transmit/services/main'
-import ChannelPolicy from '#apps/channels/policies/channel_policy'
-import logger from "@adonisjs/core/services/logger";
 
 @inject()
 export default class ChannelsController {
@@ -20,7 +18,7 @@ export default class ChannelsController {
   /**
    * Display a list of resource
    */
-  async index({ bouncer, request, response, auth }: HttpContext) {
+  async index({ request }: HttpContext) {
     const data = await request.validateUsing(indexChannelValidator)
     /*if (!data.onlyAccess) {
       await bouncer.with(ChannelPolicy).authorize('index' as never)
@@ -93,7 +91,7 @@ export default class ChannelsController {
   /**
    * Show individual record
    */
-  async show({ bouncer, request, response }: HttpContext) {
+  async show({ request, response }: HttpContext) {
     const data = await request.validateUsing(showChannelValidator)
     //await bouncer.with(ChannelPolicy).authorize('show' as never)
     const channel: Channel = await this.channelService.findById(data)

@@ -35,7 +35,7 @@ export default class MessagesController {
   async store({ auth, request }: HttpContext) {
     const payload = auth.use('jwt').payload
     const data = await request.validateUsing(createMessageValidator)
-    const message = await this.messageService.create({ validated: data, ownerId: payload.sub })
+    const message = await this.messageService.create({ validated: data, ownerId: payload!.sub as string })
 
     console.log(request.body())
     if (data.attachments) {

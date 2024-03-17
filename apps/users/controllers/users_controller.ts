@@ -20,9 +20,9 @@ export default class UsersController {
   async connectUser({ response, auth }: HttpContext) {
     const payload = auth.use('jwt').payload
 
-    await redis.hset('userStates', payload.sub, JSON.stringify({
-      id: payload.sub,
-      username: payload.username
+    await redis.hset('userStates', payload!.sub as string, JSON.stringify({
+      id: payload!.sub,
+      username: (payload as any).username as string
     }))
 
     transmit.broadcast('users/state', {
@@ -37,7 +37,7 @@ export default class UsersController {
   async disconnectUser({ response, auth }: HttpContext) {
     const payload = auth.use('jwt').payload
 
-    await redis.hdel('userStates', payload.sub)
+    await redis.hdel('userStates', payload!.sub as string)
 
     transmit.broadcast('users/state', {
       message: 'new user disconnected'
