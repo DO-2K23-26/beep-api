@@ -56,29 +56,23 @@ export default class AuthenticationService {
     return token;
   }
 
-  async verifyEmail(email: string, token: string): Promise<boolean> {
-    let user: User | null = await User.findBy('email', email);
+  async verifyEmail(token: string): Promise<boolean> {
+    const tokenEntity = await Token.query()
+      .where('token', token)
+      .firstOrFail()
 
-    if (user == null)
-      return false;
+
+    let user = await User.findOrFail(tokenEntity.ownerId)
 
     if (user.verifiedAt != null)
-      return true;
+      return true
 
-    const tokenObj: Token | null = await Token.query()
-      .where('token', token)
-      .where('ownerId', user.id)
-      .first();
+    if (tokenEntity.desactivatedAt < DateTime.now())
+      return false
 
-    if (tokenObj == null)
-      return false;
+    user.verifiedAt = DateTime.now()
+    await user.save()
 
-    if (tokenObj.desactivatedAt < DateTime.now())
-      return false;
-
-    user.verifiedAt = DateTime.now();
-    await user.save();
-
-    return true;
+    return true
   }
 }

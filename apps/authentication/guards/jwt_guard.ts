@@ -54,7 +54,8 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
       username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email
+      email: user.email,
+      'audited_account': !!user.verifiedAt
     }
 
     const payloadRefreshToken = {
