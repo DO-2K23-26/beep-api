@@ -12,15 +12,18 @@ export class MyS3Config implements S3ClientConfig {
   region: string
   endpoint: string
   credentials: { accessKeyId: string; secretAccessKey: string }
+  forcePathStyle: boolean
 
   constructor(config: {
     endpoint: string
     credentials: { accessKeyId: string; secretAccessKey: string }
     region: string
+    forcePathStyle: boolean
   }) {
     this.region = config.region
     this.endpoint = config.endpoint
     this.credentials = config.credentials
+    this.forcePathStyle = config.forcePathStyle
   }
 }
 export class S3Driver {

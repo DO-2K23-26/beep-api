@@ -22,7 +22,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm run build
 
 FROM base AS production
 ENV NODE_ENV=production
-ENV PORT=$PORT
+ENV PORT=80
 ENV HOST=0.0.0.0
 COPY ./package.json .
 COPY ./pnpm-lock.yaml .
@@ -30,5 +30,5 @@ COPY ./pnpm-lock.yaml .
 #RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod
 COPY --from=build /home/node/app/build .
 COPY --from=build /home/node/app/node_modules ./node_modules
-EXPOSE $PORT
+EXPOSE 80
 CMD ["dumb-init", "node", "bin/server.js"]

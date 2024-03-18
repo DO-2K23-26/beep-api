@@ -13,12 +13,12 @@ export default class StorageService {
   }
   async store(values: CreateStorageSchema) {
     const message = await Message.findOrFail(values.messageId)
-    const key = env.get('S3_BUCKET_NAME') + '/' + message.channelId + '/' + message.id + '/' + values.attachment.clientName
+    const key = message.channelId + '/' + message.id + '/' + values.attachment.clientName
     if (values.attachment.tmpPath) {
       console.log(values.attachment)
       const realFile = readFileSync(values.attachment.tmpPath)
       const buffer = Buffer.from(realFile)
-      await this.S3Driver.uploadFile('development', key, buffer, buffer.length)
+      await this.S3Driver.uploadFile(env.get('S3_BUCKET_NAME'), key, buffer, buffer.length)
       return await message
         .related('attachments')
         .create({ name: key, contentType: values.attachment.headers['content-type'], messageId: message.id })
