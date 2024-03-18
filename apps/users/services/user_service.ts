@@ -6,6 +6,13 @@ export default class UserService {
       .preload('roles')
   }
 
+  async findById(userId: string): Promise<User> {
+    return User
+      .query()
+      .where('id', userId)
+      .firstOrFail()
+  }
+
   public async create(data: { username: string, firstName: string, lastName: string, email: string, password: string }) {
     return User.create(data)
   }
