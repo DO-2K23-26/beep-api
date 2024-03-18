@@ -7,9 +7,8 @@ The Beep API is the backend of the Beep app.
 1. [Technologies used](#technologies-used)
 2. [Justification of Technology choices](#justification-of-technology-choices)
 3. [Architecture](#architecture)
-4. [Key details](#key-details)
-5. [Routing description](#routing-description)
-6. [Start the app in development mode](#start-the-app-in-development-mode)
+4. [Routing description](#routing-description)
+5. [Start the app in development mode](#start-the-app-in-development-mode)
 
 ## Technologies used
 
@@ -63,9 +62,10 @@ Finally Dokku is integrated with the existing Docker setup to streamline the dep
 
 ## Architecture
 
-## Key details
+![Description of the architecture of the API](image.png)
 
 ##  Routing description
+
 Following below are all the routes described in the API
 
 | Route                                 | Method | Prefix        | Middleware | Controller              | Action       | Description                               |
@@ -92,25 +92,23 @@ Following below are all the routes described in the API
 | /storage/files/:id                   | PUT    | /storage/files | auth       | FilesController         | update       | Updates an existing file.                |
 | /storage/files/:id                   | DELETE | /storage/files | auth       | FilesController         | destroy      | Deletes a file by ID.                    |
 
-
-
 ## Start the app in development mode
 
 Install all dependancies
 
-```
+```bash
 pnpm install
 ```
 
 Launch the containers and create the database
 
-```
+```bash
 docker compose up -d
 node ace migration:run
 ```
 
 Launch all seeders
 
-```
+```bash
 node ace db:seed
 ```
