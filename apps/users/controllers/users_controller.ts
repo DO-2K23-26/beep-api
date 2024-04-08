@@ -4,11 +4,14 @@ import UserService from '#apps/users/services/user_service'
 import UserPolicy from '#apps/users/policies/user_policy'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import redis from '@adonisjs/redis/services/main'
-import transmit from "@adonisjs/transmit/services/main";
+import transmit from '@adonisjs/transmit/services/main'
 
 @inject()
 export default class UsersController {
-  constructor(protected userService: UserService, protected authenticationService: AuthenticationService) {}
+  constructor(
+    protected userService: UserService,
+    protected authenticationService: AuthenticationService
+  ) {}
 
   async index({ response, bouncer }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('view' as never)
@@ -20,17 +23,21 @@ export default class UsersController {
   async connectUser({ response, auth }: HttpContext) {
     const payload = auth.use('jwt').payload
 
-    await redis.hset('userStates', payload!.sub as string, JSON.stringify({
-      id: payload!.sub,
-      username: (payload as any).username as string
-    }))
+    await redis.hset(
+      'userStates',
+      payload!.sub as string,
+      JSON.stringify({
+        id: payload!.sub,
+        username: (payload as any).username as string,
+      })
+    )
 
     transmit.broadcast('users/state', {
-      message: 'new user connected'
+      message: 'new user connected',
     })
 
     return response.send({
-      message: 'User connected'
+      message: 'User connected',
     })
   }
 
@@ -40,17 +47,23 @@ export default class UsersController {
     await redis.hdel('userStates', payload!.sub as string)
 
     transmit.broadcast('users/state', {
-      message: 'new user disconnected'
+      message: 'new user disconnected',
     })
 
     return response.send({
-      message: 'User disconnected'
+      message: 'User disconnected',
     })
   }
 
+  async all({ response }: HttpContext) {
+    const users = await this.userService.findAllToDisplay()
+
+    return response.send(users)
+  }
+
   async onlines({ response }: HttpContext) {
-    const userStates = await redis.hgetall('userStates');
-    const users = Object.values(userStates).map((userState) => JSON.parse(userState));
+    const userStates = await redis.hgetall('userStates')
+    const users = Object.values(userStates).map((userState) => JSON.parse(userState))
 
     return response.send(users)
   }

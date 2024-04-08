@@ -20,7 +20,7 @@ export default class Channel extends BaseModel {
   @hasMany(() => Message)
   declare messages: HasMany<typeof Message>
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true })  
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })

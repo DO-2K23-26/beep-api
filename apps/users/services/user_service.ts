@@ -6,6 +6,11 @@ export default class UserService {
       .preload('roles')
   }
 
+  public async findAllToDisplay() {
+    return User.query()
+      .select('id', 'username')
+  }
+
   async findById(userId: string): Promise<User> {
     return User
       .query()

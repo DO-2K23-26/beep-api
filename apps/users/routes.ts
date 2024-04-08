@@ -8,6 +8,7 @@ router.group(() => {
   router.post('/connect', [UsersController, 'connectUser'])
   router.post('/disconnect', [UsersController, 'disconnectUser'])
   router.get('/onlines', [UsersController, 'onlines'])
+  router.get('/display', [UsersController, 'all'])
 }).prefix('/users')
   .use(middleware.auth())
 
