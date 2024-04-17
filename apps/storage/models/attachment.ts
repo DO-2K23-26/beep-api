@@ -14,8 +14,6 @@ import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 import Message from '#apps/messages/models/message'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import env from '#start/env'
-import { S3Driver } from '#apps/shared/drivers/s3_driver'
 import * as querybuilder from '@adonisjs/lucid/types/querybuilder'
 
 export default class Attachment extends BaseModel {
@@ -54,29 +52,32 @@ export default class Attachment extends BaseModel {
   @afterSave()
   @afterFind()
   static async generateUrl(model: Attachment) {
-    model.url = await S3Driver.getInstance().getSignedUrl(
-      env.get('S3_BUCKET_NAME') ?? 'app',
-      model.name
-    )
+    model.url = 'http://localhost:3333/storage/files/secure/' + model.id
+    // model.url = await S3Driver.getInstance().getSignedUrl(
+    //   env.get('S3_BUCKET_NAME') ?? 'app',
+    //   model.name
+    // )
   }
 
   @afterFetch()
   static async generateUrlFetch(model: Attachment[]) {
     for (const attachment of model) {
-      attachment.url = await S3Driver.getInstance().getSignedUrl(
-        env.get('S3_BUCKET_NAME') ?? 'app',
-        attachment.name
-      )
+      attachment.url = 'http://localhost:3333/storage/files/secure/' + attachment.id
+      // attachment.url = await S3Driver.getInstance().getSignedUrl(
+      //   env.get('S3_BUCKET_NAME') ?? 'app',
+      //   attachment.name
+      // )
     }
   }
 
   @afterPaginate()
   static async generateUrlPaginate(model: querybuilder.SimplePaginatorContract<Attachment>) {
     for (const attachment of model.all()) {
-      attachment.url = await S3Driver.getInstance().getSignedUrl(
-        env.get('S3_BUCKET_NAME') ?? 'app',
-        attachment.name
-      )
+      attachment.url = 'http://localhost:3333/storage/files/secure/' + attachment.id
+      // attachment.url = await S3Driver.getInstance().getSignedUrl(
+      //   env.get('S3_BUCKET_NAME') ?? 'app',
+      //   attachment.name
+      // )
     }
   }
 }

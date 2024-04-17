@@ -71,6 +71,15 @@ export class S3Driver {
     return await getSignedUrl(this.s3, command, { expiresIn: 3600 })
   }
 
+  async getObjects(bucket: string, key: string) {
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    })
+
+    return await this.s3.send(command)
+  }
+
   async deleteFile(bucket: string, key: string) {
     const command = new DeleteObjectCommand({
       Bucket: bucket,
@@ -79,4 +88,8 @@ export class S3Driver {
 
     return await this.s3.send(command)
   }
+
+  // async getHeadObject(bucket: string, key: string) {
+  //   return s3.headObject({ Bucket: bucket, Key: key }).promise()
+  // }
 }

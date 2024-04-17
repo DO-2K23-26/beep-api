@@ -3,6 +3,8 @@ import { inject } from '@adonisjs/core'
 import StorageService from '#apps/storage/services/storage_service'
 import { createStorageValidator, updateStorageValidator } from '#apps/storage/validators/storage'
 import StoragePolicy from '#apps/storage/policies/storage_policy'
+import Attachment from "#apps/storage/models/attachment";
+
 @inject()
 export default class StoragesController {
   constructor(private storageService: StorageService) {}
@@ -29,7 +31,7 @@ export default class StoragesController {
    * Show individual record
    */
   async show({ params }: HttpContext) {
-    return await this.storageService.show(params.id)
+    return this.storageService.show(params.id)
   }
 
   /**
@@ -51,5 +53,16 @@ export default class StoragesController {
   async destroy({ bouncer, params }: HttpContext) {
     await bouncer.with(StoragePolicy).authorize('delete' as never)
     return await this.storageService.destroy(params.id)
+  }
+
+  async transmit({ params, response }: HttpContext) {
+    const attachment = await Attachment.findByOrFail('id', params.id)
+    const payload = await this.storageService.transmit(attachment.name)
+    if (payload.Body) {
+      response.type('application/octet-stream')
+      return response.stream(payload.Body)
+      // return response.stream(toString)
+    }
+    return response.notFound()
   }
 }

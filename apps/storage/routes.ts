@@ -9,6 +9,11 @@ router
         router.post('/', [FilesController, 'store'])
         router.put('/:id', [FilesController, 'update'])
         router.delete('/:id', [FilesController, 'destroy'])
+        router
+          .group(() => {
+            router.get('/:id', [FilesController, 'transmit'])
+          })
+          .prefix('/secure')
       })
       .prefix('/files')
   })
