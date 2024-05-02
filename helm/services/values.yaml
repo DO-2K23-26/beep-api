@@ -1,0 +1,28 @@
+# Default values for helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  configMapName: backend-config
+
+env:
+  dbPort: "5432"
+  dbUser: "postgres"
+  frontendUrl: "https://beep-staging.duratm.com"
+
+postgresql:
+  auth:
+    enablePostgresUser: true
+    database: "beep"
+
+redis:
+  architecture: replication
+  auth:
+    enabled: true
+
+minio:
+  defaultBuckets: beep
+  enabled: true
+  persistence:
+    enabled: true
+

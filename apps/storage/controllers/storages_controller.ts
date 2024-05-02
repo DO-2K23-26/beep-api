@@ -60,6 +60,7 @@ export default class StoragesController {
     const payload = await this.storageService.transmit(attachment.name)
     if (payload.Body) {
       response.type('application/octet-stream')
+      //@ts-ignore
       return response.stream(payload.Body)
       // return response.stream(toString)
     }

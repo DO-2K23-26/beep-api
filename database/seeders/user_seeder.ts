@@ -7,6 +7,7 @@ export default class extends BaseSeeder {
       email: 'pro.nathaelbonnal@gmail.com',
       password: 'nathael',
       username: 'nathael',
+      // @ts-ignore
       first_name: 'Nathael',
       last_name: 'Bonnal',
     })
