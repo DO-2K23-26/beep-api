@@ -11,7 +11,8 @@ router
         router.delete('/:id', [FilesController, 'destroy'])
         router
           .group(() => {
-            router.get('/:id', [FilesController, 'transmit'])
+            router.get('attachment/:id', [FilesController, 'transmitAttachment'])
+            router.get('profilePicture/:id', [FilesController, 'transmitProfilePicture'])
           })
           .prefix('/secure')
       })

@@ -10,6 +10,7 @@ import env from '#start/env'
 import { createVerifyValidator } from '../validators/verify.js'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
+import StorageService from "#apps/storage/services/storage_service";
 
 @inject()
 export default class AuthenticationController {
@@ -70,7 +71,15 @@ export default class AuthenticationController {
         )
         .replace('$_TEMPS_VALIDITE_TOKEN_$', '2')
 
-    this.mailService.sendMail(user.email, 'Bienvenue sur Beep', emailContent)
+    await this.mailService.sendMail(user.email, 'Bienvenue sur Beep', emailContent)
+
+    if (schemaUser.profilePicture) {
+      user.profilePicture = await new StorageService().storeProfilePicture(
+        schemaUser.profilePicture,
+        user.id
+      )
+      await user.save()
+    }
 
     return { user }
   }

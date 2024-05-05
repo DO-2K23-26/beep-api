@@ -4,6 +4,7 @@ import Message from '#apps/messages/models/message'
 import { readFileSync } from 'node:fs'
 import Attachment from '#apps/storage/models/attachment'
 import env from '#start/env'
+import { MultipartFile } from '@adonisjs/core/bodyparser'
 
 export default class StorageService {
   S3Driver: S3Driver
@@ -60,5 +61,16 @@ export default class StorageService {
 
   async transmit(fileName: string) {
     return await this.S3Driver.getObjects(env.get('S3_BUCKET_NAME'), fileName)
+  }
+
+  async storeProfilePicture(profilePicture: MultipartFile, id: string) {
+    const key = 'profilePictures/' + id + '/' + profilePicture.clientName
+    if (profilePicture.tmpPath) {
+      const realFile = readFileSync(profilePicture.tmpPath)
+      const buffer = Buffer.from(realFile)
+      await this.S3Driver.uploadFile(env.get('S3_BUCKET_NAME'), key, buffer, buffer.length)
+      return key
+    }
+    throw new Error('File not found')
   }
 }

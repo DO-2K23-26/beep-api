@@ -36,7 +36,10 @@ export default class MessagesController {
     const payload = auth.use('jwt').payload
     console.log(request.body())
     const data = await request.validateUsing(createMessageValidator)
-    const message = await this.messageService.create({ validated: data, ownerId: payload!.sub as string })
+    const message = await this.messageService.create({
+      validated: data,
+      ownerId: payload!.sub as string,
+    })
 
     if (data.attachments) {
       console.log(data.attachments)
@@ -50,7 +53,7 @@ export default class MessagesController {
     }
 
     transmit.broadcast(`channels/${data.channelId}/messages`, {
-      message: 'new message'
+      message: 'new message',
     })
     return this.messageService.show(message.id)
   }

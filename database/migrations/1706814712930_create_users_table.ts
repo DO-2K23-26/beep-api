@@ -6,11 +6,12 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.string('id').primary()
-      table.string('username', 80).notNullable().unique()
-      table.string('first_name', 80).notNullable()
-      table.string('last_name', 80).notNullable()
+      table.string('username', 254).notNullable().unique()
+      table.string('first_name', 254).notNullable()
+      table.string('last_name', 254).notNullable()
       table.string('email', 254).notNullable().unique()
       table.string('password').notNullable()
+      table.string('profile_picture').notNullable()
 
       table.timestamp('verified_at').nullable()
       table.timestamp('created_at').notNullable()

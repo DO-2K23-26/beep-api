@@ -9,6 +9,9 @@ import crypto from 'crypto';
 import { DateTime } from 'luxon'
 
 export default class AuthenticationService {
+
+  DEFAULT_PP_URL = 'default_profile_picture.png'
+
   async verifyToken(token: string) {
     try {
       const decodedToken = jwt.decode(token, { complete: true })
@@ -30,6 +33,7 @@ export default class AuthenticationService {
       lastName: schemaUser.lastname,
       email: schemaUser.email,
       password: schemaUser.password,
+      profilePicture: this.DEFAULT_PP_URL,
     })
 
     return user

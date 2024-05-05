@@ -19,6 +19,7 @@ export const createAuthenticationValidator = vine.compile(
     lastname: vine.string(),
     email: vine.string(),
     password: vine.string(),
+    profilePicture: vine.multipartFile().nullable(),
   })
 )
 

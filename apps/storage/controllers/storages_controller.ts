@@ -1,9 +1,10 @@
-import type { HttpContext } from '@adonisjs/core/http'
+import type { HttpContext, Response } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import StorageService from '#apps/storage/services/storage_service'
 import { createStorageValidator, updateStorageValidator } from '#apps/storage/validators/storage'
 import StoragePolicy from '#apps/storage/policies/storage_policy'
-import Attachment from "#apps/storage/models/attachment";
+import Attachment from '#apps/storage/models/attachment'
+import User from '#apps/users/models/user'
 
 @inject()
 export default class StoragesController {
@@ -55,9 +56,18 @@ export default class StoragesController {
     return await this.storageService.destroy(params.id)
   }
 
-  async transmit({ params, response }: HttpContext) {
+  async transmitAttachment({ params, response }: HttpContext) {
     const attachment = await Attachment.findByOrFail('id', params.id)
-    const payload = await this.storageService.transmit(attachment.name)
+    return await this.transmit(response, attachment.name)
+  }
+
+  async transmitProfilePicture({ params, response }: HttpContext) {
+    const user = await User.findByOrFail('id', params.id)
+    return await this.transmit(response, user.profilePicture)
+  }
+
+  async transmit(response: Response, id: string) {
+    const payload = await this.storageService.transmit(id)
     if (payload.Body) {
       response.type('application/octet-stream')
       //@ts-ignore
