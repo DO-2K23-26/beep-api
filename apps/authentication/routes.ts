@@ -6,8 +6,8 @@ const AuthenticationController = () =>
 
 router
   .group(() => {
-    router.post('/login', [AuthenticationController, 'login'])
-    router.post('/register', [AuthenticationController, 'register'])
+    router.post('/signin', [AuthenticationController, 'signin'])
+    router.post('/signup', [AuthenticationController, 'signup'])
     router.post('/verify', [AuthenticationController, 'verifyEmail'])
 
 

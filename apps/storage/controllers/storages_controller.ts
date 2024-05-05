@@ -62,7 +62,6 @@ export default class StoragesController {
       response.type('application/octet-stream')
       //@ts-ignore
       return response.stream(payload.Body)
-      // return response.stream(toString)
     }
     return response.notFound()
   }

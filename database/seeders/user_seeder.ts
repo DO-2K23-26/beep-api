@@ -1,15 +1,15 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import User from "#apps/users/models/user";
+import User from '#apps/users/models/user'
 
 export default class extends BaseSeeder {
   async run() {
     await User.create({
-      email: 'pro.nathaelbonnal@gmail.com',
-      password: 'nathael',
-      username: 'nathael',
-      // @ts-ignore
-      first_name: 'Nathael',
-      last_name: 'Bonnal',
+      email: 'baptiste.bronsin@outlook.com',
+      password: 'Baptiste01!',
+      username: 'baraly',
+      //@ts-ignore
+      first_name: 'Baptiste',
+      last_name: 'Bronsin',
     })
   }
 }

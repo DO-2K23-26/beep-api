@@ -2,12 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import User from '#apps/users/models/user'
-import { createAuthenticationValidator } from '../validators/authentication.js'
+import { createAuthenticationValidator, signinAuthenticationValidator } from '../validators/authentication.js'
 import MailService from '../services/mail_service.js'
 import Token from '#apps/users/models/token'
-import { createVerifyValidator } from '../validators/verify.js'
 import UserService from '#apps/users/services/user_service'
 import env from '#start/env'
+import { createVerifyValidator } from '../validators/verify.js'
 
 @inject()
 export default class AuthenticationController {
@@ -17,9 +17,9 @@ export default class AuthenticationController {
     private userService: UserService
   ) {}
 
-  async login({ request, response, auth }: HttpContext) {
-    const { username, password } = request.only(['username', 'password'])
-    const user = await User.verifyCredentials(username, password)
+  async signin({ request, response, auth }: HttpContext) {
+    const { email, password } = await request.validateUsing(signinAuthenticationValidator)
+    const user = await User.verifyCredentials(email, password)
     await user.load('roles')
 
     const tokens = await auth.use('jwt').generate(user)
@@ -30,7 +30,7 @@ export default class AuthenticationController {
     })
   }
 
-  async register({ request }: HttpContext) {
+  async signup({ request }: HttpContext) {
     const schemaUser = await request.validateUsing(createAuthenticationValidator)
 
     const existingUser: User | null = await this.authenticationService.getUserByEmail(
