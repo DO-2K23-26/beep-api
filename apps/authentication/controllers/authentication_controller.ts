@@ -8,6 +8,8 @@ import Token from '#apps/users/models/token'
 import UserService from '#apps/users/services/user_service'
 import env from '#start/env'
 import { createVerifyValidator } from '../validators/verify.js'
+import redis from '@adonisjs/redis/services/main'
+import transmit from '@adonisjs/transmit/services/main'
 
 @inject()
 export default class AuthenticationController {
@@ -23,6 +25,20 @@ export default class AuthenticationController {
     await user.load('roles')
 
     const tokens = await auth.use('jwt').generate(user)
+
+    await redis.hset(
+      'userStates',
+      user.id,
+      JSON.stringify({
+        id: user.id,
+        username: user.username,
+        expiresAt: Date.now() + 1200 * 1000  // Timestamp now + 20 minutes
+      })
+    )
+
+    transmit.broadcast('users/state', {
+      message: 'update user connected',
+    })
 
     return response.send({
       user,
@@ -68,6 +84,16 @@ export default class AuthenticationController {
       .where('id', payload.sub as string)
       .preload('roles')
       .firstOrFail()
+
+    await redis.hset(
+      'userStates',
+      payload!.sub as string,
+      JSON.stringify({
+        id: payload!.sub,
+        username: user.username as string,
+        expiresAt: Date.now() + 1200 * 1000  // Nouveau timestamp d'expiration
+      })
+    );
 
     const tokens = await auth.use('jwt').generate(user)
 

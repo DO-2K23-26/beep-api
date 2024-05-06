@@ -29,11 +29,12 @@ export default class UsersController {
       JSON.stringify({
         id: payload!.sub,
         username: (payload as any).username as string,
+        expiresAt: Date.now() + 1200 * 1000  // Timestamp now + 20 minutes
       })
     )
 
     transmit.broadcast('users/state', {
-      message: 'new user connected',
+      message: 'update user connected',
     })
 
     return response.send({
@@ -63,8 +64,25 @@ export default class UsersController {
 
   async onlines({ response }: HttpContext) {
     const userStates = await redis.hgetall('userStates')
+
+    let isUpdateRedis: boolean = false
+
+    for (const userKey in userStates) {
+      const userData = JSON.parse(userStates[userKey]);
+      if (userData.expiresAt <= Date.now()) {
+        await redis.hdel('userStates', userKey);
+        isUpdateRedis = true;
+      }
+    }
+
+    if (isUpdateRedis) {
+      transmit.broadcast('users/state', {
+        message: 'update user connected',
+      })
+    }
+
     const users = Object.values(userStates).map((userState) => JSON.parse(userState))
 
-    return response.send(users)
+    return response.send(users.filter(u => u.expiresAt > Date.now()))
   }
 }
