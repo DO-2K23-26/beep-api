@@ -71,3 +71,8 @@ spec:
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "node ace migration:run --force"]

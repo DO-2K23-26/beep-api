@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: gitlab.polytech.umontpellier.fr:5050/beep/file/api/file-beep-api
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: 056b6d57
   port: 80
   configMapName: backend-config
