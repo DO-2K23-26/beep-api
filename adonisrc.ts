@@ -56,6 +56,7 @@ export default defineConfig({
     () => import('#apps/storage/routes'),
     () => import('#apps/channels/routes'),
     () => import('#apps/messages/routes'),
+    () => import('#apps/servers/routes')
   ],
 
   /*
