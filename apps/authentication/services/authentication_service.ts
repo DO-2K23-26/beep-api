@@ -5,11 +5,10 @@ import logger from '@adonisjs/core/services/logger'
 import { CreateAuthenticationSchema } from '../validators/authentication.js'
 import User from '#apps/users/models/user'
 import Token from '#apps/users/models/token'
-import crypto from 'crypto';
+import crypto from 'node:crypto'
 import { DateTime } from 'luxon'
 
 export default class AuthenticationService {
-
   DEFAULT_PP_URL = 'default_profile_picture.png'
 
   async verifyToken(token: string) {
@@ -40,13 +39,13 @@ export default class AuthenticationService {
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    const user = await User.findBy('email', email);
+    const user = await User.findBy('email', email)
 
-    return user;
+    return user
   }
 
-  async createVerificationToken(user: User): Promise<Token> {
-    const currentDate: DateTime = DateTime.now();
+  async createToken(user: User): Promise<Token> {
+    const currentDate: DateTime = DateTime.now()
 
     const token = await Token.create({
       token: crypto.randomBytes(100).toString('hex'),
@@ -54,25 +53,20 @@ export default class AuthenticationService {
       createdAt: currentDate,
       desactivatedAt: currentDate.plus({
         hour: 2,
-      })
-    });
+      }),
+    })
 
-    return token;
+    return token
   }
 
   async verifyEmail(token: string): Promise<boolean> {
-    const tokenEntity = await Token.query()
-      .where('token', token)
-      .firstOrFail()
-
+    const tokenEntity = await Token.query().where('token', token).firstOrFail()
 
     let user = await User.findOrFail(tokenEntity.ownerId)
 
-    if (user.verifiedAt != null)
-      return true
+    if (user.verifiedAt != null) return true
 
-    if (tokenEntity.desactivatedAt < DateTime.now())
-      return false
+    if (tokenEntity.desactivatedAt < DateTime.now()) return false
 
     user.verifiedAt = DateTime.now()
     await user.save()

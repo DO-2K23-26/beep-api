@@ -1,18 +1,30 @@
-import env from "#start/env";
-import mail from "@adonisjs/mail/services/main";
+import Token from '#apps/users/models/token'
+import User from '#apps/users/models/user'
+import env from '#start/env'
+import mail from '@adonisjs/mail/services/main'
+import AuthenticationService from './authentication_service.js'
 
 export default class MailService {
-    async sendMail(email: string, subject: string, htmlMessage: string) {
-        const emailApp: string = env.get('SMTP_USERNAME');
+  constructor(private authenticationService: AuthenticationService) {}
+  async sendMail(email: string, subject: string, htmlMessage: string) {
+    const emailApp: string = env.get('SMTP_USERNAME')
 
-        const url_logo: string = "https://beep.baptistebronsin.be/logo.png";
-        const hauteurLogo: number = 100;
-        // Car l'image fait 400px par 400px, dans d'autres cas cette règle de mathématique est nécessaire
-        const longueurLogo: number = (hauteurLogo * 400) / 400;
+    const logoUrl: string = 'https://beep.baptistebronsin.be/logo.png'
+    const heightLogo: number = 100
+    // Car l'image fait 400px par 400px, dans d'autres cas cette règle de mathématique est nécessaire
+    const widthLogo: number = (heightLogo * 400) / 400
 
-        const corps_logo: string = "<img src='" + url_logo + "' alt='Logo Beep' width='" + longueurLogo + "' height='" + hauteurLogo + "'>";
+    const logoBody: string =
+      "<img src='" +
+      logoUrl +
+      "' alt='Logo Beep' width='" +
+      widthLogo +
+      "' height='" +
+      heightLogo +
+      "'>"
 
-        const emailBody: string = `
+    const emailBody: string =
+      `
             <!DOCTYPE html>
             <html lang="fr">
             <head>
@@ -29,7 +41,9 @@ export default class MailService {
                             <table align="center" border="0" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td style="padding: 20px;">
-                                        ` + corps_logo + `
+                                        ` +
+      logoBody +
+      `
                                     </td>
                                 </tr>
                             </table>
@@ -38,7 +52,9 @@ export default class MailService {
                             <table style="background: white; border-radius: 10px; max-width: 600px;" align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td style="padding: 10px 20px;">
-                                        ` + htmlMessage + `
+                                        ` +
+      htmlMessage +
+      `
                                     </td>
                                 </tr>
                             </table>
@@ -47,7 +63,11 @@ export default class MailService {
                             <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td style="text-align: center; padding: 20px;">
-                                        <p>Un problème, une question ? Contactez-nous à <a href="mailto:` + emailApp + `">` + emailApp + `</a></p>
+                                        <p>Un problème, une question ? Contactez-nous à <a href="mailto:` +
+      emailApp +
+      `">` +
+      emailApp +
+      `</a></p>
                                     </td>
                                 </tr>
                             </table>
@@ -56,18 +76,46 @@ export default class MailService {
                 </table>
             </body>
             </html>
-        `;
+        `
 
-        try {
-            await mail.send((message) => {
-                message
-                    .to(email)
-                    .from(emailApp, "Beep")
-                    .subject(subject)
-                    .html(emailBody);
-            });
-        } catch (error) {
-            console.log(error);
-        }
+    try {
+      await mail.send((message) => {
+        message.to(email).from(emailApp, 'Beep').subject(subject).html(emailBody)
+      })
+    } catch (error) {
+      console.log(error)
     }
+  }
+
+  async sendSignUpMail(user: User) {
+    const subject: string = 'Bienvenue sur Beep !'
+    const verificationToken: Token = await this.authenticationService.createToken(user)
+
+    const htmlMessage: string =
+      "<p>Bonjour $_PRENOM_$,</p><p>Veuillez trouver ci-dessous un bouton pour faire vérifier votre compte :</p><div style='text-align: center; margin: 40px 0;'><a href='$_URL_TOKEN_$' style='background-color: #4a7ab4; padding: 10px; border-radius: 10px; margin: 0 auto; color: white; text-decoration: none;'>Vérifier mon compte</a></div><p>Ce bouton possède une durée de validité de <span style='font-weight: bold; text-decoration: underline;'>$_TEMPS_VALIDITE_TOKEN_$ heures</span> à compter de la réception de ce mail.</p><p>Si vous n'êtes pas l'auteur de cette demande, merci de ne pas tenir compte de ce message.</p>"
+        .replace('$_PRENOM_$', user.firstName)
+        .replace(
+          '$_URL_TOKEN_$',
+          `${env.get('FRONTEND_URL')}/authentication/verify/` + verificationToken.token
+        )
+        .replace('$_TEMPS_VALIDITE_TOKEN_$', '2')
+
+    this.sendMail(user.email, subject, htmlMessage)
+  }
+
+  async sendResetPasswordMail(user: User) {
+    const subject: string = 'Réinitialisation de votre mot de passe'
+    const verificationToken: Token = await this.authenticationService.createToken(user)
+
+    const htmlMessage: string =
+      "<p>Bonjour $_PRENOM_$,</p><p>Veuillez trouver ci-dessous un bouton pour réinitialiser votre mot de passe :</p><div style='text-align: center; margin: 40px 0;'><a href='$_URL_TOKEN_$' style='background-color: #4a7ab4; padding: 10px; border-radius: 10px; margin: 0 auto; color: white; text-decoration: none;'>Réinitialiser mon mot de passe</a></div><p>Ce bouton possède une durée de validité de <span style='font-weight: bold; text-decoration: underline;'>$_TEMPS_VALIDITE_TOKEN_$ heures</span> à compter de la réception de ce mail.</p><p>Si vous n'êtes pas l'auteur de cette demande, merci de ne pas tenir compte de ce message.</p>"
+        .replace('$_PRENOM_$', user.firstName)
+        .replace(
+          '$_URL_TOKEN_$',
+          `${env.get('FRONTEND_URL')}/authentication/reset-password/` + verificationToken.token
+        )
+        .replace('$_TEMPS_VALIDITE_TOKEN_$', '2')
+
+    this.sendMail(user.email, subject, htmlMessage)
+  }
 }
