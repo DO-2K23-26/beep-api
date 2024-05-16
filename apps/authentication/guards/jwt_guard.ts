@@ -12,6 +12,10 @@ export type JwtGuardOptions = {
   secret: string
 }
 
+export interface JwtPayloadContract extends JwtPayload {
+  audited_account: boolean
+}
+
 export class JwtGuard<UserProvider extends UserProviderContract<User>>
   implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]>
 {
@@ -19,7 +23,7 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
   #userProvider: UserProvider
   #options: JwtGuardOptions
   #ctx: HttpContext
-  payload?: JwtPayload | string
+  payload?: JwtPayloadContract
 
   constructor(ctx: HttpContext, userProvider: UserProvider, options: JwtGuardOptions) {
     this.#userProvider = userProvider
@@ -108,13 +112,13 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
     return Promise.resolve(true)
   }
 
-  async verifyToken(token: string) {
+  async verifyToken(token: string): Promise<JwtPayloadContract> {
     try {
       const decodedToken = jwt.decode(token, { complete: true })
 
       const algorithm = decodedToken?.header.alg as jwt.Algorithm
 
-      const verifyToken = jwt.verify(token, this.#options.secret, { algorithms: [algorithm] })
+      const verifyToken: JwtPayloadContract = jwt.verify(token, this.#options.secret, { algorithms: [algorithm] }) as JwtPayloadContract
 
       return verifyToken
     } catch (e) {
