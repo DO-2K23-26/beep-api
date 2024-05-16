@@ -3,7 +3,8 @@ import User from '#apps/users/models/user'
 import env from '#start/env'
 import mail from '@adonisjs/mail/services/main'
 import AuthenticationService from './authentication_service.js'
-
+import { inject } from '@adonisjs/core'
+@inject()
 export default class MailService {
   constructor(private authenticationService: AuthenticationService) {}
   async sendMail(email: string, subject: string, htmlMessage: string) {
