@@ -1,15 +1,14 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-import Server from "#apps/servers/models/server";
 
 export default class extends BaseSchema {
-  protected tableName = 'roles'
+  protected tableName = 'servers'
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.string('id').primary()
-      table.string('label').unique()
-      table.integer('power').defaultTo(1)
-      table.string('server_id').references('id').inTable(Server.table).onDelete('CASCADE')
+      table.string('name').unique()
+      table.string('icon')
+      table.string('owner_id')
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })
