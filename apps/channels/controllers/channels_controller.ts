@@ -1,14 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import ChannelService from '#apps/channels/services/channel_service'
-import Channel from '../models/channel.js'
+import Channel from '#apps/channels/models/channel'
 import {
   createChannelValidator,
   indexChannelValidator,
   showChannelValidator,
   joinChannelValidator,
   updateChannelValidator,
-} from '../validators/channel.js'
+} from '#apps/channels/validators/channel'
 import transmit from '@adonisjs/transmit/services/main'
 
 @inject()
@@ -33,24 +33,20 @@ export default class ChannelsController {
 
     return this.channelService.findAll(data)
 
-
-
     //return response.abort('A problem occurred while fetching channels')
   }
 
   /**
    * Handle form submission for the create action
    */
-  async store({ auth, request, response }: HttpContext) {
+  async store({ auth, request, response, params }: HttpContext) {
     const payload = await request.validateUsing(createChannelValidator)
-    const userPayload = auth.use('jwt').payload
-    if (!userPayload?.sub) {
-      return response.abort('no user connected')
-    }
+    const userId = auth.use('jwt').payload!.sub as string
 
-    const channel: Channel = await this.channelService.create(payload)
+    // Get server with ServerService and check if user is allowed to create a channel
+    const channel: Channel = await this.channelService.create(payload, params.serverId)
 
-    await this.channelService.join(userPayload.sub.toString(), { params: { id: channel.id } })
+    await this.channelService.join(userId, channel.id)
 
     transmit.broadcast('channels/action', {
       message: 'A new channel has been created',
@@ -62,15 +58,11 @@ export default class ChannelsController {
   /**
    * Subscribe to a channel
    */
-  async join({ auth, request, response }: HttpContext) {
-    const userPayload = auth.use('jwt').payload
-    if (!userPayload?.sub) {
-      return response.abort('no user connected')
-    }
+  async join({ auth, params, response }: HttpContext) {
+    const userId = auth.use('jwt').payload!.sub as string
 
-    const data = await request.validateUsing(joinChannelValidator)
-
-    const channel: Channel = await this.channelService.join(userPayload.sub.toString(), data)
+    const channel = await this.channelService.findById(params.id)
+    await this.channelService.join(userId, channel.id)
 
     return response.send(channel)
   }

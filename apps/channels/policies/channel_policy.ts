@@ -1,10 +1,10 @@
 import Channel from '#apps/channels/models/channel'
-import {allowGuest, BasePolicy} from '@adonisjs/bouncer'
-import {AuthorizerResponse} from '@adonisjs/bouncer/types'
-import {JwtPayload} from 'jsonwebtoken'
+import { allowGuest, BasePolicy } from '@adonisjs/bouncer'
+import { AuthorizerResponse } from '@adonisjs/bouncer/types'
+import { JwtPayload } from 'jsonwebtoken'
 import PermissionResolver from '#apps/shared/services/permissions/permission_resolver'
-import {HttpContext} from '@adonisjs/core/http'
-import {inject} from '@adonisjs/core'
+import { HttpContext } from '@adonisjs/core/http'
+import { inject } from '@adonisjs/core'
 
 @inject()
 export default class ChannelPolicy extends BasePolicy {

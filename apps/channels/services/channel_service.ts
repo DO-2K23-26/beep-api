@@ -5,7 +5,7 @@ import {
   ShowChannelSchema,
   SubscribeChannelSchema,
   UpdateChannelSchema,
-} from '../validators/channel.js'
+} from '#apps/channels/validators/channel'
 
 export default class ChannelService {
   async findAll(data: IndexChannelSchema): Promise<Channel[]> {
@@ -19,9 +19,10 @@ export default class ChannelService {
   }
 
   async findAllForUser(userId: string, data: IndexChannelSchema): Promise<Channel[]> {
-    return Channel.query().whereHas('users', (builder) => {
-      builder.where('user_id', userId)
-    })
+    return Channel.query()
+      .whereHas('users', (builder) => {
+        builder.where('user_id', userId)
+      })
       .if(data.messages, (query) => {
         query.preload('messages')
       })
@@ -31,19 +32,11 @@ export default class ChannelService {
   }
 
   async findById(data: ShowChannelSchema): Promise<Channel> {
-    /*const channel = await Channel.findOrFail(data.params.id)
-    if (data.messages) {
-      await channel.load('messages')
-    }
-    if (data.users) {
-      await channel.load('users')
-    }
-    return channel*/
     return Channel.query()
       .where('id', data.params.id)
       .if(data.messages, (query) => {
-        query.preload('messages', (query) => {
-          query.preload('owner')
+        query.preload('messages', (messageQuery) => {
+          messageQuery.preload('owner')
         })
       })
       .if(data.users, (query) => {
@@ -52,19 +45,22 @@ export default class ChannelService {
       .firstOrFail()
   }
 
-  async create(payload: CreateChannelSchema): Promise<Channel> {
-    return await Channel.create({
-      name: payload.name,
-    })
+  async findAllByServer(serverId: string): Promise<Channel[]> {
+    return Channel.query().where('server_id', serverId)
   }
 
-  async join(userId: string, channelData: SubscribeChannelSchema){
-    const channel = await Channel.findOrFail(channelData.params.id)
+  async create(newChannel: CreateChannelSchema, serverId: string): Promise<Channel> {
+    return await Channel.create({ ...newChannel, serverId })
+  }
+
+  async join(userId: string, channelId: string) {
+    const channel = await Channel.findOrFail(channelId)
     await channel.related('users').attach([userId])
+    
     return channel
   }
 
-  async leave(userId: string, channelData: SubscribeChannelSchema){
+  async leave(userId: string, channelData: SubscribeChannelSchema) {
     const channel = await Channel.findOrFail(channelData.params.id)
     await channel.related('users').detach([userId])
     return channel
