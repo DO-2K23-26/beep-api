@@ -70,7 +70,8 @@
     "luxon": "^3.4.4",
     "nodemailer": "^6.9.11",
     "pg": "^8.11.3",
-    "reflect-metadata": "^0.2.1"
+    "reflect-metadata": "^0.2.1",
+    "socket.io": "^4.7.5"
   },
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/app"

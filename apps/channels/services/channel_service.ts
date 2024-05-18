@@ -56,7 +56,6 @@ export default class ChannelService {
   async join(userId: string, channelId: string) {
     const channel = await Channel.findOrFail(channelId)
     await channel.related('users').attach([userId])
-    
     return channel
   }
 

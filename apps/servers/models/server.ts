@@ -1,8 +1,15 @@
-import { BaseModel, beforeCreate, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import {
+  BaseModel,
+  beforeCreate,
+  belongsTo,
+  column,
+  hasMany,
+  manyToMany,
+} from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 import User from '#apps/users/models/user'
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Channel from '#apps/channels/models/channel'
 import Role from '#apps/users/models/role'
 import Member from '#apps/members/models/member'
@@ -33,8 +40,10 @@ export default class Server extends BaseModel {
   @hasMany(() => Role)
   declare roles: HasMany<typeof Role>
 
-  @hasMany(() => User)
-  declare users: HasMany<typeof User>
+  @manyToMany(() => User, {
+    pivotTable: 'servers_users',
+  })
+  declare users: ManyToMany<typeof User>
 
   @hasMany(() => Member)
   declare members: HasMany<typeof Member>

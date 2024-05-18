@@ -10,6 +10,7 @@ import {
   updateChannelValidator,
 } from '#apps/channels/validators/channel'
 import transmit from '@adonisjs/transmit/services/main'
+import { Payload } from '#apps/authentication/contracts/payload'
 
 @inject()
 export default class ChannelsController {
@@ -39,7 +40,7 @@ export default class ChannelsController {
   /**
    * Handle form submission for the create action
    */
-  async store({ auth, request, response, params }: HttpContext) {
+  async store({ request, response, params, auth }: HttpContext) {
     const payload = await request.validateUsing(createChannelValidator)
     const userId = auth.use('jwt').payload!.sub as string
 
@@ -59,11 +60,10 @@ export default class ChannelsController {
    * Subscribe to a channel
    */
   async join({ auth, params, response }: HttpContext) {
-    const userId = auth.use('jwt').payload!.sub as string
+    const jwtPayload = auth.use('jwt').payload as unknown as Payload
 
     const channel = await this.channelService.findById(params.id)
-    await this.channelService.join(userId, channel.id)
-
+    await this.channelService.join(jwtPayload.sub, channel.id)
     return response.send(channel)
   }
 

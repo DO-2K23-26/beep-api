@@ -21,7 +21,6 @@ export default class MessagePolicy extends BasePolicy {
 
   @allowGuest()
   async edit(): Promise<AuthorizerResponse> {
-    console.log(this.ctx)
     const data = await this.ctx.request.validateUsing(updateMessageValidator)
     const message = await Message.findOrFail(data.params.id)
     return message.ownerId === this.payload.sub

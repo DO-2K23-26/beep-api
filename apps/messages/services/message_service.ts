@@ -25,7 +25,6 @@ export default class MessageService {
   }
 
   async findAllByChannelId(channelId: string) {
-    return Message.query().where('channelId', channelId)
-    .orderBy('created_at', 'desc')
+    return Message.query().where('channelId', channelId).orderBy('created_at', 'desc')
   }
 }

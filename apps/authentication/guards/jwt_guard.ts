@@ -59,7 +59,7 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      'audited_account': !!user.verifiedAt
+      audited_account: !!user.verifiedAt,
     }
 
     const payloadRefreshToken = {
@@ -118,7 +118,9 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
 
       const algorithm = decodedToken?.header.alg as jwt.Algorithm
 
-      const verifyToken: JwtPayloadContract = jwt.verify(token, this.#options.secret, { algorithms: [algorithm] }) as JwtPayloadContract
+      const verifyToken: JwtPayloadContract = jwt.verify(token, this.#options.secret, {
+        algorithms: [algorithm],
+      }) as JwtPayloadContract
 
       return verifyToken
     } catch (e) {

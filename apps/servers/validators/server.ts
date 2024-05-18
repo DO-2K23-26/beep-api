@@ -3,19 +3,35 @@ import { Infer } from '@vinejs/vine/types'
 
 /**
  * Validator to validate the payload when creating
- * a new server.ts.
+ * a new server.
  */
 export const createServerValidator = vine.compile(
-  vine.object({})
+  vine.object({
+    name: vine.string().minLength(1),
+  })
 )
 
 /**
  * Validator to validate the payload when updating
- * an existing server.ts.
+ * an existing server.
  */
 export const updateServerValidator = vine.compile(
-  vine.object({})
+  vine.object({
+    id: vine.string().uuid({ version: [4] }),
+    name: vine.string().minLength(1),
+  })
 )
 
-export type CreateServersSchema = Infer<typeof createServerValidator>
-export type UpdateServersSchema = Infer<typeof updateServerValidator>
+/**
+ * Validator to validate the index action
+ */
+export const indexServerValidator = vine.compile(
+  vine.object({
+    page: vine.number().optional(),
+    limit: vine.number().optional(),
+  })
+)
+
+export type CreateServerSchema = Infer<typeof createServerValidator>
+export type UpdateServerSchema = Infer<typeof updateServerValidator>
+export type IndexServerSchema = Infer<typeof indexServerValidator>

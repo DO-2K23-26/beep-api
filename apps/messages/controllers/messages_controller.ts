@@ -34,7 +34,6 @@ export default class MessagesController {
    */
   async store({ auth, request }: HttpContext) {
     const payload = auth.use('jwt').payload
-    console.log(request.body())
     const data = await request.validateUsing(createMessageValidator)
     const message = await this.messageService.create({
       validated: data,
@@ -42,7 +41,6 @@ export default class MessagesController {
     })
 
     if (data.attachments) {
-      console.log(data.attachments)
       for (let attachment of data.attachments) {
         const dataAttachments: CreateStorageSchema = {
           messageId: message.id,
@@ -105,7 +103,6 @@ export default class MessagesController {
           attachment: attachment,
         }
         await storageService.store(dataAttachments)
-        console.log('okay')
       }
     }
     for (const attachment of attachments) {

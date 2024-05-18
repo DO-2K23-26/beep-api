@@ -24,7 +24,7 @@ export default class Channel extends BaseModel {
   declare serverId: string
 
   @manyToMany(() => User, {
-    pivotTable: 'channel_users',
+    pivotTable: 'channels_users',
   })
   declare users: ManyToMany<typeof User>
 
