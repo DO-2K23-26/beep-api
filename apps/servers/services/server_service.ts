@@ -4,7 +4,8 @@ import { CreateServerSchema, UpdateServerSchema } from '../validators/server.js'
 
 export default class ServerService {
   async findAll(page: number = 1, limit: number = 10): Promise<Server[]> {
-    return Server.query().paginate(page, limit)
+    const pageServers = await Server.query().paginate(page, limit)
+    return pageServers.all()
   }
 
   // public async findByUserId(userId: string): Promise<Server[]> {
