@@ -4,9 +4,7 @@ import AuthenticationService from '#apps/authentication/services/authentication_
 import User from '#apps/users/models/user'
 import { createAuthenticationValidator, signinAuthenticationValidator } from '../validators/authentication.js'
 import MailService from '../services/mail_service.js'
-import Token from '#apps/users/models/token'
 import UserService from '#apps/users/services/user_service'
-import env from '#start/env'
 import { createVerifyValidator } from '../validators/verify.js'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
@@ -47,15 +45,22 @@ export default class AuthenticationController {
     })
   }
 
-  async signup({ request }: HttpContext) {
+  async signup({ request, response }: HttpContext) {
     const schemaUser = await request.validateUsing(createAuthenticationValidator)
 
-    const existingUser: User | null = await this.authenticationService.getUserByEmail(
+    const existingUserEmail: User | null = await this.authenticationService.getUserByEmail(
       schemaUser.email
     )
 
-    if (existingUser != null)
-      return { error: 'Un utilisateur avec cette adresse email existe déjà.' }
+    if (existingUserEmail != null)
+      return response.status(403).send({ message: 'A user already exists with this email address.' })
+
+    const existingUserUsername: User | null = await this.authenticationService.getUserByUsername(
+      schemaUser.username
+    )
+
+    if (existingUserUsername != null)
+      return response.status(403).send({ message: 'A user already exists with this username.' })
 
     const user: User = await this.authenticationService.registerUser(schemaUser)
     await user.load('roles')
@@ -114,12 +119,10 @@ export default class AuthenticationController {
   async verifyEmail({ response, request }: HttpContext) {
     const schematoken = await request.validateUsing(createVerifyValidator)
 
-    const verificationStatus: boolean = await this.authenticationService.verifyEmail(
+    await this.authenticationService.verifyEmail(
       schematoken.token
     )
 
-    if (verificationStatus)
-      return response.status(200).send({ message: 'Votre compte a bien été vérifié.' })
-    else return response.status(400).send({ message: 'Le token de vérification est invalide.' })
+    return response.status(200).send({ message: 'Your account has been verified.' })
   }
 }

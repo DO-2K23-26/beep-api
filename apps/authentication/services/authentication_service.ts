@@ -44,6 +44,12 @@ export default class AuthenticationService {
     return user
   }
 
+  async getUserByUsername(username: string): Promise<User | null> {
+    const user = await User.findBy('username', username)
+
+    return user
+  }
+
   async createToken(user: User): Promise<Token> {
     const currentDate: DateTime = DateTime.now()
 
