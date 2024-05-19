@@ -60,6 +60,19 @@ export default class ServersController {
     return { ownerId: ownerId }
   }
 
+  async getAllUsers({ params }: HttpContext) {
+    // const userPayload = auth.use('jwt').payload as Payload
+
+    // const userServers: Server[] = await this.serverService.findByUserId(userPayload.sub.toString())
+
+    // console.log(userServers)
+    // if (!userServers.includes(params.serverId)) {
+    //   return response.status(403).send({ message: 'You are not allowed to access this server' })
+    // }
+
+    return this.serverService.findUsersByServerId(params.serverId)
+  }
+
   // //permet de savoir si un user est timeout sur un server
   // async timeout({ request, response }: HttpContext) {
   //   const data = await request.validateUsing(showServerValidator)

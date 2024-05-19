@@ -1,4 +1,5 @@
 import Server from '#apps/servers/models/server'
+import User from '#apps/users/models/user'
 import { CreateServerSchema, UpdateServerSchema } from '../validators/server.js'
 
 export default class ServerService {
@@ -6,13 +7,16 @@ export default class ServerService {
     return Server.query().paginate(page, limit)
   }
 
-  async findByUserId(userId: string): Promise<Server[]> {
-    return Server.query()
-      .whereHas('users', (builder) => {
-        builder.where('user_id', userId)
-      })
-      .paginate(1, 10)
-  }
+  // public async findByUserId(userId: string): Promise<Server[]> {
+  //   // Rechercher l'utilisateur par id et précharger les serveurs associés
+  //   const user = await User.query()
+  //     .where('id', userId)
+  //     .preload('servers')
+  //     .firstOrFail()
+
+  //   // Retourner la liste des serveurs
+  //   return user.servers
+  // }
 
   async findById(serverId: string): Promise<Server> {
     return Server.query().where('id', serverId).firstOrFail()
@@ -34,6 +38,17 @@ export default class ServerService {
   async getOwner(serverId: string): Promise<string> {
     const server = await Server.findOrFail(serverId)
     return server.ownerId
+  }
+
+  public async findUsersByServerId(serverId: string): Promise<User[]> {
+    // Rechercher le serveur par id et précharger les utilisateurs associés
+    const server = await Server.query()
+      .where('id', serverId)
+      .preload('users')
+      .firstOrFail()
+
+    // Retourner la liste des utilisateurs
+    return server.users
   }
 
   // async timeout(serverId: string, userId: string): Promise<void> {

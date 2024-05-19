@@ -7,7 +7,6 @@ const ServerChannelsController = () =>
 router
   .group(() => {
     router.get('/', [ServerController, 'index'])
-    router.get('/:serverId', [ServerController, 'show'])
     router.post('/', [ServerController, 'store'])
     router
       .group(() => {
@@ -18,8 +17,10 @@ router
             router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
           })
           .prefix('channels')
+        router.get('/', [ServerController, 'show'])
         router.get('/owner', [ServerController, 'getOwner'])
         router.post('/join', [ServerController, 'join'])
+        router.get('/users', [ServerController, 'getAllUsers'])
         // router.get('/timeout/:user_id', [ServerController, 'timeout'])
       })
       .prefix('/:serverId')
