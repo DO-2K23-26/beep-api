@@ -3,6 +3,10 @@ import logger from '@adonisjs/core/services/logger'
 import { createServer } from 'node:http'
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
+import ChannelGateway from '#apps/channels/gateway/channel'
+import { inject } from '@adonisjs/core'
+import ChannelService from '#apps/channels/services/channel_service'
+import { JoinChannelPayload, StreamPayload } from '#apps/channels/contracts/payloads'
 
 logger.info('Booting websocket server')
 
@@ -13,7 +17,11 @@ export interface SocketContext {
 
 type WsHandler = (context: SocketContext, ...args: any[]) => void
 
+@inject()
 class WsServer {
+  constructor(private channelGateway: ChannelGateway) {
+    this.channelGateway = channelGateway
+  }
   io!: Server
   private booted = false
   private wsListennerMap = new Map<string, WsHandler>()
@@ -78,9 +86,26 @@ class WsServer {
       })
     })
   }
+
+  registerOnVoiceJoin() {
+    this.io.on('joinVoice', (context: SocketContext, payload: JoinChannelPayload) => {
+      this.channelGateway.joinChannel(context, payload)
+    })
+  }
+  registerOnLeaveJoin() {
+    this.io.on('leaveVoice', (context: SocketContext, payload: JoinChannelPayload) => {
+      this.channelGateway.leaveChannel(context, payload)
+    })
+  }
+
+  registerOnAudio() {
+    this.io.on('audio', (context: SocketContext, payload: StreamPayload) => {
+      this.channelGateway.sendStream(context, payload)
+    })
+  }
 }
 
-const io = new WsServer()
+const io = new WsServer(new ChannelGateway(new ChannelService()))
 
 io.boot()
 
