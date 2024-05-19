@@ -32,7 +32,7 @@ export default class Message extends BaseModel {
   declare channelId: string
 
   @belongsTo(() => User, {
-    foreignKey: 'ownerId'
+    foreignKey: 'ownerId',
   })
   declare owner: BelongsTo<typeof User>
 

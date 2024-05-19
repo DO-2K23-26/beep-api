@@ -1,11 +1,11 @@
 import Message from '#apps/messages/models/message'
+import PermissionResolver from '#apps/shared/services/permissions/permission_resolver'
+import User from '#apps/users/models/user'
 import { allowGuest, BasePolicy } from '@adonisjs/bouncer'
 import { AuthorizerResponse } from '@adonisjs/bouncer/types'
-import { JwtPayload } from 'jsonwebtoken'
-import PermissionResolver from '#apps/shared/services/permissions/permission_resolver'
-import { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
-import { updateMessageValidator } from '#apps/messages/validators/message'
+import { HttpContext } from '@adonisjs/core/http'
+import { JwtPayload } from 'jsonwebtoken'
 
 @inject()
 export default class MessagePolicy extends BasePolicy {
@@ -20,15 +20,12 @@ export default class MessagePolicy extends BasePolicy {
   }
 
   @allowGuest()
-  async edit(): Promise<AuthorizerResponse> {
-    const data = await this.ctx.request.validateUsing(updateMessageValidator)
-    const message = await Message.findOrFail(data.params.id)
+  async edit(user: User | null, message: Message): Promise<AuthorizerResponse> {
     return message.ownerId === this.payload.sub
   }
 
   @allowGuest()
-  async delete(): Promise<AuthorizerResponse> {
-    const message = await Message.findOrFail(this.ctx.params.id)
+  async delete(user: User | null, message: Message): Promise<AuthorizerResponse> {
     return message.ownerId === this.payload.sub
   }
 }

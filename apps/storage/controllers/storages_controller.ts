@@ -11,11 +11,6 @@ export default class StoragesController {
   constructor(private storageService: StorageService) {}
 
   /**
-   * Display a list of resource
-   */
-  async index({}: HttpContext) {}
-
-  /**
    * Handle form submission for the create action
    */
   async store({ bouncer, auth, request }: HttpContext) {
@@ -26,13 +21,6 @@ export default class StoragesController {
     const data = await request.validateUsing(createStorageValidator)
     await bouncer.with(StoragePolicy).authorize('create' as never)
     return await this.storageService.store(data)
-  }
-
-  /**
-   * Show individual record
-   */
-  async show({ params }: HttpContext) {
-    return this.storageService.show(params.id)
   }
 
   /**

@@ -8,20 +8,22 @@ import { MultipartFile } from '@adonisjs/core/bodyparser'
 
 export default class StorageService {
   S3Driver: S3Driver
-  BUCKET_NAME = env.get('S3_BUCKET_NAME') || 'development'
+  BUCKET_NAME = env.get('S3_BUCKET_NAME') ?? 'app'
 
   constructor() {
     this.S3Driver = S3Driver.getInstance()
   }
 
-  async store(values: CreateStorageSchema) {
-    const message = await Message.findOrFail(values.messageId)
+  async store(values: CreateStorageSchema, message: Message) {
+    console.log(this.BUCKET_NAME)
+    console.log('trying to store')
     const key = message.channelId + '/' + message.id + '/' + values.attachment.clientName
     if (values.attachment.tmpPath) {
       console.log(values.attachment)
       const realFile = readFileSync(values.attachment.tmpPath)
       const buffer = Buffer.from(realFile)
-      await this.S3Driver.uploadFile(env.get('S3_BUCKET_NAME'), key, buffer, buffer.length)
+
+      await this.S3Driver.uploadFile(this.BUCKET_NAME, key, buffer, buffer.length)
       return await message.related('attachments').create({
         name: key,
         contentType: values.attachment.headers['content-type'],
@@ -29,11 +31,6 @@ export default class StorageService {
       })
     }
     throw new Error('File not found')
-  }
-
-  async show(values: { key: string }) {
-    return 'http://localhost:3333/storage/files/secure/' + values.key
-    // return await this.S3Driver.getSignedUrl(env.get('S3_BUCKET_NAME'), values.key)
   }
 
   async update(values: UpdateStorageSchema) {
@@ -44,7 +41,7 @@ export default class StorageService {
     if (values.attachment.tmpPath) {
       const realFile = readFileSync(values.attachment.tmpPath)
       const buffer = Buffer.from(realFile)
-      await this.S3Driver.uploadFile(env.get('S3_BUCKET_NAME'), key, buffer, buffer.length)
+      await this.S3Driver.uploadFile(this.BUCKET_NAME, key, buffer, buffer.length)
       const newAttachment = await Attachment.findByOrFail('name', key)
       return newAttachment
         .merge({ name: key, contentType: values.attachment.headers['content-type'] })
@@ -55,12 +52,12 @@ export default class StorageService {
 
   async destroy(id: string) {
     const attachment = await Attachment.findOrFail(id)
-    await this.S3Driver.deleteFile(env.get('S3_BUCKET_NAME'), attachment.name)
+    await this.S3Driver.deleteFile(this.BUCKET_NAME, attachment.name)
     return attachment.delete()
   }
 
   async transmit(fileName: string) {
-    return await this.S3Driver.getObjects(env.get('S3_BUCKET_NAME'), fileName)
+    return await this.S3Driver.getObjects(this.BUCKET_NAME, fileName)
   }
 
   async storeProfilePicture(profilePicture: MultipartFile, id: string) {
@@ -68,7 +65,7 @@ export default class StorageService {
     if (profilePicture.tmpPath) {
       const realFile = readFileSync(profilePicture.tmpPath)
       const buffer = Buffer.from(realFile)
-      await this.S3Driver.uploadFile(env.get('S3_BUCKET_NAME'), key, buffer, buffer.length)
+      await this.S3Driver.uploadFile(this.BUCKET_NAME, key, buffer, buffer.length)
       return key
     }
     throw new Error('File not found')
