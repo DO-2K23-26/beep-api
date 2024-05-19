@@ -30,7 +30,7 @@ export default class AuthenticationService {
       username: schemaUser.username,
       firstName: schemaUser.firstname,
       lastName: schemaUser.lastname,
-      email: schemaUser.email,
+      email: schemaUser.email.toLowerCase(),
       password: schemaUser.password,
       profilePicture: this.DEFAULT_PP_URL,
     })
@@ -39,7 +39,7 @@ export default class AuthenticationService {
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    const user = await User.findBy('email', email)
+    const user = await User.findBy('email', email.toLowerCase())
 
     return user
   }
