@@ -13,6 +13,10 @@ export default class ServerChannelsController {
     return this.channelService.findAllByServer(params.serverId)
   }
 
+  async findByChannelId({ params }: HttpContext) {
+    return this.channelService.findById({ params: { id: params.channelId as string }, messages: undefined, users: undefined })
+  }
+
   // permet de créer un channel dans un serveur
   async createChannel({ auth, request, params }: HttpContext) {
     const receivedChannel = await request.validateUsing(createChannelValidator)

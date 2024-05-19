@@ -15,6 +15,7 @@ router
           .group(() => {
             router.get('/', [ServerChannelsController, 'findByServerId'])
             router.post('/', [ServerChannelsController, 'createChannel'])
+            router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
           })
           .prefix('channels')
         router.get('/owner', [ServerController, 'getOwner'])
