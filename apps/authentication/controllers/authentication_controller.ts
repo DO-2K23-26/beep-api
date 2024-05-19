@@ -20,7 +20,7 @@ export default class AuthenticationController {
 
   async signin({ request, response, auth }: HttpContext) {
     const { email, password } = await request.validateUsing(signinAuthenticationValidator)
-    const user = await User.verifyCredentials(email, password)
+    const user = await User.verifyCredentials(email.toLocaleLowerCase(), password)
     await user.load('roles')
 
     const tokens = await auth.use('jwt').generate(user)
@@ -49,7 +49,7 @@ export default class AuthenticationController {
     const schemaUser = await request.validateUsing(createAuthenticationValidator)
 
     const existingUserEmail: User | null = await this.authenticationService.getUserByEmail(
-      schemaUser.email
+      schemaUser.email.toLocaleLowerCase()
     )
 
     if (existingUserEmail != null)
