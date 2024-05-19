@@ -16,9 +16,13 @@ export default class ServerChannelsController {
   // permet de créer un channel dans un serveur
   async createChannel({ auth, request, params }: HttpContext) {
     const receivedChannel = await request.validateUsing(createChannelValidator)
+    const type = receivedChannel.type as 'voice' | 'text'
     const userPayload = auth.use('jwt').payload as Payload
     const serverId = params.serverId
-    const channel = await this.channelService.create(receivedChannel, serverId)
+    const channel = await this.channelService.create(
+      { name: receivedChannel.name, type: type },
+      serverId
+    )
     await this.channelService.join(userPayload.sub, channel.id)
     return channel
   }

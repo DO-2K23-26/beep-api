@@ -11,8 +11,12 @@ router
     router.post('/', [ServerController, 'store'])
     router
       .group(() => {
-        router.get('/channels', [ServerChannelsController, 'findByServerId'])
-        router.post('/channels', [ServerChannelsController, 'createChannel'])
+        router
+          .group(() => {
+            router.get('/', [ServerChannelsController, 'findByServerId'])
+            router.post('/', [ServerChannelsController, 'createChannel'])
+          })
+          .prefix('channels')
         router.get('/owner', [ServerController, 'getOwner'])
         router.post('/join', [ServerController, 'join'])
         // router.get('/timeout/:user_id', [ServerController, 'timeout'])

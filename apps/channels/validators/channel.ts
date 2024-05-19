@@ -8,6 +8,7 @@ import { Infer } from '@vinejs/vine/types'
 export const createChannelValidator = vine.compile(
   vine.object({
     name: vine.string().minLength(1), // Assurez-vous que le nom est une chaîne non vide et obligatoire
+    type: vine.string().in(['text', 'voice']),
   })
 )
 
@@ -58,7 +59,10 @@ export const joinChannelValidator = vine.compile(
   })
 )
 
-export type CreateChannelSchema = Infer<typeof createChannelValidator>
+export type CreateChannelSchema = {
+  name: string
+  type: 'voice' | 'text'
+}
 export type UpdateChannelSchema = Infer<typeof updateChannelValidator>
 export type ShowChannelSchema = Infer<typeof showChannelValidator>
 export type SubscribeChannelSchema = Infer<typeof joinChannelValidator>

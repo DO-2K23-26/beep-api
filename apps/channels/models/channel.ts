@@ -23,6 +23,9 @@ export default class Channel extends BaseModel {
   @column()
   declare serverId: string
 
+  @column()
+  declare type: 'voice' | 'text'
+
   @manyToMany(() => User, {
     pivotTable: 'channels_users',
   })
