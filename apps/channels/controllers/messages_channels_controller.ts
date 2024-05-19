@@ -3,6 +3,7 @@ import MessageService from '#apps/messages/services/message_service'
 import { createMessageValidator, updateMessageValidator } from '#apps/messages/validators/message'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import transmit from '@adonisjs/transmit/services/main'
 
 @inject()
 export default class MessagesChannelsController {
@@ -21,7 +22,11 @@ export default class MessagesChannelsController {
   async store({ auth, request, params }: HttpContext) {
     const payload = auth.use('jwt').payload
     const channelId = params.channelId
+
     const data = await request.validateUsing(createMessageValidator)
+    transmit.broadcast(`channels/${params.channelId}/messages`, {
+      messageId: params.messageId,
+    })
     return this.messageService.create(data, payload!.sub as string, channelId)
   }
 
@@ -33,6 +38,9 @@ export default class MessagesChannelsController {
     const receivedMessage = await request.validateUsing(updateMessageValidator)
     const message = await this.messageService.show(messageId)
     await bouncer.with(MessagePolicy).authorize('edit' as never, message)
+    transmit.broadcast(`channels/${params.channelId}/messages`, {
+      messageId: messageId,
+    })
     return this.messageService.update(receivedMessage, messageId)
   }
 
@@ -52,6 +60,9 @@ export default class MessagesChannelsController {
     const messageId = params.messageId
     const message = await this.messageService.show(messageId)
     await bouncer.with(MessagePolicy).authorize('delete' as never, message)
+    transmit.broadcast(`channels/${params.channelId}/messages`, {
+      messageId: params.messageId,
+    })
     return this.messageService.destroy(messageId)
   }
 }
