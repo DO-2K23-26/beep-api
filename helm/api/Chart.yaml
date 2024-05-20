@@ -1,6 +1,6 @@
 apiVersion: v2
-name: beep-backend-files
-description: A Helm chart for the backend of beep for the file group
+name: beep-api
+description: A Helm chart for the api of beep
 type: application
 version: 0.0.0
 appVersion: "0.0.0"

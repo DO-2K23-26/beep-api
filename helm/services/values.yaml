@@ -8,7 +8,7 @@ image:
 env:
   dbPort: "5432"
   dbUser: "postgres"
-  frontendUrl: "https://beep-staging.duratm.com"
+  frontendUrl: "https://beep.do-2023.fr/"
 
 postgresql:
   auth:
