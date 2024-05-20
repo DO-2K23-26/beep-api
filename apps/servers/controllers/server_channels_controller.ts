@@ -14,7 +14,11 @@ export default class ServerChannelsController {
   }
 
   async findByChannelId({ params }: HttpContext) {
-    return this.channelService.findById({ params: { id: params.channelId as string }, messages: undefined, users: undefined })
+    return this.channelService.findById({
+      params: { id: params.channelId as string },
+      messages: undefined,
+      users: undefined,
+    })
   }
 
   // permet de créer un channel dans un serveur
@@ -29,5 +33,9 @@ export default class ServerChannelsController {
     )
     await this.channelService.join(userPayload.sub, channel.id)
     return channel
+  }
+
+  streamingUsers({ params }: HttpContext) {
+    return this.channelService.occupiedVoiceChannels(params.serverId)
   }
 }
