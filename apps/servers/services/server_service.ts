@@ -8,16 +8,14 @@ export default class ServerService {
     return pageServers.all()
   }
 
-  // public async findByUserId(userId: string): Promise<Server[]> {
-  //   // Rechercher l'utilisateur par id et précharger les serveurs associés
-  //   const user = await User.query()
-  //     .where('id', userId)
-  //     .preload('servers')
-  //     .firstOrFail()
-
-  //   // Retourner la liste des serveurs
-  //   return user.servers
-  // }
+  public async findByUserId(userId: string, page: number = 1, limit: number = 10): Promise<Server[]> {
+    const pageServers = await Server.query()
+      .whereHas('users', (builder) => {
+        builder.where('id', userId)
+      })
+      .paginate(page, limit)
+    return pageServers.all()
+  }
 
   async findById(serverId: string): Promise<Server> {
     return Server.query().where('id', serverId).firstOrFail()
@@ -43,10 +41,7 @@ export default class ServerService {
 
   public async findUsersByServerId(serverId: string): Promise<User[]> {
     // Rechercher le serveur par id et précharger les utilisateurs associés
-    const server = await Server.query()
-      .where('id', serverId)
-      .preload('users')
-      .firstOrFail()
+    const server = await Server.query().where('id', serverId).preload('users').firstOrFail()
 
     // Retourner la liste des utilisateurs
     return server.users

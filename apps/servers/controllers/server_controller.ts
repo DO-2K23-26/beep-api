@@ -11,10 +11,11 @@ export default class ServersController {
   /**
    * Display a list of resource
    */
-  //Liste de tous les serveurs
-  async index({ request }: HttpContext) {
+  //Liste les servers en fonction de l'id du user
+  async index({ request, auth }: HttpContext) {
+    const userPayload = auth.use('jwt').payload as Payload
     const payload = await request.validateUsing(indexServerValidator)
-    const servers = await this.serverService.findAll(payload.page, payload.limit)
+    const servers = await this.serverService.findByUserId(userPayload.sub, payload.page, payload.limit)
     return servers
   }
 
