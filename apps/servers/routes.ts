@@ -15,6 +15,7 @@ router
             router.get('/', [ServerChannelsController, 'findByServerId'])
             router.post('/', [ServerChannelsController, 'createChannel'])
             router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
+            router.get('/:channelId/streaming/users', [ServerChannelsController, 'streamingUsers'])
           })
           .prefix('channels')
         router.get('/', [ServerController, 'show'])
