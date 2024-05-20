@@ -1,28 +1,14 @@
-import type { HttpContext, Response } from '@adonisjs/core/http'
-import { inject } from '@adonisjs/core'
-import StorageService from '#apps/storage/services/storage_service'
-import { createStorageValidator, updateStorageValidator } from '#apps/storage/validators/storage'
-import StoragePolicy from '#apps/storage/policies/storage_policy'
 import Attachment from '#apps/storage/models/attachment'
+import StoragePolicy from '#apps/storage/policies/storage_policy'
+import StorageService from '#apps/storage/services/storage_service'
+import { updateStorageValidator } from '#apps/storage/validators/storage'
 import User from '#apps/users/models/user'
+import { inject } from '@adonisjs/core'
+import type { HttpContext, Response } from '@adonisjs/core/http'
 
 @inject()
 export default class StoragesController {
   constructor(private storageService: StorageService) {}
-
-  /**
-   * Handle form submission for the create action
-   */
-  async store({ bouncer, auth, request }: HttpContext) {
-    const payload = auth.use('jwt').payload
-    if (!(payload && typeof payload.sub === 'string')) {
-      return { error: 'User not found' }
-    }
-    const data = await request.validateUsing(createStorageValidator)
-    await bouncer.with(StoragePolicy).authorize('create' as never)
-    return await this.storageService.store(data)
-  }
-
   /**
    * Handle form submission for the edit action
    */

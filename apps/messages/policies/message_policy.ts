@@ -20,12 +20,12 @@ export default class MessagePolicy extends BasePolicy {
   }
 
   @allowGuest()
-  async edit(user: User | null, message: Message): Promise<AuthorizerResponse> {
+  async edit(_user: User | null, message: Message): Promise<AuthorizerResponse> {
     return message.ownerId === this.payload.sub
   }
 
   @allowGuest()
-  async delete(user: User | null, message: Message): Promise<AuthorizerResponse> {
+  async delete(_user: User | null, message: Message): Promise<AuthorizerResponse> {
     return message.ownerId === this.payload.sub
   }
 }

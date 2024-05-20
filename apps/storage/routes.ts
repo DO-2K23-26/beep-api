@@ -5,7 +5,6 @@ router
   .group(() => {
     router
       .group(() => {
-        router.post('/', [FilesController, 'store'])
         router.put('/:id', [FilesController, 'update'])
         router.delete('/:id', [FilesController, 'destroy'])
         router
