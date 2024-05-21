@@ -54,12 +54,7 @@ export default class MessageService {
   }
 
   findAllByChannelId(channelId: string) {
-    return Message.query()
-      .where('channelId', channelId)
-      .preload('owner', (ownerQuery) => {
-        ownerQuery.select('id', 'username', 'profilePicture')
-      })
-      .orderBy('created_at', 'desc')
+    return Message.query().where('channelId', channelId).preload('owner').orderBy('created_at', 'desc')
   }
   
 
