@@ -15,7 +15,7 @@ export default class GenerateModuleBase extends BaseCommand {
   declare name: string
 
   async run() {
-    this.logger.info('Let\'s go to create your module')
+    this.logger.info("Let's go to create your module")
 
     const codemods = await this.createCodemods()
     await Promise.all([
@@ -23,7 +23,7 @@ export default class GenerateModuleBase extends BaseCommand {
       codemods.makeUsingStub(STUBS_ROOT.pathname, 'controller.stub', {
         name: this.name,
         module: this.name,
-        includeServiceInjection: true
+        includeServiceInjection: true,
       }),
       codemods.makeUsingStub(STUBS_ROOT.pathname, 'validator.stub', {
         name: this.name,
@@ -35,7 +35,7 @@ export default class GenerateModuleBase extends BaseCommand {
       }),
       codemods.makeUsingStub(STUBS_ROOT.pathname, 'service.stub', {
         name: this.name,
-      })
+      }),
     ])
 
     try {
