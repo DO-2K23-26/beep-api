@@ -1,8 +1,10 @@
 import { inject } from '@adonisjs/core'
 import ChannelService from '#apps/channels/services/channel_service'
 import logger from '@adonisjs/core/services/logger'
-import { SocketContext } from '#start/ws'
 import { StreamPayload, JoinChannelPayload } from '#apps/channels/contracts/payloads'
+import { SocketContext } from '#start/ws'
+import jwt from 'jsonwebtoken'
+import { Payload } from '#apps/authentication/contracts/payload'
 
 @inject()
 export default class ChannelGateway {
@@ -10,8 +12,10 @@ export default class ChannelGateway {
     this.channelService = channelService
   }
   async joinChannel({ server, socket }: SocketContext, message: JoinChannelPayload) {
-    const { data, emit } = socket
-    if (!data.sub || !data.username) {
+    const { emit } = socket
+    const payload = jwt.decode(socket.handshake.auth.token) as Payload
+    console.log(payload)
+    if (!payload?.sub || !payload?.username) {
       emit('error', {
         code: 400,
         message: 'Bad request',
@@ -21,10 +25,10 @@ export default class ChannelGateway {
     logger.info(`Message is ${JSON.stringify(message)}`)
     try {
       await this.channelService.joinVoiceChannel(
-        message.server_id,
-        message.channel_id,
-        data.sub,
-        data.username
+        message.serverId,
+        message.channelId,
+        payload.sub,
+        payload.username
       )
     } catch (e) {
       emit('error', {
@@ -32,7 +36,7 @@ export default class ChannelGateway {
         message: 'Bad request',
       })
     }
-    socket.join(message.channel_id)
+    socket.join(message.channelId)
 
     server.emit('usermove', {
       message: 'userConnected',
@@ -46,25 +50,25 @@ export default class ChannelGateway {
   }
 
   async leaveChannel({ socket, server }: SocketContext, message: JoinChannelPayload) {
-    const { data, emit } = socket
-    if (!data.sub || !data.username) {
+    const { emit } = socket
+    const payload = jwt.decode(socket.handshake.auth.token) as Payload
+    if (!payload.sub || !payload.username) {
       emit('error', {
         code: 400,
         message: 'Bad request',
       })
       return
     }
+    console.log('first test')
     try {
-      await this.channelService.quitVoiceChannel(data.sub)
+      await this.channelService.quitVoiceChannel(payload.sub)
     } catch (e) {
       emit('error', {
         code: 400,
         message: 'Bad request',
       })
     }
-
-    socket.leave(message.channel_id)
-
+    socket.leave(message.channelId)
     server.emit('usermove', {
       message: 'userDisconnected',
     })

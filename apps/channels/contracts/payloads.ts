@@ -1,6 +1,6 @@
 interface JoinChannelPayload {
-  server_id: string
-  channel_id: string
+  serverId: string
+  channelId: string
 }
 
 interface StreamPayload {
