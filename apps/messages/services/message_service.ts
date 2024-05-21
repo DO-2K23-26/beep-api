@@ -1,5 +1,4 @@
 import Message from '#apps/messages/models/message'
-import User from '#apps/users/models/user'
 import { CreateMessagesSchema, UpdateMessagesSchema } from '#apps/messages/validators/message'
 import Attachment from '#apps/storage/models/attachment'
 import StorageService from '#apps/storage/services/storage_service'
