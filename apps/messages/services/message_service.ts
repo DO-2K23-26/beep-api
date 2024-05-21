@@ -1,4 +1,5 @@
 import Message from '#apps/messages/models/message'
+import User from '#apps/users/models/user'
 import { CreateMessagesSchema, UpdateMessagesSchema } from '#apps/messages/validators/message'
 import Attachment from '#apps/storage/models/attachment'
 import StorageService from '#apps/storage/services/storage_service'
@@ -53,8 +54,14 @@ export default class MessageService {
   }
 
   findAllByChannelId(channelId: string) {
-    return Message.query().where('channelId', channelId).orderBy('created_at', 'desc')
+    return Message.query()
+      .where('channelId', channelId)
+      .preload('owner', (ownerQuery) => {
+        ownerQuery.select('id', 'username', 'profilePicture')
+      })
+      .orderBy('created_at', 'desc')
   }
+  
 
   async updateFilesOfMessage(
     updatedMessage: Message,
