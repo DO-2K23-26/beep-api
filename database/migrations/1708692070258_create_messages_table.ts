@@ -6,7 +6,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.string('id').primary()
-      table.string('content').notNullable()
+      table.text('content').notNullable()
       table.string('owner_id').references('id').inTable('users').nullable()
       table.string('channel_id').references('id').inTable('channels').onDelete('CASCADE').notNullable()
 
