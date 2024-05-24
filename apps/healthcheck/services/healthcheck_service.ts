@@ -16,7 +16,6 @@ export default class HealthcheckService {
       await this.S3Driver.uploadFile(this.BUCKET_NAME, 'healthcheck', 'ok', 2)
       return true
     } catch (error) {
-      console.log(error)
       return false
     }
   }
