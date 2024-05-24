@@ -61,6 +61,7 @@ export default defineConfig({
     () => import('#apps/storage/routes'),
     () => import('#apps/channels/routes'),
     () => import('#apps/servers/routes'),
+    () => import('#apps/healthcheck/routes'),
     () => import('#start/ws'),
   ],
 
