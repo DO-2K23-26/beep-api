@@ -8,7 +8,7 @@ import { inject } from '@adonisjs/core'
 export default class HealthchecksController {
   constructor(private healthcheckService: HealthcheckService) {}
 
-  async up({ response }: HttpContext) {
+  async health({ response }: HttpContext) {
     const pgHealthy = await this.healthcheckService.checkPg()
     const redisHealthy = await this.healthcheckService.checkRedis()
     const minioHealthy = await this.healthcheckService.checkMinio()
