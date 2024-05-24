@@ -4,4 +4,5 @@ const HealthchecksController = () => import('#apps/healthcheck/controllers/healt
 
 router.group(() => {
   router.get('up', [HealthchecksController, 'up'])
+  router.get('live', [HealthchecksController, 'live'])
 })

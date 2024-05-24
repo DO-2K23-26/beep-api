@@ -18,4 +18,8 @@ export default class HealthchecksController {
       minio: minioHealthy ? 'ok' : 'error',
     })
   }
+
+  async live({ response }: HttpContext) {
+    return response.status(200).send('ok')
+  }
 }
