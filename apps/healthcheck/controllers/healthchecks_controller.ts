@@ -1,7 +1,7 @@
 // import type { HttpContext } from '@adonisjs/core/http'
 
 import { HttpContext } from '@adonisjs/core/http'
-import HealthcheckService from '../services/healthcheck_service.js'
+import HealthcheckService from '#apps/healthcheck/services/healthcheck_service'
 import { inject } from '@adonisjs/core'
 
 @inject()
