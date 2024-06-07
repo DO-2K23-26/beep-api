@@ -1,10 +1,10 @@
 ## Summary
 [[_TOC_]]
 
-### Overview (Description)
+## Overview (Description)
 This is the overview.
 
-### Endpoint
+## Endpoint
 **Path**: `/server/:serverId`
 
 **Input**: 
@@ -23,20 +23,20 @@ This is the overview.
 }
 ```
 
-### Task (Segmentation)
+## Task (Segmentation)
 - Create route.
 - Add additional tasks as needed.
 - Document the route in the relevant documentation.
 - Add tests for the route.
 
-### Definition of done
+## Definition of done
 - The endpoint is created and operational.
 - Documentation for the route is complete.
 - Tests for the route are written and passing.
 
-### Dependencies
+## Dependencies
 - List any dependencies with other issues, tasks, or external systems.
 - Include links to related issues if applicable.
 
-### Importance
+## Importance
 - Indicate the priority of the issue (High, Medium, Low).
