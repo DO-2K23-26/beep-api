@@ -4,10 +4,17 @@ import { createMessageValidator, updateMessageValidator } from '#apps/messages/v
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import transmit from '@adonisjs/transmit/services/main'
+import ServerService from '#apps/servers/services/server_service'
+import ChannelService from '#apps/channels/services/channel_service'
+import { ShowChannelSchema } from '#apps/channels/validators/channel'
 
 @inject()
 export default class MessagesChannelsController {
-  constructor(private messageService: MessageService) {}
+  constructor(
+    private messageService: MessageService,
+    private channelService: ChannelService,
+    private serverService: ServerService
+  ) {}
   /**
    * Display a list of resource
    */
@@ -59,7 +66,18 @@ export default class MessagesChannelsController {
   async destroy({ params, bouncer }: HttpContext) {
     const messageId = params.messageId
     const message = await this.messageService.show(messageId)
-    await bouncer.with(MessagePolicy).authorize('delete' as never, message)
+
+    let showChannelSchema: ShowChannelSchema = {
+      params: {
+        id: message.channelId,
+      },
+      users: true,
+      messages: undefined,
+    }
+    const channel = await this.channelService.findById(showChannelSchema)
+
+    const server = await this.serverService.findById(channel.serverId)
+    await bouncer.with(MessagePolicy).authorize('delete' as never, message, server)
     transmit.broadcast(`channels/${params.channelId}/messages`, {
       messageId: params.messageId,
     })
