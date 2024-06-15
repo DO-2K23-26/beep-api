@@ -20,6 +20,7 @@ router
           })
           .prefix('channels')
         router.get('/', [ServerController, 'show'])
+        router.patch('/', [ServerController, 'update'])
         router.get('/owner', [ServerController, 'getOwner'])
         router.post('/join', [ServerController, 'join'])
         router.get('/users', [ServerController, 'getAllUsers'])

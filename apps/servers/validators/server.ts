@@ -18,7 +18,8 @@ export const createServerValidator = vine.compile(
 export const updateServerValidator = vine.compile(
   vine.object({
     id: vine.string().uuid({ version: [4] }),
-    name: vine.string().minLength(1),
+    name: vine.string().minLength(1).optional(),
+    description: vine.string().optional(),
   })
 )
 

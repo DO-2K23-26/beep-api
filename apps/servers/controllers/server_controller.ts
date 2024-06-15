@@ -2,7 +2,11 @@ import { Payload } from '#apps/authentication/contracts/payload'
 import ServerService from '#apps/servers/services/server_service'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import { indexServerValidator, createServerValidator } from '#apps/servers/validators/server'
+import {
+  indexServerValidator,
+  createServerValidator,
+  updateServerValidator,
+} from '#apps/servers/validators/server'
 
 @inject()
 export default class ServersController {
@@ -42,9 +46,13 @@ export default class ServersController {
   }
 
   /**
-   * Handle form submission for the edit action
+   * Mettre à jour un serveur (nom,description)
    */
-  // async update({ params, request }: HttpContext) {}
+
+  async update({ request, params }: HttpContext) {
+    const payload = await request.validateUsing(updateServerValidator)
+    return this.serverService.update(params.serverId, payload)
+  }
 
   /**
    * Delete record
