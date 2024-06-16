@@ -1,9 +1,9 @@
 import Channel from '#apps/channels/models/channel'
 import {
   CreateChannelSchema,
+  UpdateChannelSchema,
   IndexChannelSchema,
   ShowChannelSchema,
-  UpdateChannelSchema,
 } from '#apps/channels/validators/channel'
 import jwt from 'jsonwebtoken'
 import env from '#start/env'
@@ -63,9 +63,6 @@ export default class ChannelService {
     userId: string
   ): Promise<Channel> {
     const channel = await Channel.create({ ...newChannel, serverId: serverId })
-    await channel.related('users').attach([userId])
-    return channel
-  }
 
   async update(payload: UpdateChannelSchema): Promise<Channel> {
     return Channel.updateOrCreate({ id: payload.id }, payload)
@@ -74,6 +71,18 @@ export default class ChannelService {
   async deleteById(channelId: string): Promise<void> {
     const channel: Channel = await Channel.findOrFail(channelId)
     await channel.delete()
+  }
+
+  async join(userId: string, channelId: string) {
+    const channel = await Channel.findOrFail(channelId)
+    await channel.related('users').attach([userId])
+    return channel
+  }
+
+  async leave(userId: string, channelData: SubscribeChannelSchema) {
+    const channel = await Channel.findOrFail(channelData.params.id)
+    await channel.related('users').detach([userId])
+    return channel
   }
 
   async occupiedVoiceChannels(serverId: string) {
