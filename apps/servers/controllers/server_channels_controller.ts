@@ -41,7 +41,7 @@ export default class ServerChannelsController {
   }
 
   // Updates a chan (name, description...)
-  async updateChannel({ auth, request, params }: HttpContext) {
+  async updateChannel({ request, params }: HttpContext) {
     const receivedChannel = await request.validateUsing(updateChannelValidator)
     const channel = await this.channelService.update(
       params.channelId, { name: receivedChannel.name, description: receivedChannel.description }

@@ -1,6 +1,5 @@
 import vine from '@vinejs/vine'
 import { Infer } from '@vinejs/vine/types'
-import { describe } from 'node:test'
 
 /**
  * Validator to validate the payload when creating
