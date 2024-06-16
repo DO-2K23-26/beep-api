@@ -21,7 +21,7 @@ router
             router.get('/', [ServerChannelsController, 'findByServerId'])
             router.post('/', [ServerChannelsController, 'createChannel'])
             router.put('/:channelId', [ServerChannelsController, 'updateChannel'])
-            router.get('/:channelId', [ServerChannelsController, 'deleteChannel'])
+            router.delete('/:channelId', [ServerChannelsController, 'deleteChannel'])
             router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
             router.post('/join', [ServerChannelsController, 'joinChannel']).prefix('/:channelId')
           })
