@@ -20,6 +20,7 @@ router
           .group(() => {
             router.get('/', [ServerChannelsController, 'findByServerId'])
             router.post('/', [ServerChannelsController, 'createChannel'])
+            router.put('/:channelId', [ServerChannelsController, 'updateChannel'])
             router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
             router.post('/join', [ServerChannelsController, 'joinChannel']).prefix('/:channelId')
           })
