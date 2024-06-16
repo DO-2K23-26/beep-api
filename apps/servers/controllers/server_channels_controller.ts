@@ -1,6 +1,6 @@
 import { Payload } from '#apps/authentication/contracts/payload'
 import ChannelService from '#apps/channels/services/channel_service'
-import { createChannelValidator } from '#apps/channels/validators/channel'
+import { createChannelValidator, updateChannelValidator } from '#apps/channels/validators/channel'
 import UserService from '#apps/users/services/user_service'
 import { mutedValidator } from '#apps/users/validators/muted_validator'
 import { inject } from '@adonisjs/core'
@@ -26,7 +26,7 @@ export default class ServerChannelsController {
     })
   }
 
-  // permet de créer un channel dans un serveur
+  // Creates a channel in a server
   async createChannel({ auth, request, params }: HttpContext) {
     const receivedChannel = await request.validateUsing(createChannelValidator)
     const type = receivedChannel.type as 'voice' | 'text'
@@ -36,6 +36,15 @@ export default class ServerChannelsController {
       { name: receivedChannel.name, type: type },
       serverId,
       userPayload.sub
+    )
+    return channel
+  }
+
+  // Updates a chan (name, description...)
+  async updateChannel({ auth, request, params }: HttpContext) {
+    const receivedChannel = await request.validateUsing(updateChannelValidator)
+    const channel = await this.channelService.update(
+      params.channelId, { name: receivedChannel.name, description: receivedChannel.description }
     )
     return channel
   }
