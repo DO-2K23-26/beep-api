@@ -46,7 +46,14 @@ export default class ServerChannelsController {
     const channel = await this.channelService.update(
       params.channelId, { name: receivedChannel.name, description: receivedChannel.description }
     )
-    return channel
+    return channel  // Returns the updated channel.
+  }
+  
+  // Deletes a channel from a server
+  async deleteChannel({ params }: HttpContext) {
+    const channelId = params.channelId;
+    await this.channelService.deleteById(channelId);
+    return { message: 'Channel deleted successfully' };
   }
 
   async joinChannel({ auth, params }: HttpContext): Promise<string> {
