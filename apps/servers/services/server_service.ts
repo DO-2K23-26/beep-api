@@ -116,17 +116,4 @@ export default class ServerService {
     }
     return server
   }
-
-  async discover(page: number = 1, limit: number = 10): Promise<Server[]> {
-    const pageServers = await Server.query().where('visibility', 'public').paginate(page, limit)
-    return pageServers.all()
-  }
-
-  async discoverAndSearch(search: string, page: number = 1, limit: number = 10): Promise<Server[]> {
-    const pageServers = await Server.query()
-      .where('visibility', 'public')
-      .where('name', 'like', `%${search}%`)
-      .paginate(page, limit)
-    return pageServers.all()
-  }
 }
