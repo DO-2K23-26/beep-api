@@ -28,6 +28,9 @@ export default class Server extends BaseModel {
   declare icon: string
 
   @column()
+  declare visibility: 'public' | 'private'
+
+  @column()
   declare banner: string
 
   @column()

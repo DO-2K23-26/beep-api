@@ -3,7 +3,11 @@ import { inject } from '@adonisjs/core'
 import UserService from '#apps/users/services/user_service'
 import UserPolicy from '#apps/users/policies/user_policy'
 import User from '#apps/users/models/user'
-import { confirmEmailUpdateValidator, emailUpdateValidator, updateUserValidator } from '#apps/users/validators/users'
+import {
+  confirmEmailUpdateValidator,
+  emailUpdateValidator,
+  updateUserValidator,
+} from '#apps/users/validators/users'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
@@ -13,7 +17,7 @@ export default class UsersController {
   constructor(
     protected userService: UserService,
     protected authenticationService: AuthenticationService
-  ) { }
+  ) {}
 
   async index({ response, bouncer }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('view' as never)
@@ -25,25 +29,25 @@ export default class UsersController {
   async findMe({ auth, response }: HttpContext) {
     const payload = auth.use('jwt').payload
     const user = await this.userService.findById(payload?.sub ?? '')
-    type userOmit = Omit<User, 'password'>
-    const omittedUser: userOmit = user
+    type UserOmit = Omit<User, 'password'>
+    const omittedUser: UserOmit = user
     return response.send(omittedUser)
   }
 
   async update({ request, auth, response }: HttpContext) {
     const payload = auth.use('jwt').payload
-    const data = await request.validateUsing(updateUserValidator);
+    const data = await request.validateUsing(updateUserValidator)
     if (data.email) return response.abort({ message: "You can't update the email with this route" })
     if (!payload?.sub) return response.abort({ message: "Can't update the user" })
-    return this.userService.update(data, payload?.sub ?? "");
+    return this.userService.update(data, payload?.sub ?? '')
   }
 
   async show({ params, response }: HttpContext) {
     const user: User = await this.userService.findById(params.userId)
-    
+
     return response.send({
       id: user.id,
-      username: user.username
+      username: user.username,
     })
   }
 
@@ -56,7 +60,7 @@ export default class UsersController {
       JSON.stringify({
         id: payload!.sub,
         username: (payload as any).username as string,
-        expiresAt: Date.now() + 1200 * 1000  // Timestamp now + 20 minutes
+        expiresAt: Date.now() + 1200 * 1000, // Timestamp now + 20 minutes
       })
     )
 
@@ -95,10 +99,10 @@ export default class UsersController {
     let isUpdateRedis: boolean = false
 
     for (const userKey in userStates) {
-      const userData = JSON.parse(userStates[userKey]);
+      const userData = JSON.parse(userStates[userKey])
       if (userData.expiresAt <= Date.now()) {
-        await redis.hdel('userStates', userKey);
-        isUpdateRedis = true;
+        await redis.hdel('userStates', userKey)
+        isUpdateRedis = true
       }
     }
 
@@ -110,22 +114,28 @@ export default class UsersController {
 
     const users = Object.values(userStates).map((userState) => JSON.parse(userState))
 
-    return response.send(users.filter(u => u.expiresAt > Date.now()))
+    return response.send(users.filter((u) => u.expiresAt > Date.now()))
   }
 
   async createEmailToken({ request, auth, response }: HttpContext) {
     const payload = auth.use('jwt').payload
-    const data = await request.validateUsing(emailUpdateValidator);
-    if (payload?.sub == null) return response.abort({ message: "Can't update email" })
-    const token = await this.userService.storeEmailChangeToken(payload.sub, payload.email, data.email)
+    const data = await request.validateUsing(emailUpdateValidator)
+    if (!payload?.sub) return response.abort({ message: "Can't update email" })
+    const token = await this.userService.storeEmailChangeToken(
+      payload.sub,
+      payload.email,
+      data.email
+    )
     return response.send({ token: token })
   }
 
   async confirmEmailUpdate({ auth, bouncer, request }: HttpContext) {
     const payload = auth.use('jwt').payload
-    const data = await request.validateUsing(confirmEmailUpdateValidator);
+    const data = await request.validateUsing(confirmEmailUpdateValidator)
     const emailChangeToken = await this.userService.getEmailChangeToken(data.token)
-    await bouncer.with(UserPolicy).authorize('updateEmail' as never, payload?.sub, emailChangeToken.user_id)
+    await bouncer
+      .with(UserPolicy)
+      .authorize('updateEmail' as never, payload?.sub, emailChangeToken.user_id)
     return this.userService.updateEmail(emailChangeToken.user_id, emailChangeToken.new_email)
   }
 }

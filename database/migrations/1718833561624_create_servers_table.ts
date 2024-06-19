@@ -6,6 +6,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.alterTable(this.tableName, (table) => {
       table.enum('visibility', ['public', 'private']).defaultTo('public')
+      table.string('icon').notNullable()
     })
   }
 }
