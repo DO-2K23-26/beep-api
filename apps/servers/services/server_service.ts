@@ -2,6 +2,7 @@ import Server from '#apps/servers/models/server'
 import User from '#apps/users/models/user'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
 import StorageService from '#apps/storage/services/storage_service'
+import assert from 'node:assert'
 
 export default class ServerService {
   async findAll(page: number = 1, limit: number = 10): Promise<Server[]> {
@@ -22,12 +23,14 @@ export default class ServerService {
     return Server.query().where('id', serverId).firstOrFail()
   }
 
-  async create(payload: CreateServerSchema, ownerId: string): Promise<Server> {
+  async create({ name, icon, visibility }: CreateServerSchema, ownerId: string): Promise<Server> {
+    assert(name === 'public' || name === 'private') // assert that the name is either 'public' or 'private', if not the case validator failed
+
     return await Server.create({
-      name: payload.name,
+      name: name,
       description: '',
-      banner: '',
       icon: '',
+      visibility: visibility as 'public' | 'private',
       ownerId: ownerId,
     })
   }

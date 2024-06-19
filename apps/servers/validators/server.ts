@@ -9,6 +9,9 @@ import { Infer } from '@vinejs/vine/types'
 export const createServerValidator = vine.compile(
   vine.object({
     name: vine.string().minLength(1),
+    visibility: vine.string().in(['public', 'private']),
+    icon: new VineMultipartFile().nullable().optional(),
+    description: vine.string().optional(),
   })
 )
 

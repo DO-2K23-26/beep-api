@@ -29,6 +29,9 @@ export default class Server extends BaseModel {
   @column()
   declare banner: string
 
+  @column()
+  declare visibility: 'public' | 'private'
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
