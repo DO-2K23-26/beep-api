@@ -2,9 +2,11 @@ import Server from '#apps/servers/models/server'
 import User from '#apps/users/models/user'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
 import StorageService from '#apps/storage/services/storage_service'
-import assert from 'node:assert'
+import { assert } from 'node:console'
 
 export default class ServerService {
+  constructor(private storageService: StorageService) {}
+
   async findAll(page: number = 1, limit: number = 10): Promise<Server[]> {
     const pageServers = await Server.query().paginate(page, limit)
     return pageServers.all()
@@ -26,13 +28,25 @@ export default class ServerService {
   async create({ name, icon, visibility }: CreateServerSchema, ownerId: string): Promise<Server> {
     assert(name === 'public' || name === 'private') // assert that the name is either 'public' or 'private', if not the case validator failed
 
-    return await Server.create({
+    const server = await Server.create({
       name: name,
       description: '',
       icon: '',
       visibility: visibility as 'public' | 'private',
       ownerId: ownerId,
     })
+
+    let path: string | null = null
+
+    if (icon) {
+      path = await this.storageService.storeServerIcon(icon, server.id)
+    } else {
+      throw new Error('No icon provided')
+    }
+
+    server.icon = path
+
+    return server.save()
   }
 
   async join(userId: string, serverId: string): Promise<Server> {
