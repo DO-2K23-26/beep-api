@@ -27,19 +27,17 @@ export default class ServerService {
     return Server.query().where('id', serverId).firstOrFail()
   }
 
-  async create({ name, icon, visibility }: CreateServerSchema, ownerId: string): Promise<Server> {
-    console.log(name)
-    assert(visibility === 'public' || visibility === 'private') // assert that the visibility is either 'public' or 'private', if not the case validator failed
-
-    const checkIfServerExists = await Server.query().where('name', name).first()
-    if (checkIfServerExists) {
-      throw new Error('Server already exists')
-    }
+  async create(
+    { name, description, visibility, icon }: CreateServerSchema,
+    ownerId: string
+  ): Promise<Server> {
+    assert(name === 'public' || name === 'private') // assert that the name is either 'public' or 'private', if not the case validator failed
 
     const server = await Server.create({
-      name: name,
-      description: '',
+      banner: '',
       icon: '',
+      name: name,
+      description: description,
       visibility: visibility as 'public' | 'private',
       ownerId: ownerId,
     })
