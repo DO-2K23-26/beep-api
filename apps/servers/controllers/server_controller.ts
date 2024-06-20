@@ -6,6 +6,7 @@ import {
   indexServerValidator,
   createServerValidator,
   updateServerValidator,
+  updateBannerValidator,
 } from '#apps/servers/validators/server'
 import ServerPolicy from '../policies/server_policy.js'
 
@@ -95,4 +96,12 @@ export default class ServersController {
   //   const timeout = await this.serverService.timeout(data.params.id)
   //   return response.send(timeout)
   // }
+
+  //Banner
+
+  //update banner
+  async updateBanner({ request }: HttpContext) {
+    const data = await request.validateUsing(updateBannerValidator)
+    return this.serverService.updateBanner(data)
+  }
 }

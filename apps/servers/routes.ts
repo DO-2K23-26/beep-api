@@ -1,3 +1,4 @@
+import StoragesController from '#apps/storage/controllers/storages_controller'
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 
@@ -19,6 +20,12 @@ router
             router.post('/join', [ServerChannelsController, 'joinChannel']).prefix('/:channelId')
           })
           .prefix('channels')
+        router
+          .group(() => {
+            router.get('/', [StoragesController, 'transmitBanner'])
+            router.put('/', [ServerController, 'updateBanner'])
+          })
+          .prefix('banner')
         router.get('/', [ServerController, 'show'])
         router.patch('/', [ServerController, 'update'])
         router.get('/owner', [ServerController, 'getOwner'])

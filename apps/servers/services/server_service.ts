@@ -1,6 +1,7 @@
 import Server from '#apps/servers/models/server'
 import User from '#apps/users/models/user'
-import { CreateServerSchema, UpdateServerSchema } from '../validators/server.js'
+import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
+import StorageService from '#apps/storage/services/storage_service'
 
 export default class ServerService {
   async findAll(page: number = 1, limit: number = 10): Promise<Server[]> {
@@ -8,7 +9,11 @@ export default class ServerService {
     return pageServers.all()
   }
 
-  async findByUserId(userId: string, page: number = 1, limit: number = 10): Promise<Server[]> {
+  public async findByUserId(
+    userId: string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<Server[]> {
     const pageServers = await Server.query()
       .whereHas('users', (builder) => {
         builder.where('id', userId)
@@ -62,5 +67,13 @@ export default class ServerService {
   async delete(serverId: string): Promise<void> {
     const server: Server = await Server.findOrFail(serverId)
     await server.delete()
+  }
+
+  // banner
+
+  async updateBanner(payload: UpdateBannerSchema): Promise<void> {
+    const server = await Server.findOrFail(payload.params.serverId)
+    server.banner = await new StorageService().updateBanner(payload.attachment, server.id)
+    await server.save()
   }
 }

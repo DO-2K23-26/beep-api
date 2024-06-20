@@ -1,10 +1,11 @@
+import Server from '#apps/servers/models/server'
 import Attachment from '#apps/storage/models/attachment'
 import StoragePolicy from '#apps/storage/policies/storage_policy'
 import StorageService from '#apps/storage/services/storage_service'
 import { updateStorageValidator } from '#apps/storage/validators/storage'
 import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
-import type { HttpContext, Response } from '@adonisjs/core/http'
+import { type HttpContext, type Response } from '@adonisjs/core/http'
 
 @inject()
 export default class StoragesController {
@@ -38,6 +39,11 @@ export default class StoragesController {
   async transmitProfilePicture({ params, response }: HttpContext) {
     const user = await User.findByOrFail('id', params.id)
     return await this.transmit(response, user.profilePicture)
+  }
+
+  async transmitBanner({ params, response }: HttpContext) {
+    const server = await Server.findByOrFail('id', params.serverId)
+    return await this.transmit(response, server.banner)
   }
 
   async transmit(response: Response, id: string) {

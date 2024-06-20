@@ -1,3 +1,4 @@
+import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
 import vine from '@vinejs/vine'
 import { Infer } from '@vinejs/vine/types'
 
@@ -33,6 +34,18 @@ export const indexServerValidator = vine.compile(
   })
 )
 
+//banner
+
+export const updateBannerValidator = vine.compile(
+  vine.object({
+    attachment: new VineMultipartFile(),
+    params: vine.object({
+      serverId: vine.string().uuid({ version: [4] }),
+    }),
+  })
+)
+
+export type UpdateBannerSchema = Infer<typeof updateBannerValidator>
 export type CreateServerSchema = Infer<typeof createServerValidator>
 export type UpdateServerSchema = Infer<typeof updateServerValidator>
 export type IndexServerSchema = Infer<typeof indexServerValidator>
