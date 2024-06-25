@@ -3,7 +3,9 @@ import User from '#apps/users/models/user'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
 import StorageService from '#apps/storage/services/storage_service'
 import { assert } from 'node:console'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class ServerService {
   constructor(private storageService: StorageService) {}
 
