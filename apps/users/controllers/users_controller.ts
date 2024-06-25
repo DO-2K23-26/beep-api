@@ -22,20 +22,18 @@ export default class UsersController {
     return response.send(users)
   }
 
-  async findMe({ auth, response }: HttpContext) {
-    const payload = auth.use('jwt').payload
-    const user = await this.userService.findById(payload?.sub ?? '')
-    type userOmit = Omit<User, 'password'>
-    const omittedUser: userOmit = user
-    return response.send(omittedUser)
-  }
-
-  async update({ request, auth, response }: HttpContext) {
-    const payload = auth.use('jwt').payload
-    const data = await request.validateUsing(updateUserValidator);
-    if (data.email) return response.abort({ message: "You can't update the email with this route" })
-    if (!payload?.sub) return response.abort({ message: "Can't update the user" })
-    return this.userService.update(data, payload?.sub ?? "");
+  async show({ params, response }: HttpContext) {
+    try {
+      const user: User = await this.userService.findById(params.userId)
+      return response.send({
+        id: user.id,
+        username: user.username
+      })
+    } catch (error) {
+      return response.status(404).send({
+        message: 'No user has been found with this ID.',
+      })
+    }
   }
 
   async connectUser({ response, auth }: HttpContext) {

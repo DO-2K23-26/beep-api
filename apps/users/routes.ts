@@ -5,6 +5,7 @@ const UsersController = () => import("#apps/users/controllers/users_controller")
 
 router.group(() => {
   router.get('', [UsersController, 'index'])
+  router.get('/:userId', [UsersController, 'show'])
   router.post('/connect', [UsersController, 'connectUser'])
   router.post('/disconnect', [UsersController, 'disconnectUser'])
   router.get('/onlines', [UsersController, 'onlines'])
