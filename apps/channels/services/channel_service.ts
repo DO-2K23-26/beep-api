@@ -5,10 +5,16 @@ import {
   ShowChannelSchema,
   UpdateChannelSchema,
 } from '#apps/channels/validators/channel'
+import jwt from 'jsonwebtoken'
+import env from '#start/env'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 import { CachedUser, OccupiedChannel } from '#apps/channels/models/occupied_channels'
 
+export interface PayloadJWTSFUConnection {
+  channelId?: string
+  userId: string
+}
 export default class ChannelService {
   async findAll(data: IndexChannelSchema): Promise<Channel[]> {
     return Channel.query()
@@ -90,35 +96,41 @@ export default class ChannelService {
     return occupiedChannels
   }
 
-  async joinVoiceChannel(serverId: string, channelId: string, userId: string, username: string) {
+  async joinVoiceChannel(
+    serverId: string,
+    channelId: string,
+    userId: string,
+    username: string
+  ): Promise<string> {
     try {
       const multi = redis.multi()
       const userKey = `user:${userId}`
       const channel = await redis.get(userKey)
       if (channel) {
-        multi.del(channel, userId)
+        multi.hdel(channel, userId)
       }
+
       // on ajoute l'utilisateur dans le channel
       multi.hset(`server:${serverId}:channel:${channelId}`, userId, username)
-      console.log(await redis.keys(`server:${serverId}:channel:${channelId}`))
       // on associe le channel au user
       multi.set(userKey, `server:${serverId}:channel:${channelId}`)
       await multi.exec()
       transmit.broadcast(`servers/${serverId}/movement`, { message: 'user joined' })
-      return true
+      const payload: PayloadJWTSFUConnection = { channelId, userId }
+      return this.generateToken(payload)
     } catch (error) {
       console.error('Error joining channel:', error)
-      return false
+      return ''
     }
   }
 
-  async quitVoiceChannel(userId: string) {
+  async quitVoiceChannel(userId: string): Promise<string> {
     // connaissant le channel surlequel se trouve le user on peut le retirer
     try {
       const userKey = `user:${userId}`
       const channel = await redis.get(userKey)
       if (!channel) {
-        return false
+        return ''
       }
       const multi = redis.multi()
       multi.hdel(channel, userId)
@@ -126,10 +138,15 @@ export default class ChannelService {
       await multi.exec()
       const serverId = channel.split(':')[1]
       transmit.broadcast(`servers/${serverId}/movement`, { message: 'user left' })
-      return true
+      const payload: PayloadJWTSFUConnection = { userId }
+      return this.generateToken(payload)
     } catch (error) {
       console.error('Error joining channel:', error)
-      return false
+      return ''
     }
+  }
+
+  generateToken(payload: PayloadJWTSFUConnection): string {
+    return jwt.sign(payload, env.get('APP_KEY'))
   }
 }

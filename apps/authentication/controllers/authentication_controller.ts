@@ -2,13 +2,16 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import User from '#apps/users/models/user'
-import { createAuthenticationValidator, signinAuthenticationValidator } from '../validators/authentication.js'
+import {
+  createAuthenticationValidator,
+  signinAuthenticationValidator,
+} from '../validators/authentication.js'
 import MailService from '../services/mail_service.js'
 import UserService from '#apps/users/services/user_service'
 import { createVerifyValidator } from '../validators/verify.js'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
-import StorageService from "#apps/storage/services/storage_service";
+import StorageService from '#apps/storage/services/storage_service'
 
 @inject()
 export default class AuthenticationController {
@@ -31,7 +34,7 @@ export default class AuthenticationController {
       JSON.stringify({
         id: user.id,
         username: user.username,
-        expiresAt: Date.now() + 1200 * 1000  // Timestamp now + 20 minutes
+        expiresAt: Date.now() + 1200 * 1000, // Timestamp now + 20 minutes
       })
     )
 
@@ -53,7 +56,9 @@ export default class AuthenticationController {
     )
 
     if (existingUserEmail != null)
-      return response.status(403).send({ message: 'A user already exists with this email address.' })
+      return response
+        .status(403)
+        .send({ message: 'A user already exists with this email address.' })
 
     const existingUserUsername: User | null = await this.authenticationService.getUserByUsername(
       schemaUser.username
@@ -93,9 +98,9 @@ export default class AuthenticationController {
       JSON.stringify({
         id: payload!.sub,
         username: user.username as string,
-        expiresAt: Date.now() + 1200 * 1000  // Nouveau timestamp d'expiration
+        expiresAt: Date.now() + 1200 * 1000, // Nouveau timestamp d'expiration
       })
-    );
+    )
 
     const tokens = await auth.use('jwt').generate(user)
 
@@ -119,9 +124,7 @@ export default class AuthenticationController {
   async verifyEmail({ response, request }: HttpContext) {
     const schematoken = await request.validateUsing(createVerifyValidator)
 
-    await this.authenticationService.verifyEmail(
-      schematoken.token
-    )
+    await this.authenticationService.verifyEmail(schematoken.token)
 
     return response.status(200).send({ message: 'Your account has been verified.' })
   }
