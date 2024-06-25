@@ -2,14 +2,8 @@ import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 const MessagesChannelsController = () => import('./controllers/messages_channels_controller.js')
 
-const ChannelsController = () => import('#apps/channels/controllers/channels_controller')
-
 router
   .group(() => {
-    router.group(() => {
-      router.post('/:id/join', [ChannelsController, 'join'])
-      router.post('/:id/leave', [ChannelsController, 'leave'])
-    })
     router
       .group(() => {
         router.post('/', [MessagesChannelsController, 'store'])

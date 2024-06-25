@@ -29,10 +29,29 @@ export default class ServerChannelsController {
     const serverId = params.serverId
     const channel = await this.channelService.create(
       { name: receivedChannel.name, type: type },
-      serverId
+      serverId,
+      userPayload.sub
     )
-    await this.channelService.join(userPayload.sub, channel.id)
     return channel
+  }
+
+  async joinChannel({ auth, request, params }: HttpContext) {
+    const userPayload = auth.use('jwt').payload as Payload
+    const channelId = params.channelId
+    const serverId = params.serverId
+    await this.channelService.joinVoiceChannel(
+      serverId,
+      channelId,
+      userPayload.sub.toString(),
+      userPayload.username
+    )
+    return { message: 'User joined successfully' }
+  }
+
+  async leaveChannel({ auth }: HttpContext) {
+    const userPayload = auth.use('jwt').payload as Payload
+    await this.channelService.quitVoiceChannel(userPayload.sub.toString())
+    return { message: 'User left successfully' }
   }
 
   streamingUsers({ params }: HttpContext) {

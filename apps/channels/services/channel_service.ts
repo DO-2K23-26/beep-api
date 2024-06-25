@@ -8,6 +8,7 @@ import {
 } from '#apps/channels/validators/channel'
 import redis from '@adonisjs/redis/services/main'
 import { CachedUser, OccupiedChannel } from '../models/occupied_channels.js'
+import transmit from '@adonisjs/transmit/services/main'
 
 export default class ChannelService {
   async findAll(data: IndexChannelSchema): Promise<Channel[]> {
@@ -51,19 +52,13 @@ export default class ChannelService {
     return Channel.query().where('server_id', serverId)
   }
 
-  async create(newChannel: CreateChannelSchema, serverId: string): Promise<Channel> {
-    return await Channel.create({ ...newChannel, serverId: serverId })
-  }
-
-  async join(userId: string, channelId: string) {
-    const channel = await Channel.findOrFail(channelId)
+  async create(
+    newChannel: CreateChannelSchema,
+    serverId: string,
+    userId: string
+  ): Promise<Channel> {
+    const channel = await Channel.create({ ...newChannel, serverId: serverId })
     await channel.related('users').attach([userId])
-    return channel
-  }
-
-  async leave(userId: string, channelData: SubscribeChannelSchema) {
-    const channel = await Channel.findOrFail(channelData.params.id)
-    await channel.related('users').detach([userId])
     return channel
   }
 
@@ -109,6 +104,7 @@ export default class ChannelService {
       // on associe le channel au user
       multi.set(userKey, `server:${serverId}:channel:${channelId}`)
       await multi.exec()
+      transmit.broadcast(`channel/${channelId}/join`, { message: 'user_joined' })
       return true
     } catch (error) {
       console.error('Error joining channel:', error)
@@ -128,6 +124,8 @@ export default class ChannelService {
       multi.hdel(channel, userId)
       multi.del(userKey)
       await multi.exec()
+      const channelId = channel.split(':')[3]
+      transmit.broadcast(`channel/${channelId}/leave`, { message: 'user_left' })
       return true
     } catch (error) {
       console.error('Error joining channel:', error)

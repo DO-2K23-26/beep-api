@@ -8,6 +8,7 @@ router
   .group(() => {
     router.get('/', [ServerController, 'index'])
     router.post('/', [ServerController, 'store'])
+    router.post('/leave', [ServerChannelsController, 'leaveChannel']).prefix('channels')
     router
       .group(() => {
         router
@@ -15,6 +16,7 @@ router
             router.get('/', [ServerChannelsController, 'findByServerId'])
             router.post('/', [ServerChannelsController, 'createChannel'])
             router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
+            router.post('/join', [ServerChannelsController, 'joinChannel']).prefix('/:channelId')
           })
           .prefix('channels')
         router.get('/', [ServerController, 'show'])
