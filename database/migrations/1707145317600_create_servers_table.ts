@@ -8,7 +8,6 @@ export default class extends BaseSchema {
       table.string('id').primary()
       table.string('name').unique()
       table.string('icon')
-      table.string('banner')
       table.string('owner_id')
       table.timestamp('created_at')
       table.timestamp('updated_at')
