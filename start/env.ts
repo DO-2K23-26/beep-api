@@ -59,5 +59,5 @@ export default await Env.create(new URL('../', import.meta.url), {
   SMTP_PASSWORD: Env.schema.string(),
 
   REDIS_HOST: Env.schema.string({ format: 'host' }),
-  REDIS_PORT: Env.schema.number()
+  REDIS_PORT: Env.schema.number(),
 })

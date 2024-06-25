@@ -15,7 +15,11 @@ export default class ServersController {
   async index({ request, auth }: HttpContext) {
     const userPayload = auth.use('jwt').payload as Payload
     const payload = await request.validateUsing(indexServerValidator)
-    const servers = await this.serverService.findByUserId(userPayload.sub, payload.page, payload.limit)
+    const servers = await this.serverService.findByUserId(
+      userPayload.sub,
+      payload.page,
+      payload.limit
+    )
     return servers
   }
 
