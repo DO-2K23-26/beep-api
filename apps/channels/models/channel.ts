@@ -12,6 +12,7 @@ import Message from '#apps/messages/models/message'
 import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import User from '#apps/users/models/user'
 import Server from '#apps/servers/models/server'
+import { generateSnowflake } from '#apps/shared/services/snowflake'
 
 export default class Channel extends BaseModel {
   @column({ isPrimary: true })
@@ -22,6 +23,9 @@ export default class Channel extends BaseModel {
 
   @column()
   declare description: string
+
+  @column()
+  declare serialNumber: string
 
   @column()
   declare serverId: string
@@ -51,5 +55,6 @@ export default class Channel extends BaseModel {
   @beforeCreate()
   static async generateUuid(model: Channel) {
     model.id = randomUUID()
+    model.serialNumber = generateSnowflake()
   }
 }
