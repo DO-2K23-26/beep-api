@@ -35,7 +35,7 @@ export default class ServerChannelsController {
     return channel
   }
 
-  async joinChannel({ auth, request, params }: HttpContext): Promise<string> {
+  async joinChannel({ auth, params }: HttpContext): Promise<string> {
     const userPayload = auth.use('jwt').payload as Payload
     const channelId = params.channelId
     const serverId = params.serverId
