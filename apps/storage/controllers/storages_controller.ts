@@ -46,6 +46,11 @@ export default class StoragesController {
     return await this.transmit(response, server.banner)
   }
 
+  async transmitPicture({ params, response }: HttpContext) {
+    const server = await Server.findByOrFail('id', params.serverId)
+    return await this.transmit(response, server.icon)
+  }
+
   async transmit(response: Response, id: string) {
     const payload = await this.storageService.transmit(id)
     if (payload.Body) {

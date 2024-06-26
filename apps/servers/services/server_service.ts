@@ -76,4 +76,12 @@ export default class ServerService {
     server.banner = await new StorageService().updateBanner(payload.attachment, server.id)
     await server.save()
   }
+
+  // picture
+
+  async updatePicture(payload: UpdateBannerSchema): Promise<void> {
+    const server = await Server.findOrFail(payload.params.serverId)
+    server.icon = await new StorageService().updatePicture(payload.attachment, server.id)
+    await server.save()
+  }
 }

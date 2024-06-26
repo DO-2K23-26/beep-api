@@ -7,6 +7,7 @@ import {
   createServerValidator,
   updateServerValidator,
   updateBannerValidator,
+  updatePictureValidator,
 } from '#apps/servers/validators/server'
 import ServerPolicy from '../policies/server_policy.js'
 
@@ -104,4 +105,12 @@ export default class ServersController {
     const data = await request.validateUsing(updateBannerValidator)
     return this.serverService.updateBanner(data)
   }
+
+  // update picture
+  async updatePicture({ request }: HttpContext) {
+    const data = await request.validateUsing(updatePictureValidator)
+    return this.serverService.updatePicture(data)
+  }
+
+
 }

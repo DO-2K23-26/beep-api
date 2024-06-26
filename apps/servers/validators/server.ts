@@ -45,7 +45,19 @@ export const updateBannerValidator = vine.compile(
   })
 )
 
+//picture
+
+export const updatePictureValidator = vine.compile(
+  vine.object({
+    attachment: new VineMultipartFile(),
+    params: vine.object({
+      serverId: vine.string().uuid({ version: [4] }),
+    }),
+  })
+)
+
 export type UpdateBannerSchema = Infer<typeof updateBannerValidator>
 export type CreateServerSchema = Infer<typeof createServerValidator>
 export type UpdateServerSchema = Infer<typeof updateServerValidator>
 export type IndexServerSchema = Infer<typeof indexServerValidator>
+export type UpdatePictureSchema = Infer<typeof updatePictureValidator>

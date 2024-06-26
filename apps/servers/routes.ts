@@ -26,6 +26,10 @@ router
             router.put('/', [ServerController, 'updateBanner'])
           })
           .prefix('banner')
+        router.group(() => {
+          router.get('/',[StoragesController, 'transmitPicture'])
+          router.put('/', [ServerController, 'updatePicture'])
+        }).prefix('picture')
         router.get('/', [ServerController, 'show'])
         router.patch('/', [ServerController, 'update'])
         router.get('/owner', [ServerController, 'getOwner'])

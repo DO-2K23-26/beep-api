@@ -82,4 +82,18 @@ export default class StorageService {
     }
     throw new Error('File not found')
   }
+
+  //picture
+
+  async updatePicture(picture: MultipartFile, id_server: string): Promise<string> {
+    const key = id_server + '/' + 'picture' + '/' + picture.clientName
+
+    if (picture.tmpPath) {
+      const realFile = readFileSync(picture.tmpPath)
+      const buffer = Buffer.from(realFile)
+      await this.S3Driver.uploadFile(this.BUCKET_NAME, key, buffer, buffer.length)
+      return key
+    }
+    throw new Error('File not found')
+  }
 }
