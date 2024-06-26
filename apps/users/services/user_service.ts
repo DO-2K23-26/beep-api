@@ -1,3 +1,4 @@
+import HttpException from '#apps/shared/exceptions/http-exception'
 import User from '#apps/users/models/user'
 import redis from '@adonisjs/redis/services/main'
 import jwt from 'jsonwebtoken'
@@ -22,7 +23,11 @@ export default class UserService {
   }
 
   async findById(userId: string): Promise<User> {
-    return User.query().where('id', userId).firstOrFail()
+    try {
+      return User.query().where('id', userId).firstOrFail()
+    } catch (error) {
+      throw new HttpException('No user has been found with this ID.', { status: 404 })
+    }
   }
 
   async create(data: {

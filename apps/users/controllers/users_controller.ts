@@ -23,17 +23,12 @@ export default class UsersController {
   }
 
   async show({ params, response }: HttpContext) {
-    try {
-      const user: User = await this.userService.findById(params.userId)
-      return response.send({
-        id: user.id,
-        username: user.username
-      })
-    } catch (error) {
-      return response.status(404).send({
-        message: 'No user has been found with this ID.',
-      })
-    }
+    const user: User = await this.userService.findById(params.userId)
+    
+    return response.send({
+      id: user.id,
+      username: user.username
+    })
   }
 
   async connectUser({ response, auth }: HttpContext) {
