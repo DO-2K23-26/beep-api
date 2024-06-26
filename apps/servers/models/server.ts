@@ -14,6 +14,7 @@ import Channel from '#apps/channels/models/channel'
 import Role from '#apps/users/models/role'
 import Member from '#apps/members/models/member'
 import Invitation from '#apps/invitations/models/invitation'
+import { generateSnowflake } from '#apps/shared/services/snowflake'
 export default class Server extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -23,6 +24,9 @@ export default class Server extends BaseModel {
 
   @column()
   declare description: string
+
+  @column()
+  declare serialNumber: string
 
   @column()
   declare icon: string
@@ -69,5 +73,6 @@ export default class Server extends BaseModel {
   @beforeCreate()
   static async generateUuid(model: Server) {
     model.id = randomUUID()
+    model.serialNumber = generateSnowflake()
   }
 }
