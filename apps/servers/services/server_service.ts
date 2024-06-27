@@ -8,7 +8,7 @@ export default class ServerService {
     return pageServers.all()
   }
 
-  public async findByUserId(userId: string, page: number = 1, limit: number = 10): Promise<Server[]> {
+  async findByUserId(userId: string, page: number = 1, limit: number = 10): Promise<Server[]> {
     const pageServers = await Server.query()
       .whereHas('users', (builder) => {
         builder.where('id', userId)
@@ -39,7 +39,7 @@ export default class ServerService {
     return server.ownerId
   }
 
-  public async findUsersByServerId(serverId: string): Promise<User[]> {
+  async findUsersByServerId(serverId: string): Promise<User[]> {
     // Rechercher le serveur par id et précharger les utilisateurs associés
     const server = await Server.query().where('id', serverId).preload('users').firstOrFail()
 
