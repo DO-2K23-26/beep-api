@@ -56,12 +56,6 @@ export default class ServerService {
     return server.save()
   }
 
-  async join(userId: string, serverId: string): Promise<Server> {
-    const server = await Server.findOrFail(serverId)
-    await server.related('users').attach([userId])
-    return server
-  }
-
   async getOwner(serverId: string): Promise<string> {
     const server = await Server.findOrFail(serverId)
     return server.ownerId

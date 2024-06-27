@@ -11,6 +11,7 @@ import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 import Token from './token.js'
+import Invitation from '#apps/invitations/models/invitation'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -68,6 +69,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => Token)
   declare tokens: HasMany<typeof Token>
+
+  @hasMany(() => Invitation, {
+    foreignKey: 'creatorId',
+  })
+  declare invitations: HasMany<typeof Invitation>
 
   @beforeCreate()
   static async generateUuid(model: User) {

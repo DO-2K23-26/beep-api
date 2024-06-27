@@ -8,4 +8,10 @@ export default class extends BaseSchema {
       table.enum('visibility', ['public', 'private']).defaultTo('private')
     })
   }
+
+  async down() {
+    this.schema.alterTable(this.tableName, (table) => {
+      table.dropColumn('visibility')
+    })
+  }
 }

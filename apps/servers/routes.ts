@@ -5,11 +5,15 @@ import router from '@adonisjs/core/services/router'
 const ServerController = () => import('#apps/servers/controllers/server_controller')
 const ServerChannelsController = () =>
   import('#apps/servers/controllers/server_channels_controller')
+const ServerInvitationsController = () =>
+  import('#apps/servers/controllers/server_invitations_controller')
+
 router
   .group(() => {
     router.get('/', [ServerController, 'index'])
     router.post('/', [ServerController, 'store'])
     router.post('/leave', [ServerChannelsController, 'leaveChannel']).prefix('channels')
+    router.post('/join/:invitationId', [ServerInvitationsController, 'joinPrivate'])
     router
       .group(() => {
         router
@@ -35,10 +39,15 @@ router
         router.get('/', [ServerController, 'show'])
         router.patch('/', [ServerController, 'update'])
         router.get('/owner', [ServerController, 'getOwner'])
-        router.post('/join', [ServerController, 'join'])
         router.get('/users', [ServerController, 'getAllUsers'])
+        router.post('/join', [ServerInvitationsController, 'joinPublic'])
         router.get('/streaming/users', [ServerChannelsController, 'streamingUsers'])
         // router.get('/timeout/:user_id', [ServerController, 'timeout'])
+        router
+          .group(() => {
+            router.post('/', [ServerInvitationsController, 'createInvitation'])
+          })
+          .prefix('/invitation')
       })
       .prefix('/:serverId')
   })

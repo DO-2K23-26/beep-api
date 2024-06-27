@@ -10,10 +10,14 @@ import {
   updatePictureValidator,
 } from '#apps/servers/validators/server'
 import ServerPolicy from '../policies/server_policy.js'
+import InvitationService from '#apps/invitations/services/invitation_service'
 
 @inject()
 export default class ServersController {
-  constructor(private serverService: ServerService) {}
+  constructor(
+    private serverService: ServerService,
+    private invitationService: InvitationService
+  ) {}
 
   /**
    * Display a list of resource
@@ -37,7 +41,7 @@ export default class ServersController {
     const payload = await request.validateUsing(createServerValidator)
     const userPayload = auth.use('jwt').payload as Payload
     const server = await this.serverService.create(payload, userPayload.sub)
-    await this.serverService.join(userPayload.sub.toString(), server.id)
+    await this.invitationService.joinPublic(userPayload.sub.toString(), server.id)
     return server
   }
 
@@ -63,14 +67,6 @@ export default class ServersController {
    * Delete record
    */
   // async destroy({ params }: HttpContext) {}
-
-  //permet à un utilisateur de rejoindre un serveur
-  async join({ auth, response, params }: HttpContext) {
-    const userPayload = auth.use('jwt').payload as Payload
-    const serverId = params.serverId
-    await this.serverService.join(userPayload.sub.toString(), serverId)
-    return response.send({ message: 'User joined successfully' })
-  }
 
   //récupère le proprio du serveur
   async getOwner({ params }: HttpContext) {
