@@ -33,6 +33,11 @@ export default class ServerService {
   ): Promise<Server> {
     assert(name === 'public' || name === 'private') // assert that the name is either 'public' or 'private', if not the case validator failed
 
+    const checkIfServerExists = await Server.query().where('name', name).first()
+    if (checkIfServerExists) {
+      throw new Error('Server already exists')
+    }
+
     const server = await Server.create({
       banner: '',
       icon: '',
