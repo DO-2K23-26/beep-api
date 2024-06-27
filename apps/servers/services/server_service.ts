@@ -41,7 +41,7 @@ export default class ServerService {
     let path: string | null = null
 
     if (icon) {
-      path = await this.storageService.storeServerIcon(icon, server.id)
+      path = await this.storageService.updatePicture(icon, server.id)
     } else {
       throw new Error('No icon provided')
     }
