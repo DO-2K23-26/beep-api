@@ -112,4 +112,14 @@ export default class ServersController {
     await bouncer.with(ServerPolicy).authorize('edit' as never, server)
     return this.serverService.updatePicture(data)
   }
+
+  async destroy({ params, response }: HttpContext) {
+    const owner = await this.serverService.getOwner(params.serverId)
+    //TODO: Replace with correct authorization management
+    if (owner !== params.userId) {
+      return response.status(403).send({ message: 'You are not allowed to delete this server' })
+    }
+    await this.serverService.delete(params.serverId)
+    return response.send({ message: 'Server deleted successfully' })
+  }
 }

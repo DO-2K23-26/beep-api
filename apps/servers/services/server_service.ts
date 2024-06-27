@@ -57,6 +57,7 @@ export default class ServerService {
     return server.save()
   }
 
+  // get owner of the server and return its id
   async getOwner(serverId: string): Promise<string> {
     const server = await Server.findOrFail(serverId)
     return server.ownerId

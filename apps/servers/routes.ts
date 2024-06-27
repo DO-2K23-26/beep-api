@@ -21,7 +21,6 @@ router
             router.get('/', [ServerChannelsController, 'findByServerId'])
             router.post('/', [ServerChannelsController, 'createChannel'])
             router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
-            router.post('/join', [ServerChannelsController, 'joinChannel']).prefix('/:channelId')
           })
           .prefix('channels')
         router
@@ -42,6 +41,7 @@ router
         router.get('/users', [ServerController, 'getAllUsers'])
         router.post('/join', [ServerInvitationsController, 'joinPublic'])
         router.get('/streaming/users', [ServerChannelsController, 'streamingUsers'])
+        router.delete('/', [ServerController, 'destroy'])
         // router.get('/timeout/:user_id', [ServerController, 'timeout'])
         router
           .group(() => {
