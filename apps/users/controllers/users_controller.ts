@@ -2,6 +2,8 @@ import { type HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import UserService from '#apps/users/services/user_service'
 import UserPolicy from '#apps/users/policies/user_policy'
+import User from '#apps/users/models/user'
+import { confirmEmailUpdateValidator, emailUpdateValidator, updateUserValidator } from '#apps/users/validators/users'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
@@ -11,13 +13,29 @@ export default class UsersController {
   constructor(
     protected userService: UserService,
     protected authenticationService: AuthenticationService
-  ) {}
+  ) { }
 
   async index({ response, bouncer }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('view' as never)
     const users = await this.userService.findAll()
 
     return response.send(users)
+  }
+
+  async findMe({ auth, response }: HttpContext) {
+    const payload = auth.use('jwt').payload
+    const user = await this.userService.findById(payload?.sub ?? '')
+    type userOmit = Omit<User, 'password'>
+    const omittedUser: userOmit = user
+    return response.send(omittedUser)
+  }
+
+  async update({ request, auth, response }: HttpContext) {
+    const payload = auth.use('jwt').payload
+    const data = await request.validateUsing(updateUserValidator);
+    if (data.email) return response.abort({ message: "You can't update the email with this route" })
+    if (!payload?.sub) return response.abort({ message: "Can't update the user" })
+    return this.userService.update(data, payload?.sub ?? "");
   }
 
   async connectUser({ response, auth }: HttpContext) {
@@ -84,5 +102,21 @@ export default class UsersController {
     const users = Object.values(userStates).map((userState) => JSON.parse(userState))
 
     return response.send(users.filter(u => u.expiresAt > Date.now()))
+  }
+
+  async createEmailToken({ request, auth, response }: HttpContext) {
+    const payload = auth.use('jwt').payload
+    const data = await request.validateUsing(emailUpdateValidator);
+    if (payload?.sub == null) return response.abort({ message: "Can't update email" })
+    const token = await this.userService.storeEmailChangeToken(payload.sub, payload.email, data.email)
+    return response.send({ token: token })
+  }
+
+  async confirmEmailUpdate({ auth, bouncer, request }: HttpContext) {
+    const payload = auth.use('jwt').payload
+    const data = await request.validateUsing(confirmEmailUpdateValidator);
+    const emailChangeToken = await this.userService.getEmailChangeToken(data.token)
+    await bouncer.with(UserPolicy).authorize('updateEmail' as never, payload?.sub, emailChangeToken.user_id)
+    return this.userService.updateEmail(emailChangeToken.user_id, emailChangeToken.new_email)
   }
 }

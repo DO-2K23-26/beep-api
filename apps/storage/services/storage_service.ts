@@ -63,11 +63,12 @@ export default class StorageService {
   async storeProfilePicture(profilePicture: MultipartFile, id: string) {
     const key = 'profilePictures/' + id + '/' + profilePicture.clientName
     if (profilePicture.tmpPath) {
-      const realFile = readFileSync(profilePicture.tmpPath)
-      const buffer = Buffer.from(realFile)
+      const buffer = Buffer.from(readFileSync(profilePicture.tmpPath))
       await this.S3Driver.uploadFile(this.BUCKET_NAME, key, buffer, buffer.length)
       return key
     }
     throw new Error('File not found')
   }
+
+  
 }

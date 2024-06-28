@@ -1,12 +1,12 @@
-import { errors } from '@adonisjs/auth'
-import jwt from 'jsonwebtoken'
-import env from '#start/env'
-import logger from '@adonisjs/core/services/logger'
-import { CreateAuthenticationSchema } from '../validators/authentication.js'
-import User from '#apps/users/models/user'
 import Token from '#apps/users/models/token'
-import crypto from 'node:crypto'
+import User from '#apps/users/models/user'
+import env from '#start/env'
+import { errors } from '@adonisjs/auth'
+import logger from '@adonisjs/core/services/logger'
+import jwt from 'jsonwebtoken'
 import { DateTime } from 'luxon'
+import crypto from 'node:crypto'
+import { CreateAuthenticationSchema } from '../validators/authentication.js'
 
 export default class AuthenticationService {
   DEFAULT_PP_URL = 'default_profile_picture.png'
@@ -79,4 +79,6 @@ export default class AuthenticationService {
 
     return true
   }
+
+
 }

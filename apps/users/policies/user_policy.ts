@@ -1,9 +1,11 @@
-import {allowGuest, BasePolicy} from "@adonisjs/bouncer";
+import PermissionResolver from "#apps/shared/services/permissions/permission_resolver";
+import User from '#apps/users/models/user';
+import { allowGuest, BasePolicy } from "@adonisjs/bouncer";
 import { AuthorizerResponse } from "@adonisjs/bouncer/types";
 import { inject } from "@adonisjs/core";
 import { HttpContext } from "@adonisjs/core/http";
-import {JwtPayload} from "jsonwebtoken";
-import PermissionResolver from "#apps/shared/services/permissions/permission_resolver";
+import { JwtPayload } from "jsonwebtoken";
+
 
 @inject()
 export default class UserPolicy extends BasePolicy {
@@ -46,4 +48,10 @@ export default class UserPolicy extends BasePolicy {
       .createResolve(this.payload.resource_access)
       .verifyAccess('view-users')
   }
+  @allowGuest()
+  async updateEmail(_user: User | null, senderId: string, userId: string): Promise<AuthorizerResponse> {
+    return senderId == userId
+  }
+
+
 }
