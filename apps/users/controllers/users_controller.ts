@@ -3,7 +3,7 @@ import { inject } from '@adonisjs/core'
 import UserService from '#apps/users/services/user_service'
 import UserPolicy from '#apps/users/policies/user_policy'
 import User from '#apps/users/models/user'
-import { confirmEmailUpdateValidator, emailUpdateValidator } from '#apps/users/validators/users'
+import { confirmEmailUpdateValidator, emailUpdateValidator, updateUserValidator } from '#apps/users/validators/users'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
@@ -20,6 +20,22 @@ export default class UsersController {
     const users = await this.userService.findAll()
 
     return response.send(users)
+  }
+
+  async findMe({ auth, response }: HttpContext) {
+    const payload = auth.use('jwt').payload
+    const user = await this.userService.findById(payload?.sub ?? '')
+    type userOmit = Omit<User, 'password'>
+    const omittedUser: userOmit = user
+    return response.send(omittedUser)
+  }
+
+  async update({ request, auth, response }: HttpContext) {
+    const payload = auth.use('jwt').payload
+    const data = await request.validateUsing(updateUserValidator);
+    if (data.email) return response.abort({ message: "You can't update the email with this route" })
+    if (!payload?.sub) return response.abort({ message: "Can't update the user" })
+    return this.userService.update(data, payload?.sub ?? "");
   }
 
   async show({ params, response }: HttpContext) {
