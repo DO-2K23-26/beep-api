@@ -113,10 +113,11 @@ export default class ServersController {
     return this.serverService.updatePicture(data)
   }
 
-  async destroy({ params, response }: HttpContext) {
+  async destroy({ params, response, auth }: HttpContext) {
     const owner = await this.serverService.getOwner(params.serverId)
-    //TODO: Replace with correct authorization management
-    if (owner !== params.userId) {
+    //TODO: Replace with correct authorization managemen/*  */t
+    const userPayload = auth.use('jwt').payload as Payload
+    if (owner !== userPayload.sub.toString()) {
       return response.status(403).send({ message: 'You are not allowed to delete this server' })
     }
     await this.serverService.delete(params.serverId)
