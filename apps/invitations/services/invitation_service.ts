@@ -53,9 +53,13 @@ export default class InvitationService {
     const existingUser = await server.related('users').query().where('user_id', userId).first()
     if (!existingUser) {
       await server.related('users').attach([userId])
+      return invitation.save()
+    } else {
+      throw new UnusableInvitationException('User already in server', {
+        status: 400,
+        code: 'E_UNUSABLEINVITATION',
+      })
     }
-
-    return invitation.save()
   }
 
   async joinPublic(userId: string, serverId: string): Promise<Server> {
