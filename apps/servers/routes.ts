@@ -11,6 +11,7 @@ const ServerInvitationsController = () =>
 router
   .group(() => {
     router.get('/', [ServerController, 'index'])
+    router.get('/discover', [ServerController, 'discover'])
     router.post('/', [ServerController, 'store'])
     router.post('/leave', [ServerChannelsController, 'leaveChannel']).prefix('channels')
     router.post('/join/:invitationId', [ServerInvitationsController, 'joinPrivate'])

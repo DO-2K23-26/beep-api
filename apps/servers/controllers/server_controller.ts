@@ -35,6 +35,23 @@ export default class ServersController {
   }
 
   /**
+   * Display a list of discoverable servers -> servers that are public
+   */
+  async discover({ request }: HttpContext) {
+    const payload = await request.validateUsing(indexServerValidator)
+    if (payload.q) {
+      const servers = await this.serverService.discoverAndSearch(
+        payload.q,
+        payload.page,
+        payload.limit
+      )
+      return servers
+    }
+    const servers = await this.serverService.discover(payload.page, payload.limit)
+    return servers
+  }
+
+  /**
    * Handle form submission for the create action
    */
   async store({ auth, request }: HttpContext) {
