@@ -1,10 +1,11 @@
 import Message from '#apps/messages/models/message'
 import { CreateMessagesSchema, UpdateMessagesSchema } from '#apps/messages/validators/message'
-import Attachment from '#apps/storage/models/attachment'
+// import Attachment from '#apps/storage/models/attachment'
 import StorageService from '#apps/storage/services/storage_service'
-import { CreateStorageSchema, UpdateStorageSchema } from '#apps/storage/validators/storage'
+import { CreateStorageSchema } from '#apps/storage/validators/storage'
+// import { CreateStorageSchema, UpdateStorageSchema } from '#apps/storage/validators/storage'
 import { inject } from '@adonisjs/core'
-import { MultipartFile } from '@adonisjs/core/bodyparser'
+// import { MultipartFile } from '@adonisjs/core/bodyparser'
 
 @inject()
 export default class MessageService {
@@ -44,7 +45,7 @@ export default class MessageService {
   async update(updatedMessage: UpdateMessagesSchema, messageId: string) {
     const message = await Message.findOrFail(messageId)
     await message.merge(updatedMessage).save()
-    this.updateFilesOfMessage(message, updatedMessage)
+    // this.updateFilesOfMessage(message, updatedMessage)
     return message
   }
 
@@ -53,10 +54,14 @@ export default class MessageService {
   }
 
   findAllByChannelId(channelId: string) {
-    return Message.query().where('channelId', channelId).preload('owner').orderBy('created_at', 'desc')
+    return Message.query()
+      .where('channelId', channelId)
+      .preload('owner')
+      .orderBy('created_at', 'desc')
   }
-  
 
+  // No need for the moment
+  /*
   async updateFilesOfMessage(
     updatedMessage: Message,
     providedMessage: UpdateMessagesSchema
@@ -116,4 +121,5 @@ export default class MessageService {
     }
     return updatedAttachement
   }
+   */
 }
