@@ -1,6 +1,8 @@
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 const MessagesChannelsController = () => import('./controllers/messages_channels_controller.js')
+const AttachementsChannelController = () =>
+  import('#apps/channels/controllers/attachments_channel_controller')
 
 router
   .group(() => {
@@ -16,6 +18,12 @@ router
         router.delete('/:messageId/find-and-delete', [MessagesChannelsController, 'findAndDelete'])
       })
       .prefix('/:channelId/messages')
+
+    router
+      .group(() => {
+        router.get('/attachments', [AttachementsChannelController, 'index'])
+      })
+      .prefix('/:channelId')
   })
   .prefix('channels')
   .use(middleware.auth())
