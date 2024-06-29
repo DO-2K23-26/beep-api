@@ -21,7 +21,13 @@ export default class Server extends BaseModel {
   declare name: string
 
   @column()
+  declare description: string
+
+  @column()
   declare icon: string
+
+  @column()
+  declare banner: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
