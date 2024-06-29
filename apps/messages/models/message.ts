@@ -31,6 +31,9 @@ export default class Message extends BaseModel {
   @column()
   declare channelId: string
 
+  @column()
+  declare pinned: boolean
+
   @belongsTo(() => User, {
     foreignKey: 'ownerId',
   })

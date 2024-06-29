@@ -8,8 +8,12 @@ export default class extends BaseSchema {
       table.string('id').primary()
       table.text('content').notNullable()
       table.string('owner_id').references('id').inTable('users').nullable()
-      table.string('channel_id').references('id').inTable('channels').onDelete('CASCADE').notNullable()
-
+      table
+        .string('channel_id')
+        .references('id')
+        .inTable('channels')
+        .onDelete('CASCADE')
+        .notNullable()
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })

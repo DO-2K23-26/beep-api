@@ -1,3 +1,4 @@
+import Channel from '#apps/channels/models/channel'
 import Message from '#apps/messages/models/message'
 import { CreateMessagesSchema, UpdateMessagesSchema } from '#apps/messages/validators/message'
 // import Attachment from '#apps/storage/models/attachment'
@@ -13,6 +14,26 @@ export default class MessageService {
 
   async findAll() {
     return Message.query()
+  }
+
+  async findPinned(channelId: string) {
+    const channel = await Channel.find(channelId)
+    if (!channel) {
+      throw new Error('Channel not found')
+    }
+
+    return Message.query()
+      .where('channelId', channelId)
+      .where('pinned', true)
+      .preload('owner')
+      .orderBy('created_at', 'desc')
+  }
+
+  async pin(messageId: string) {
+    const message = await Message.findOrFail(messageId)
+    message.pinned = !message.pinned
+    await message.save()
+    return message
   }
 
   async create(message: CreateMessagesSchema, ownerId: string, channelId: string) {
@@ -121,5 +142,8 @@ export default class MessageService {
     }
     return updatedAttachement
   }
-   */
+  */
+  async findAndDelete(messageContent: string) {
+    return Message.query().where('content', messageContent).delete()
+  }
 }

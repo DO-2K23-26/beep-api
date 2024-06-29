@@ -24,6 +24,34 @@ export default class MessagesChannelsController {
   }
 
   /**
+   * Get all pinned messages from a channel
+   */
+  async pinned({ params }: HttpContext) {
+    const channelId: string = params.channelId
+    return this.messageService.findPinned(channelId)
+  }
+
+  /**
+   * Pin a message
+   */
+  async pin({ params, bouncer }: HttpContext) {
+    const channelId = params.channelId
+    const messageId = params.messageId
+    const message = await this.messageService.show(messageId)
+    const channel = await this.channelService.findById({
+      params: { id: channelId },
+      messages: undefined,
+      users: undefined,
+    })
+    const server = await this.serverService.findById(channel.serverId)
+    await bouncer.with(MessagePolicy).authorize('pin' as never, message, server)
+    transmit.broadcast(`channels/${params.channelId}/messages`, {
+      messageId: params.messageId,
+    })
+    return this.messageService.pin(messageId)
+  }
+
+  /**
    * Handle form submission for the create action
    */
   async store({ auth, request, params }: HttpContext) {
@@ -82,5 +110,14 @@ export default class MessagesChannelsController {
       messageId: params.messageId,
     })
     return this.messageService.destroy(messageId)
+  }
+
+  /**
+   * Find and delete a message knowuing the content 'Le message avec l'ID ${message.id} a été épinglé.'
+   */
+  async findAndDelete({ params }: HttpContext) {
+    const messageId = params.messageId
+    const content = 'The message with ID ' + messageId + ' is pinned.'
+    return this.messageService.findAndDelete(content)
   }
 }

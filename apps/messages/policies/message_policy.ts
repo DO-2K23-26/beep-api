@@ -32,4 +32,12 @@ export default class MessagePolicy extends BasePolicy {
 
     return message.ownerId === this.payload.sub || isServerAdmin
   }
+
+  @allowGuest()
+  async pin(_user: User | null, message: Message, server: Server): Promise<AuthorizerResponse> {
+    let isServerAdmin: boolean
+    isServerAdmin = server.ownerId === this.payload.sub
+
+    return message.ownerId === this.payload.sub || isServerAdmin
+  }
 }
