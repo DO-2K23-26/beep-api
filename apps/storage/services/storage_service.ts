@@ -57,7 +57,11 @@ export default class StorageService {
   }
 
   async transmit(fileName: string) {
-    return await this.S3Driver.getObjects(this.BUCKET_NAME, fileName)
+    try {
+      return await this.S3Driver.getObjects(this.BUCKET_NAME, fileName)
+    } catch {
+      return undefined
+    }
   }
 
   async storeProfilePicture(profilePicture: MultipartFile, id: string) {

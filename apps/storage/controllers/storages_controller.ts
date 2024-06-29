@@ -32,7 +32,7 @@ export default class StoragesController {
   }
 
   async transmitAttachment({ params, response }: HttpContext) {
-    const attachment = await Attachment.findByOrFail('id', params.id)
+    const attachment = await Attachment.findByOrFail('id', params.id)    
     return await this.transmit(response, attachment.name)
   }
 
@@ -53,7 +53,7 @@ export default class StoragesController {
 
   async transmit(response: Response, id: string) {
     const payload = await this.storageService.transmit(id)
-    if (payload.Body) {
+    if (payload && payload.Body) {
       response.type('application/octet-stream')
       //@ts-ignore
       return response.stream(payload.Body)
