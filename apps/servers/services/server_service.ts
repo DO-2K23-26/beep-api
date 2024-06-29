@@ -28,7 +28,8 @@ export default class ServerService {
   }
 
   async create({ name, icon, visibility }: CreateServerSchema, ownerId: string): Promise<Server> {
-    assert(name === 'public' || name === 'private') // assert that the name is either 'public' or 'private', if not the case validator failed
+    console.log(name)
+    assert(visibility === 'public' || visibility === 'private') // assert that the visibility is either 'public' or 'private', if not the case validator failed
 
     const checkIfServerExists = await Server.query().where('name', name).first()
     if (checkIfServerExists) {
@@ -100,5 +101,15 @@ export default class ServerService {
     const server = await Server.findOrFail(payload.params.serverId)
     server.icon = await new StorageService().updatePicture(payload.attachment, server.id)
     await server.save()
+  }
+
+  async join(serverId: string, userId: string): Promise<Server> {
+    const server = await Server.findOrFail(serverId)
+    try {
+      await server.related('users').attach([userId])
+    } catch (e) {
+      console.error(e)
+    }
+    return server
   }
 }
