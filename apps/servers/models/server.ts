@@ -13,7 +13,6 @@ import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relat
 import Channel from '#apps/channels/models/channel'
 import Role from '#apps/users/models/role'
 import Member from '#apps/members/models/member'
-import Invitation from '#apps/invitations/models/invitation'
 export default class Server extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -32,9 +31,6 @@ export default class Server extends BaseModel {
 
   @column()
   declare banner: string
-
-  @column()
-  declare visibility: 'public' | 'private'
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -63,11 +59,6 @@ export default class Server extends BaseModel {
 
   @hasMany(() => Channel)
   declare channels: HasMany<typeof Channel>
-
-  @hasMany(() => Invitation, {
-    foreignKey: 'serverId',
-  })
-  declare invitations: HasMany<typeof Invitation>
 
   @beforeCreate()
   static async generateUuid(model: Server) {
