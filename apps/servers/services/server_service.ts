@@ -45,6 +45,7 @@ export default class ServerService {
       description: description,
       visibility: visibility as 'public' | 'private',
       ownerId: ownerId,
+      icon: '',
     })
 
     let path: string | null = null
