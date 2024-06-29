@@ -7,6 +7,7 @@ import {
   createServerValidator,
   updateServerValidator,
 } from '#apps/servers/validators/server'
+import ServerPolicy from '../policies/server_policy.js'
 
 @inject()
 export default class ServersController {
@@ -49,8 +50,10 @@ export default class ServersController {
    * Mettre à jour un serveur (nom,description)
    */
 
-  async update({ request, params }: HttpContext) {
+  async update({ request, params, bouncer }: HttpContext) {
     const payload = await request.validateUsing(updateServerValidator)
+    const server = await this.serverService.findById(params.serverId)
+    await bouncer.with(ServerPolicy).authorize('edit' as never, server)
     return this.serverService.update(params.serverId, payload)
   }
 
