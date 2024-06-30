@@ -9,11 +9,7 @@ export default class ServerService {
     return pageServers.all()
   }
 
-  public async findByUserId(
-    userId: string,
-    page: number = 1,
-    limit: number = 10
-  ): Promise<Server[]> {
+  async findByUserId(userId: string, page: number = 1, limit: number = 10): Promise<Server[]> {
     const pageServers = await Server.query()
       .whereHas('users', (builder) => {
         builder.where('id', userId)
@@ -28,7 +24,10 @@ export default class ServerService {
 
   async create(payload: CreateServerSchema, ownerId: string): Promise<Server> {
     return await Server.create({
-      ...payload,
+      name: payload.name,
+      description: '',
+      banner: '',
+      icon: '',
       ownerId: ownerId,
     })
   }

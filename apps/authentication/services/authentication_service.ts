@@ -79,6 +79,4 @@ export default class AuthenticationService {
 
     return true
   }
-
-
 }

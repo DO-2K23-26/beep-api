@@ -103,16 +103,17 @@ export default class ServersController {
   //update banner
   async updateBanner({ request, bouncer }: HttpContext) {
     const data = await request.validateUsing(updateBannerValidator)
-    await bouncer.with(ServerPolicy).authorize('edit' as never, data.params.serverId)
+    const server = await this.serverService.findById(data.params.serverId)
+    await bouncer.with(ServerPolicy).authorize('edit' as never, server)
     return this.serverService.updateBanner(data)
   }
 
   // update picture
   async updatePicture({ request, bouncer }: HttpContext) {
     const data = await request.validateUsing(updatePictureValidator)
-    await bouncer.with(ServerPolicy).authorize('edit' as never, data.params.serverId)
+    console.log(data)
+    const server = await this.serverService.findById(data.params.serverId)
+    await bouncer.with(ServerPolicy).authorize('edit' as never, server)
     return this.serverService.updatePicture(data)
   }
-
-
 }

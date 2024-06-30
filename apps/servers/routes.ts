@@ -1,4 +1,4 @@
-import StoragesController from '#apps/storage/controllers/storages_controller'
+const StoragesController = () => import('#apps/storage/controllers/storages_controller')
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
 
@@ -26,10 +26,12 @@ router
             router.put('/', [ServerController, 'updateBanner'])
           })
           .prefix('banner')
-        router.group(() => {
-          router.get('/',[StoragesController, 'transmitPicture'])
-          router.put('/', [ServerController, 'updatePicture'])
-        }).prefix('picture')
+        router
+          .group(() => {
+            router.get('/', [StoragesController, 'transmitPicture'])
+            router.put('/', [ServerController, 'updatePicture'])
+          })
+          .prefix('picture')
         router.get('/', [ServerController, 'show'])
         router.patch('/', [ServerController, 'update'])
         router.get('/owner', [ServerController, 'getOwner'])
