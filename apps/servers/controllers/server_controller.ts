@@ -41,7 +41,7 @@ export default class ServersController {
     const payload = await request.validateUsing(createServerValidator)
     const userPayload = auth.use('jwt').payload as Payload
     const server = await this.serverService.create(payload, userPayload.sub)
-    await this.serverService.join(server.id, userPayload.sub)
+    await this.invitationService.joinPublic(userPayload.sub.toString(), server.id)
     return server
   }
 
