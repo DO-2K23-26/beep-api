@@ -20,7 +20,7 @@ export default class ServerPolicy extends BasePolicy {
   }
 
   @allowGuest()
-  async edit(user: User, server: Server): Promise<AuthorizerResponse> {
+  async edit(_: User, server: Server): Promise<AuthorizerResponse> {
     return server.ownerId === this.payload.sub
   }
 }
