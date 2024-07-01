@@ -4,6 +4,7 @@ import {
   UpdateChannelSchema,
   IndexChannelSchema,
   ShowChannelSchema,
+  SubscribeChannelSchema,
 } from '#apps/channels/validators/channel'
 import jwt from 'jsonwebtoken'
 import env from '#start/env'
@@ -68,7 +69,8 @@ export default class ChannelService {
   }
 
   async update(payload: UpdateChannelSchema): Promise<Channel> {
-    return Channel.updateOrCreate({ id: payload.id }, payload)
+    const { id } = payload.params;
+    return Channel.updateOrCreate({ id }, payload);
   }
 
   async deleteById(channelId: string): Promise<void> {
