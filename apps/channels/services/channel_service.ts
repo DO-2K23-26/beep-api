@@ -63,6 +63,9 @@ export default class ChannelService {
     userId: string
   ): Promise<Channel> {
     const channel = await Channel.create({ ...newChannel, serverId: serverId })
+    await channel.related('users').attach([userId])
+    return channel
+  }
 
   async update(payload: UpdateChannelSchema): Promise<Channel> {
     return Channel.updateOrCreate({ id: payload.id }, payload)
