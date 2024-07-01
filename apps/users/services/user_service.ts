@@ -1,5 +1,6 @@
 import MailService from '#apps/authentication/services/mail_service'
 import HttpException from '#apps/shared/exceptions/http_exception'
+import { generateSnowflake } from '#apps/shared/services/snowflake'
 import StorageService from '#apps/storage/services/storage_service'
 import User from '#apps/users/models/user'
 import { UpdateUserValidator } from '#apps/users/validators/users'
@@ -40,7 +41,8 @@ export default class UserService {
     email: string
     password: string
   }) {
-    return User.create(data)
+    const sn = generateSnowflake()
+    return User.create({ ...data, serialNumber: sn })
   }
 
   async update(updatedUser: UpdateUserValidator, userId: string) {

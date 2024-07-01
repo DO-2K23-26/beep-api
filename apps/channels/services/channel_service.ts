@@ -11,10 +11,12 @@ import env from '#start/env'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 import { CachedUser, OccupiedChannel } from '#apps/channels/models/occupied_channels'
+import User from '#apps/users/models/user'
+import { generateSnowflake } from '#apps/shared/services/snowflake'
 
 export interface PayloadJWTSFUConnection {
-  channelId?: string
-  userId: string
+  channelSn?: string
+  userSn: string
 }
 export default class ChannelService {
   async findAll(data: IndexChannelSchema): Promise<Channel[]> {
@@ -63,7 +65,8 @@ export default class ChannelService {
     serverId: string,
     userId: string
   ): Promise<Channel> {
-    const channel = await Channel.create({ ...newChannel, serverId: serverId })
+    const sn = generateSnowflake()
+    const channel = await Channel.create({ ...newChannel, serverId: serverId, serialNumber: sn })
     await channel.related('users').attach([userId])
     return channel
   }
@@ -144,7 +147,11 @@ export default class ChannelService {
       multi.set(userKey, `server:${serverId}:channel:${channelId}`)
       await multi.exec()
       transmit.broadcast(`servers/${serverId}/movement`, { message: 'user joined' })
-      const payload: PayloadJWTSFUConnection = { channelId, userId }
+      const channelObject = await Channel.query().where('id', channelId).firstOrFail()
+      const channelSn = channelObject?.serialNumber
+      const userObject = await User.query().where('id', userId).firstOrFail()
+      const userSn = userObject?.serialNumber
+      const payload: PayloadJWTSFUConnection = { channelSn, userSn }
       return this.generateToken(payload)
     } catch (error) {
       // TODO: handle error
@@ -165,8 +172,10 @@ export default class ChannelService {
       multi.del(userKey)
       await multi.exec()
       const serverId = channel.split(':')[1]
+      const userObject = await User.query().where('id', userId).firstOrFail()
+      const userSn = userObject?.serialNumber
       transmit.broadcast(`servers/${serverId}/movement`, { message: 'user left' })
-      const payload: PayloadJWTSFUConnection = { userId }
+      const payload: PayloadJWTSFUConnection = { userSn }
       return this.generateToken(payload)
     } catch (error) {
       // TODO: handle error
@@ -175,6 +184,6 @@ export default class ChannelService {
   }
 
   generateToken(payload: PayloadJWTSFUConnection): string {
-    return jwt.sign(payload, env.get('APP_KEY'))
+    return jwt.sign(payload, env.get('APP_KEY'), { expiresIn: '5m' })
   }
 }

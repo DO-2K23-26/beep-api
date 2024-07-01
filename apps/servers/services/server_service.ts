@@ -4,6 +4,7 @@ import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../v
 import StorageService from '#apps/storage/services/storage_service'
 import { assert } from 'node:console'
 import { inject } from '@adonisjs/core'
+import { generateSnowflake } from '#apps/shared/services/snowflake'
 
 @inject()
 export default class ServerService {
@@ -38,6 +39,7 @@ export default class ServerService {
       throw new Error('Server already exists')
     }
 
+    const sn = generateSnowflake()
     const server = await Server.create({
       banner: '',
       icon: '',
@@ -45,6 +47,7 @@ export default class ServerService {
       description: description,
       visibility: visibility as 'public' | 'private',
       ownerId: ownerId,
+      serialNumber: sn,
     })
 
     let path: string | null = null
