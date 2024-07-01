@@ -62,8 +62,9 @@ export default class UserService {
     return user
   }
 
-  async getSn(userId: string) {
-    return User.query().where('id', userId).select('serialNumber').first()
+  async getSn(userId: string): Promise<string> {
+    const user = await User.query().where('id', userId).firstOrFail()
+    return user.serialNumber
   }
 
   async storeEmailChangeToken(userId: string, oldEmail: string, newEmail: string) {
