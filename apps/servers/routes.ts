@@ -43,6 +43,7 @@ router
         router.post('/join', [ServerInvitationsController, 'joinPublic'])
         router.get('/streaming/users', [ServerChannelsController, 'streamingUsers'])
         router.delete('/', [ServerController, 'destroy'])
+        router.post('/mic', [ServerChannelsController, 'changeMutedStatus']).prefix('users')
         // router.get('/timeout/:user_id', [ServerController, 'timeout'])
         router
           .group(() => {

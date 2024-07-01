@@ -6,4 +6,6 @@ export interface OccupiedChannel {
 export interface CachedUser {
   id: string
   username: string
+  muted?: boolean
+  voiceMuted?: boolean
 }

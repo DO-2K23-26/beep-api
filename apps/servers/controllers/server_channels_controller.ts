@@ -1,12 +1,17 @@
 import { Payload } from '#apps/authentication/contracts/payload'
 import ChannelService from '#apps/channels/services/channel_service'
 import { createChannelValidator } from '#apps/channels/validators/channel'
+import UserService from '#apps/users/services/user_service'
+import { mutedValidator } from '#apps/users/validators/muted_validator'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
 @inject()
 export default class ServerChannelsController {
-  constructor(private channelService: ChannelService) {}
+  constructor(
+    private channelService: ChannelService,
+    private userService: UserService
+  ) {}
 
   //recupere les channels d'un server
   async findByServerId({ params }: HttpContext) {
@@ -56,5 +61,12 @@ export default class ServerChannelsController {
 
   streamingUsers({ params }: HttpContext) {
     return this.channelService.occupiedVoiceChannels(params.serverId)
+  }
+
+  async changeMutedStatus({ auth, params, request }: HttpContext) {
+    const userPayload = auth.use('jwt').payload as Payload
+    const payload = await request.validateUsing(mutedValidator)
+    await this.userService.changeMutedStatus(userPayload.sub.toString(), params.serverId, payload)
+    return 'ok'
   }
 }

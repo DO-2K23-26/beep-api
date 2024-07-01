@@ -88,7 +88,22 @@ export default class ChannelService {
       let users: CachedUser[] = []
       for (const userId in channelData) {
         let username = channelData[userId]
-        users.push({ id: userId, username: username })
+        let payload = await redis.hget(`users:${serverId}`, userId)
+        if (!payload) {
+          payload = '{"muted": false, "voiceMuted": false}'
+        }
+        try {
+          const mutedState = JSON.parse(payload)
+          let user: CachedUser = {
+            id: userId,
+            username: username,
+            muted: mutedState.muted,
+            voiceMuted: mutedState.voiceMuted,
+          }
+          users.push(user)
+        } catch (e) {
+          console.error('Error parsing payload:', e)
+        }
       }
       occupiedChannel = { channelId: channel.split(':')[3], users: users }
       occupiedChannels.push(occupiedChannel)
