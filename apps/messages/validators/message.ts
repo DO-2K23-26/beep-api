@@ -10,6 +10,7 @@ export const createMessageValidator = vine.compile(
   vine.object({
     content: vine.string(),
     attachments: vine.array(new VineMultipartFile()).optional(),
+    parentMessageId: vine.string().optional(),
   })
 )
 

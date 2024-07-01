@@ -42,7 +42,6 @@ export default class MessageService {
       ownerId: ownerId,
       channelId: channelId,
     })
-    console.log(createdMessage.attachments)
     if (message.attachments) {
       console.log('attachment')
       for (let attachment of message.attachments) {
@@ -78,10 +77,12 @@ export default class MessageService {
     return Message.query()
       .where('channelId', channelId)
       .preload('owner')
+      .preload('parentMessage', (query) => {
+        query.preload('owner')
+      })
       .orderBy('created_at', 'desc')
   }
 
-  // No need for the moment
   /*
   async updateFilesOfMessage(
     updatedMessage: Message,

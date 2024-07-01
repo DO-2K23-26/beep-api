@@ -83,7 +83,6 @@ export default class MessagesChannelsController {
    * Show individual record
    */
   async show({ params }: HttpContext) {
-    console.log('in message service show')
     const messageId: string = params.messageId
     return this.messageService.show(messageId)
   }
