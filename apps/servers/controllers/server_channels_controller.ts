@@ -67,13 +67,13 @@ export default class ServerChannelsController {
       userPayload.sub.toString(),
       userPayload.username
     )
-    return token
+    return JSON.stringify({ token: token })
   }
 
   async leaveChannel({ auth }: HttpContext): Promise<string> {
     const userPayload = auth.use('jwt').payload as Payload
     const token = await this.channelService.quitVoiceChannel(userPayload.sub.toString())
-    return token
+    return JSON.stringify({ token: token })
   }
 
   streamingUsers({ params }: HttpContext) {
