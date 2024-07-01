@@ -45,7 +45,6 @@ export default class ServerService {
       description: description,
       visibility: visibility as 'public' | 'private',
       ownerId: ownerId,
-      icon: '',
     })
 
     let path: string | null = null
@@ -125,7 +124,7 @@ export default class ServerService {
   async discoverAndSearch(search: string, page: number = 1, limit: number = 10): Promise<Server[]> {
     const pageServers = await Server.query()
       .where('visibility', 'public')
-      .where('name', 'like', `%${search}%`)
+      .where('name', 'ilike', `%${search}%`)
       .paginate(page, limit)
     return pageServers.all()
   }
