@@ -75,4 +75,11 @@ export default class InvitationService {
     await server.related('users').attach([userId])
     return server
   }
+
+  async join(userId: string, serverId: string): Promise<Server> {
+    const server = await Server.findOrFail(serverId)
+
+    await server.related('users').attach([userId])
+    return server
+  }
 }
