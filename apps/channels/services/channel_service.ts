@@ -68,8 +68,7 @@ export default class ChannelService {
     return channel
   }
 
-  async update(payload: UpdateChannelSchema): Promise<Channel> {
-    const { id } = payload.params;
+  async update(id: string, payload: UpdateChannelSchema): Promise<Channel> {
     return Channel.updateOrCreate({ id }, payload);
   }
 
