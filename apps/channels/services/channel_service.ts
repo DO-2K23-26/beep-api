@@ -14,11 +14,14 @@ import { CachedUser, OccupiedChannel } from '#apps/channels/models/occupied_chan
 import User from '#apps/users/models/user'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import UserService from '#apps/users/services/user_service'
+import { inject } from '@adonisjs/core'
 
 export interface PayloadJWTSFUConnection {
   channelSn?: string
   userSn: string
 }
+
+@inject()
 export default class ChannelService {
   constructor(private userService: UserService) {}
 
