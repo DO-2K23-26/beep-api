@@ -39,9 +39,9 @@ export default class ServersController {
    */
   async discover({ request }: HttpContext) {
     const payload = await request.validateUsing(indexServerValidator)
-    if (payload.q) {
+    if (payload.query) {
       const servers = await this.serverService.discoverAndSearch(
-        payload.q,
+        payload.query,
         payload.page,
         payload.limit
       )
