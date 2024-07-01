@@ -1,18 +1,17 @@
 import MailService from '#apps/authentication/services/mail_service'
 import HttpException from '#apps/shared/exceptions/http-exception'
-import drive from '#apps/shared/services/disk'
 import User from '#apps/users/models/user'
 import { UpdateUserValidator } from '#apps/users/validators/users'
 import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
-import { readFileSync } from 'fs'
 import jwt from 'jsonwebtoken'
 import { ChangeEmailToken } from '../models/change_email_token.js'
+import StorageService from '#apps/storage/services/storage_service'
 
 @inject()
 export default class UserService {
-  constructor(protected mailService: MailService) {}
+  constructor(protected mailService: MailService, protected storageService: StorageService) { }
   async findAll() {
     return User.query().preload('roles')
   }
@@ -43,15 +42,15 @@ export default class UserService {
     const user = await User.findOrFail(userId)
     const { ['profilePicture']: file, ...restOfObject } = updatedUser
 
-    console.log(user)
     if (updatedUser?.profilePicture?.tmpPath) {
-      const key = 'profilePictures/' + userId + '/' + updatedUser.profilePicture.clientName
-      const buffer = Buffer.from(readFileSync(updatedUser.profilePicture.tmpPath))
-      console.log(key)
+      // The goal is to use this service in the end
+      // const key = 'profilePictures/' + userId + '/' + updatedUser.profilePicture.clientName
+      // const buffer = Buffer.from(readFileSync(updatedUser.profilePicture.tmpPath))
+      // console.log(key)
+      // drive.put(key, buffer)
+      const key = await this.storageService.storeProfilePicture(updatedUser.profilePicture, user.id)
       user.merge({ profilePicture: key })
-      drive.put(key, buffer)
     }
-    console.log(user)
     await user.merge(restOfObject).save()
     return user
   }
