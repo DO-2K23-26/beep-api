@@ -9,8 +9,8 @@ export function generateSnowflake(): string {
   const timestamp = Date.now()
 
   const timestampStr = timestamp.toString().slice(7)
-  const machineId = generateNumber(5)
-  const sequence = generateNumber(4)
+  const machineId = generateNumber(4)
+  const sequence = generateNumber(3)
 
   return `${machineId}${timestampStr}${sequence}`
 }
