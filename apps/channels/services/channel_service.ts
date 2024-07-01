@@ -13,12 +13,15 @@ import transmit from '@adonisjs/transmit/services/main'
 import { CachedUser, OccupiedChannel } from '#apps/channels/models/occupied_channels'
 import User from '#apps/users/models/user'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
+import UserService from '#apps/users/services/user_service'
 
 export interface PayloadJWTSFUConnection {
   channelSn?: string
   userSn: string
 }
 export default class ChannelService {
+  constructor(private userService: UserService) {}
+
   async findAll(data: IndexChannelSchema): Promise<Channel[]> {
     return Channel.query()
       .if(data.messages, (query) => {
@@ -115,6 +118,7 @@ export default class ChannelService {
             username: username,
             muted: mutedState.muted,
             voiceMuted: mutedState.voiceMuted,
+            userSn: await this.userService.getSn(userId),
           }
           users.push(user)
         } catch (e) {

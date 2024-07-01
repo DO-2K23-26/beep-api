@@ -62,6 +62,10 @@ export default class UserService {
     return user
   }
 
+  async getSn(userId: string) {
+    return User.query().where('id', userId).select('serialNumber').first()
+  }
+
   async storeEmailChangeToken(userId: string, oldEmail: string, newEmail: string) {
     const id = crypto.randomUUID()
     const key = `change_email:${id}`

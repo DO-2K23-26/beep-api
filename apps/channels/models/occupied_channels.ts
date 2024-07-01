@@ -8,4 +8,5 @@ export interface CachedUser {
   username: string
   muted?: boolean
   voiceMuted?: boolean
+  userSn: string
 }
