@@ -112,6 +112,7 @@ export default class ChannelService {
             username: username,
             muted: mutedState.muted,
             voiceMuted: mutedState.voiceMuted,
+            camera: mutedState.camera,
           }
           users.push(user)
         } catch (e) {
