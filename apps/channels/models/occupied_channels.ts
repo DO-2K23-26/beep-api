@@ -9,4 +9,5 @@ export interface CachedUser {
   muted?: boolean
   voiceMuted?: boolean
   userSn: string
+  camera?: boolean
 }

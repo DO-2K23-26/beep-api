@@ -122,6 +122,7 @@ export default class ChannelService {
             muted: mutedState.muted,
             voiceMuted: mutedState.voiceMuted,
             userSn: await this.userService.getSn(userId),
+            camera: mutedState.camera,
           }
           users.push(user)
         } catch (e) {
