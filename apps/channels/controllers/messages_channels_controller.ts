@@ -59,10 +59,13 @@ export default class MessagesChannelsController {
     const channelId = params.channelId
 
     const data = await request.validateUsing(createMessageValidator)
-    transmit.broadcast(`channels/${params.channelId}/messages`, {
-      messageId: params.messageId,
+
+    return this.messageService.create(data, payload!.sub as string, channelId).then((message) => {
+      transmit.broadcast(`channels/${params.channelId}/messages`, {
+        messageId: params.messageId,
+      })
+      return message
     })
-    return this.messageService.create(data, payload!.sub as string, channelId)
   }
 
   /**
