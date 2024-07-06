@@ -15,11 +15,8 @@ export default class StorageService {
   }
 
   async store(values: CreateStorageSchema, message: Message) {
-    console.log(this.BUCKET_NAME)
-    console.log('trying to store')
     const key = message.channelId + '/' + message.id + '/' + values.attachment.clientName
     if (values.attachment.tmpPath) {
-      console.log(values.attachment)
       const realFile = readFileSync(values.attachment.tmpPath)
       const buffer = Buffer.from(realFile)
 

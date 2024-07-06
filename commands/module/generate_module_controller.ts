@@ -23,7 +23,7 @@ export default class MakeModuleController extends BaseCommand {
       codemods.makeUsingStub(STUBS_ROOT.pathname, 'controller.stub', {
         name: this.name,
         module,
-        includeServiceInjection: false
+        includeServiceInjection: false,
       }),
     ])
   }

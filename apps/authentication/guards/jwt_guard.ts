@@ -141,7 +141,6 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
     user: UserProvider[typeof symbols.PROVIDER_REAL_USER],
     ...args: any[]
   ): Promise<AuthClientResponse> {
-    console.log(user, args)
     return Promise.resolve({})
   }
 

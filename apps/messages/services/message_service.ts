@@ -43,7 +43,6 @@ export default class MessageService {
       channelId: channelId,
     })
     if (message.attachments) {
-      console.log('attachment')
       for (let attachment of message.attachments) {
         const dataAttachments: CreateStorageSchema = {
           messageId: createdMessage.id,
@@ -52,13 +51,11 @@ export default class MessageService {
         await this.storageService.store(dataAttachments, createdMessage)
       }
     } else {
-      console.log('no attachments')
     }
     return createdMessage
   }
 
   show(id: string) {
-    console.log('preload')
     return Message.query().preload('attachments').where('id', id).firstOrFail()
   }
 

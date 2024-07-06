@@ -8,7 +8,12 @@ export default class extends BaseSchema {
       table.string('id').primary()
       table.string('name').notNullable()
       table.string('content_type').notNullable()
-      table.string('message_id').references('id').inTable('messages').onDelete('CASCADE').notNullable()
+      table
+        .string('message_id')
+        .references('id')
+        .inTable('messages')
+        .onDelete('CASCADE')
+        .notNullable()
 
       table.timestamp('created_at')
       table.timestamp('updated_at')

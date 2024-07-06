@@ -55,7 +55,7 @@ export default class AuthenticationController {
       schemaUser.email.toLocaleLowerCase()
     )
 
-    if (existingUserEmail != null)
+    if (existingUserEmail !== null)
       return response
         .status(403)
         .send({ message: 'A user already exists with this email address.' })
@@ -64,7 +64,7 @@ export default class AuthenticationController {
       schemaUser.username
     )
 
-    if (existingUserUsername != null)
+    if (existingUserUsername !== null)
       return response.status(403).send({ message: 'A user already exists with this username.' })
 
     const user: User = await this.authenticationService.registerUser(schemaUser)

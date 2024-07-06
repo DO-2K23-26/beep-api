@@ -1,6 +1,6 @@
 import vine from '@vinejs/vine'
 import { Infer } from '@vinejs/vine/types'
-import {VineMultipartFile} from "#apps/shared/vineType/vine_multipart_file";
+import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
 
 export const signinAuthenticationValidator = vine.compile(
   vine.object({
@@ -28,9 +28,7 @@ export const createAuthenticationValidator = vine.compile(
  * Validator to validate the payload when updating
  * an existing authentication.ts.
  */
-export const updateAuthenticationValidator = vine.compile(
-  vine.object({})
-)
+export const updateAuthenticationValidator = vine.compile(vine.object({}))
 
 export type SigninAuthenticationSchema = Infer<typeof signinAuthenticationValidator>
 export type CreateAuthenticationSchema = Infer<typeof createAuthenticationValidator>

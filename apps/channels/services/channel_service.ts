@@ -69,7 +69,7 @@ export default class ChannelService {
   }
 
   async update(id: string, payload: UpdateChannelSchema): Promise<Channel> {
-    return Channel.updateOrCreate({ id }, payload);
+    return Channel.updateOrCreate({ id }, payload)
   }
 
   async deleteById(channelId: string): Promise<void> {
@@ -115,7 +115,7 @@ export default class ChannelService {
           }
           users.push(user)
         } catch (e) {
-          console.error('Error parsing payload:', e)
+          // TODO: handle error
         }
       }
       occupiedChannel = { channelId: channel.split(':')[3], users: users }
@@ -147,7 +147,7 @@ export default class ChannelService {
       const payload: PayloadJWTSFUConnection = { channelId, userId }
       return this.generateToken(payload)
     } catch (error) {
-      console.error('Error joining channel:', error)
+      // TODO: handle error
       return ''
     }
   }
@@ -169,7 +169,7 @@ export default class ChannelService {
       const payload: PayloadJWTSFUConnection = { userId }
       return this.generateToken(payload)
     } catch (error) {
-      console.error('Error joining channel:', error)
+      // TODO: handle error
       return ''
     }
   }

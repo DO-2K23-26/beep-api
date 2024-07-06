@@ -1,11 +1,10 @@
-import PermissionResolver from "#apps/shared/services/permissions/permission_resolver";
-import User from '#apps/users/models/user';
-import { allowGuest, BasePolicy } from "@adonisjs/bouncer";
-import { AuthorizerResponse } from "@adonisjs/bouncer/types";
-import { inject } from "@adonisjs/core";
-import { HttpContext } from "@adonisjs/core/http";
-import { JwtPayload } from "jsonwebtoken";
-
+import PermissionResolver from '#apps/shared/services/permissions/permission_resolver'
+import User from '#apps/users/models/user'
+import { allowGuest, BasePolicy } from '@adonisjs/bouncer'
+import { AuthorizerResponse } from '@adonisjs/bouncer/types'
+import { inject } from '@adonisjs/core'
+import { HttpContext } from '@adonisjs/core/http'
+import { JwtPayload } from 'jsonwebtoken'
 
 @inject()
 export default class UserPolicy extends BasePolicy {
@@ -15,7 +14,7 @@ export default class UserPolicy extends BasePolicy {
     protected permissionResolver: PermissionResolver,
     protected ctx: HttpContext
   ) {
-    super();
+    super()
     this.payload = ctx.auth.use('jwt').payload! as JwtPayload
   }
 
@@ -26,7 +25,6 @@ export default class UserPolicy extends BasePolicy {
 
     if (isAdmin) return true
   }
-
 
   @allowGuest()
   async view(): Promise<AuthorizerResponse> {
@@ -49,9 +47,11 @@ export default class UserPolicy extends BasePolicy {
       .verifyAccess('view-users')
   }
   @allowGuest()
-  async updateEmail(_user: User | null, senderId: string, userId: string): Promise<AuthorizerResponse> {
-    return senderId == userId
+  async updateEmail(
+    _user: User | null,
+    senderId: string,
+    userId: string
+  ): Promise<AuthorizerResponse> {
+    return senderId === userId
   }
-
-
 }

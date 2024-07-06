@@ -13,7 +13,6 @@ export function jwtGuard<UserProvider>(
 ) {
   return {
     async resolver() {
-      console.log(config.provider)
       const provider = config.provider
 
       const options: JwtGuardOptions = {

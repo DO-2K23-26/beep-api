@@ -24,7 +24,7 @@ export default class Role extends BaseModel {
   declare updatedAt: DateTime | null
 
   @beforeCreate()
-  public static async generateUuid(model: Role) {
+  static async generateUuid(model: Role) {
     if (!model.$dirty.id) {
       model.id = randomUUID()
     }

@@ -13,7 +13,7 @@ export default class Permission extends BaseModel {
   declare updatedAt: DateTime | null
 
   @beforeCreate()
-  public static async generateUuid(model: Permission) {
+  static async generateUuid(model: Permission) {
     if (model.$dirty.id) {
       model.id = randomUUID()
     }

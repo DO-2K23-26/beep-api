@@ -43,17 +43,18 @@ export default class ServerChannelsController {
   // Updates a chan (name, description...)
   async updateChannel({ request, params }: HttpContext) {
     const receivedChannel = await request.validateUsing(updateChannelValidator)
-    const channel = await this.channelService.update(
-      params.channelId, { name: receivedChannel.name, description: receivedChannel.description }
-    )
-    return channel  // Returns the updated channel.
+    const channel = await this.channelService.update(params.channelId, {
+      name: receivedChannel.name,
+      description: receivedChannel.description,
+    })
+    return channel // Returns the updated channel.
   }
-  
+
   // Deletes a channel from a server
   async deleteChannel({ params }: HttpContext) {
-    const channelId = params.channelId;
-    await this.channelService.deleteById(channelId);
-    return { message: 'Channel deleted successfully' };
+    const channelId = params.channelId
+    await this.channelService.deleteById(channelId)
+    return { message: 'Channel deleted successfully' }
   }
 
   async joinChannel({ auth, params }: HttpContext): Promise<string> {

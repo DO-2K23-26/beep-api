@@ -11,7 +11,10 @@ import StorageService from '#apps/storage/services/storage_service'
 
 @inject()
 export default class UserService {
-  constructor(protected mailService: MailService, protected storageService: StorageService) { }
+  constructor(
+    protected mailService: MailService,
+    protected storageService: StorageService
+  ) {}
   async findAll() {
     return User.query().preload('roles')
   }
@@ -68,7 +71,6 @@ export default class UserService {
     })
 
     await redis.expire(key, 20) //one day
-    console.log('mail outside')
     this.mailService.sendEmailUpdateMail(oldEmail, token)
     return token
   }

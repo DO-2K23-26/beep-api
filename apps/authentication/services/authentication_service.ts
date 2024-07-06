@@ -70,7 +70,7 @@ export default class AuthenticationService {
 
     let user = await User.findOrFail(tokenEntity.ownerId)
 
-    if (user.verifiedAt != null) return true
+    if (user.verifiedAt !== null) return true
 
     if (tokenEntity.desactivatedAt < DateTime.now()) return false
 

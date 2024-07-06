@@ -124,7 +124,6 @@ export default class ServersController {
   // update picture
   async updatePicture({ request, bouncer }: HttpContext) {
     const data = await request.validateUsing(updatePictureValidator)
-    console.log(data)
     const server = await this.serverService.findById(data.params.serverId)
     await bouncer.with(ServerPolicy).authorize('edit' as never, server)
     return this.serverService.updatePicture(data)

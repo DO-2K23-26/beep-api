@@ -6,7 +6,7 @@ import AuthenticationService from './authentication_service.js'
 import { inject } from '@adonisjs/core'
 @inject()
 export default class MailService {
-  constructor(private authenticationService: AuthenticationService) { }
+  constructor(private authenticationService: AuthenticationService) {}
   async sendMail(email: string, subject: string, htmlMessage: string) {
     const emailApp: string = env.get('SMTP_USERNAME')
 
@@ -34,7 +34,7 @@ export default class MailService {
                 <title>Beep</title>
             </head>
             <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background: #EEEEEE;">
-            
+
                 <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0">
                     <tr>
                         <td>
@@ -48,7 +48,7 @@ export default class MailService {
                                     </td>
                                 </tr>
                             </table>
-            
+
                             <!-- Contenu principal de l'email -->
                             <table style="background: white; border-radius: 10px; max-width: 600px;" align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
@@ -59,7 +59,7 @@ export default class MailService {
                                     </td>
                                 </tr>
                             </table>
-            
+
                             <!-- Pied de page de l'email -->
                             <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
@@ -84,7 +84,7 @@ export default class MailService {
         message.to(email).from(emailApp, 'Beep').subject(subject).html(emailBody)
       })
     } catch (error) {
-      console.log(error)
+      // TODO: handle error
     }
   }
 

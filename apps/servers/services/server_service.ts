@@ -112,7 +112,7 @@ export default class ServerService {
     try {
       await server.related('users').attach([userId])
     } catch (e) {
-      console.error(e)
+      // TODO: handle error
     }
     return server
   }

@@ -43,8 +43,7 @@ export default class GenerateModuleBase extends BaseCommand {
         rcFile.addPreloadFile(`#apps/${this.name}/routes`)
       })
     } catch (error) {
-      console.error('Unable to update adonisrc.ts file')
-      console.error(error)
+      // TODO: Handle error
     }
   }
 }

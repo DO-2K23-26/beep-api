@@ -30,11 +30,10 @@ export default class Message extends BaseModel {
   // Column for channel ID
   @column()
   declare channelId: string
-  
+
   // Column for pinned status
   @column()
   declare pinned: boolean
-
 
   // Column for reply to message ID, adjusted to allow null
   @column()
