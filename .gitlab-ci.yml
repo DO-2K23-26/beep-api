@@ -48,6 +48,7 @@ lint:
   script:
     - pnpm install
     - pnpm typecheck
+    - pnpm lint
   when: always
 
 build-publish-image:

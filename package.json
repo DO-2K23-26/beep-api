@@ -75,7 +75,10 @@
     "socket.io": "^4.7.5"
   },
   "eslintConfig": {
-    "extends": "@adonisjs/eslint-config/app"
+    "extends": "@adonisjs/eslint-config/app",
+    "rules": {
+      "no-console": "error"
+    }
   },
   "prettier": "@adonisjs/prettier-config"
 }
