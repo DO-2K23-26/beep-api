@@ -138,8 +138,8 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
   }
 
   authenticateAsClient(
-    user: UserProvider[typeof symbols.PROVIDER_REAL_USER],
-    ...args: any[]
+    _user: UserProvider[typeof symbols.PROVIDER_REAL_USER],
+    ..._args: any[]
   ): Promise<AuthClientResponse> {
     return Promise.resolve({})
   }
