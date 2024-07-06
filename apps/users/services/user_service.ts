@@ -1,5 +1,5 @@
 import MailService from '#apps/authentication/services/mail_service'
-import HttpException from '#apps/shared/exceptions/http-exception'
+import HttpException from '#apps/shared/exceptions/http_exception'
 import User from '#apps/users/models/user'
 import { UpdateUserValidator } from '#apps/users/validators/users'
 import { inject } from '@adonisjs/core'
