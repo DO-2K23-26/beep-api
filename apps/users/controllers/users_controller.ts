@@ -18,15 +18,14 @@ export default class UsersController {
   constructor(
     protected userService: UserService,
     protected authenticationService: AuthenticationService
-  ) { }
+  ) {}
 
   async index({ response, request }: HttpContext) {
     const userIds = await request.validateUsing(getMultipleUserValidator)
     let users: User[] = []
     if (userIds?.ids) {
       users = await this.userService.findFrom(userIds.ids)
-    }
-    else users = await this.userService.findAll()
+    } else users = await this.userService.findAll()
     return response.send(users)
   }
 

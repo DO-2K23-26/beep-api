@@ -1,24 +1,23 @@
 import MailService from '#apps/authentication/services/mail_service'
 import HttpException from '#apps/shared/exceptions/http_exception'
+import StorageService from '#apps/storage/services/storage_service'
 import User from '#apps/users/models/user'
-import { GetMultipleUserValidator, UpdateUserValidator } from '#apps/users/validators/users'
+import { UpdateUserValidator } from '#apps/users/validators/users'
 import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 import jwt from 'jsonwebtoken'
 import { ChangeEmailToken } from '../models/change_email_token.js'
-import StorageService from '#apps/storage/services/storage_service'
 
 @inject()
 export default class UserService {
   constructor(
     protected mailService: MailService,
     protected storageService: StorageService
-  ) { }
+  ) {}
   async findAll() {
     return User.query().preload('roles')
   }
-
   async findFrom(userIds: string[]) {
     return User.query().whereIn('id', userIds)
   }
@@ -26,7 +25,6 @@ export default class UserService {
   async findAllToDisplay() {
     return User.query().select('id', 'username')
   }
-
   async findById(userId: string): Promise<User> {
     try {
       return User.query().where('id', userId).firstOrFail()
