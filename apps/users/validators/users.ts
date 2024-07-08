@@ -28,4 +28,11 @@ export const updateUserValidator = vine.compile(
   })
 )
 
+export const getMultipleUserValidator = vine.compile(
+  vine.object({
+    ids: vine.array(vine.string()).optional(),
+  })
+)
+
 export type UpdateUserValidator = Infer<typeof updateUserValidator>
+export type GetMultipleUserValidator = Infer<typeof getMultipleUserValidator>

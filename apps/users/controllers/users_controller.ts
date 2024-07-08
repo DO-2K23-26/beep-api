@@ -6,6 +6,7 @@ import User from '#apps/users/models/user'
 import {
   confirmEmailUpdateValidator,
   emailUpdateValidator,
+  getMultipleUserValidator,
   updateUserValidator,
 } from '#apps/users/validators/users'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
@@ -17,12 +18,15 @@ export default class UsersController {
   constructor(
     protected userService: UserService,
     protected authenticationService: AuthenticationService
-  ) {}
+  ) { }
 
-  async index({ response, bouncer }: HttpContext) {
-    await bouncer.with(UserPolicy).authorize('view' as never)
-    const users = await this.userService.findAll()
-
+  async index({ response, request }: HttpContext) {
+    const userIds = await request.validateUsing(getMultipleUserValidator)
+    let users: User[] = []
+    if (userIds?.ids) {
+      users = await this.userService.findFrom(userIds.ids)
+    }
+    else users = await this.userService.findAll()
     return response.send(users)
   }
 
