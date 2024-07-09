@@ -8,10 +8,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 @inject()
 export default class ServerChannelsController {
-  constructor(
-    private channelService: ChannelService,
-    private userService: UserService
-  ) {}
+  constructor(private channelService: ChannelService) {}
 
   //recupere les channels d'un server
   async findByServerId({ params }: HttpContext) {
