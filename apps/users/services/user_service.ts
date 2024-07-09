@@ -6,7 +6,6 @@ import User from '#apps/users/models/user'
 import { UpdateUserValidator } from '#apps/users/validators/users'
 import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
-import transmit from '@adonisjs/transmit/services/main'
 import jwt from 'jsonwebtoken'
 import { ChangeEmailToken } from '../models/change_email_token.js'
 
@@ -28,7 +27,7 @@ export default class UserService {
   }
   async findById(userId: string): Promise<User> {
     try {
-      return User.query().where('id', userId).firstOrFail()
+      return await User.query().where('id', userId).firstOrFail()
     } catch (error) {
       throw new HttpException('No user has been found with this ID.', { status: 404 })
     }
