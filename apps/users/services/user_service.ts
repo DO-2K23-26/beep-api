@@ -101,12 +101,4 @@ export default class UserService {
     }
     return this.update(changeEmailValidator, userId)
   }
-  async changeMutedStatus(
-    userId: string,
-    serverId: any,
-    payload: { muted: boolean; voiceMuted: boolean; camera: boolean }
-  ) {
-    redis.hset(`users:${serverId}`, userId, JSON.stringify(payload))
-    transmit.broadcast(`users/${serverId}/state`, { message: 'update muted' })
-  }
 }

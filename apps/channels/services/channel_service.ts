@@ -112,7 +112,7 @@ export default class ChannelService {
         let username = channelData[userId]
         let payload = await redis.hget(`users:${serverId}`, userId)
         if (!payload) {
-          payload = '{"muted": false, "voiceMuted": false}'
+          payload = '{"muted": false, "voiceMuted": false, "camera": false}'
         }
         try {
           const mutedState = JSON.parse(payload)
@@ -139,7 +139,8 @@ export default class ChannelService {
     serverId: string,
     channelId: string,
     userId: string,
-    username: string
+    username: string,
+    payload: { muted: boolean; voiceMuted: boolean; camera: boolean }
   ): Promise<string> {
     try {
       const multi = redis.multi()
@@ -159,12 +160,22 @@ export default class ChannelService {
       const channelSn = channelObject?.serialNumber
       const userObject = await User.query().where('id', userId).firstOrFail()
       const userSn = userObject?.serialNumber
-      const payload: PayloadJWTSFUConnection = { channelSn, userSn }
-      return this.generateToken(payload)
+      this.changeMutedStatus(userId, serverId, payload)
+      const tokenPayload: PayloadJWTSFUConnection = { channelSn, userSn }
+      return this.generateToken(tokenPayload)
     } catch (error) {
       // TODO: handle error
       return ''
     }
+  }
+
+  async changeMutedStatus(
+    userId: string,
+    serverId: any,
+    payload: { muted: boolean; voiceMuted: boolean; camera: boolean }
+  ) {
+    redis.hset(`users:${serverId}`, userId, JSON.stringify(payload))
+    transmit.broadcast(`users/${serverId}/state`, { message: 'update muted' })
   }
 
   async quitVoiceChannel(userId: string): Promise<string> {
