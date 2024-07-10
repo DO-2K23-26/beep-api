@@ -8,7 +8,10 @@ import {
 } from '../validators/authentication.js'
 import MailService from '../services/mail_service.js'
 import UserService from '#apps/users/services/user_service'
-import { createVerifyValidator } from '../validators/verify.js'
+import {
+  createVerifyValidator,
+  updatePasswordValidator,
+} from '#apps/authentication/validators/verify'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 import StorageService from '#apps/storage/services/storage_service'
@@ -127,5 +130,15 @@ export default class AuthenticationController {
     await this.authenticationService.verifyEmail(schematoken.token)
 
     return response.status(200).send({ message: 'Your account has been verified.' })
+  }
+
+  // Mise à jour du mot de passe
+  async updatePassword({ auth, request, response }: HttpContext) {
+    const validator = await request.validateUsing(updatePasswordValidator)
+    const payload = auth.use('jwt').payload!
+
+    await this.authenticationService.updateNewPassword(payload.email, validator)
+
+    return response.send({ message: 'Password updated successfully.' })
   }
 }

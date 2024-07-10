@@ -9,11 +9,11 @@ router
     router.post('/signin', [AuthenticationController, 'signin'])
     router.post('/signup', [AuthenticationController, 'signup'])
     router.post('/verify', [AuthenticationController, 'verifyEmail'])
-
     router.post('/refresh', [AuthenticationController, 'refresh'])
 
     router
       .group(() => {
+        router.post('/updatePassword', [AuthenticationController, 'updatePassword'])
         router.post('/send-email', [AuthenticationController, 'sendEmail'])
       })
       .use(middleware.auth())

@@ -6,5 +6,12 @@ export const createVerifyValidator = vine.compile(
     token: vine.string(),
   })
 )
+export const updatePasswordValidator = vine.compile(
+  vine.object({
+    newPassword: vine.string(),
+    oldPassword: vine.string().minLength(6),
+  })
+)
 
 export type CreateVerifySchema = Infer<typeof createVerifyValidator>
+export type UpdatePasswordValidator = Infer<typeof updatePasswordValidator>

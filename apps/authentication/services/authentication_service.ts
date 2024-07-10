@@ -6,7 +6,8 @@ import logger from '@adonisjs/core/services/logger'
 import jwt from 'jsonwebtoken'
 import { DateTime } from 'luxon'
 import crypto from 'node:crypto'
-import { CreateAuthenticationSchema } from '../validators/authentication.js'
+import { UpdatePasswordValidator } from '#apps/authentication/validators/verify'
+import { CreateAuthenticationSchema } from '#apps/authentication/validators/authentication'
 
 export default class AuthenticationService {
   DEFAULT_PP_URL = 'default_profile_picture.png'
@@ -78,5 +79,14 @@ export default class AuthenticationService {
     await user.save()
 
     return true
+  }
+
+  async updateNewPassword(email: string, validator: UpdatePasswordValidator) {
+    // On vérifie les mots de passes
+    const user = await User.verifyCredentials(email, validator.oldPassword)
+
+    // Si les mdp correspondent on maj
+    user.password = validator.newPassword
+    await user.save()
   }
 }
