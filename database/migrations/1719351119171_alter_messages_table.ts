@@ -16,7 +16,7 @@ export default class extends BaseSchema {
 
   async down() {
     this.schema.alterTable(this.tableName, (table) => {
-      table.dropColumn('parentMessageId')
+      table.dropColumn('parent_message_id')
     })
   }
 }
