@@ -1,10 +1,10 @@
 replicaCount: 1
 
 imagePullSecrets:
-- name: beep-registry
+  - name: beep-registry
 
 image:
-  repository: gitlab.polytech.umontpellier.fr:5050/beep/api
+  repository: milou666/beep-api
   pullPolicy: Always
   tag: 056b6d57
   port: 80
@@ -17,10 +17,9 @@ service:
 
 ingress:
   enabled: true
-  annotations: {traefik.ingress.kubernetes.io/router.entrypoints: web}
+  annotations: { traefik.ingress.kubernetes.io/router.entrypoints: web }
   hosts:
-  - host: 'if you see this, it means that the ingress is not working properly'
-    paths: ['/']
+    - host: 'if you see this, it means that the ingress is not working properly'
+      paths: ['/']
 
 servicesReleaseName: beep-services
-
