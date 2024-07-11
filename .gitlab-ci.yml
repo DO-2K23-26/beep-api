@@ -64,7 +64,8 @@ build-publish-image:
     - determineversion
   script:
     - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$USER_DOCKERHUB\",\"password\":\"$PASSWORD_DOCKERHUB\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination beep-api:$GitVersion_MajorMinorPatch
+    - docker login
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination milou666/beep-api:$GitVersion_MajorMinorPatch
   environment:
     name: $DEPLOY_VARIABLE
 
