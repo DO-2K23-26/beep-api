@@ -11,5 +11,8 @@
   "prettier.singleQuote": true,
   "prettier.trailingComma": "all",
   "files.insertFinalNewline": true,
-  "files.trimTrailingWhitespace": true
+  "files.trimTrailingWhitespace": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  }
 }

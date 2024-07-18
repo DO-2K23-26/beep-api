@@ -16,6 +16,9 @@ import server from '@adonisjs/core/services/server'
  * to a HTTP response.
  */
 server.errorHandler(() => import('#apps/shared/exceptions/handler'))
+server.errorHandler(
+  () => import('#apps/authentication/exceptions/authentication_exception_handler')
+)
 
 /**
  * The server middleware stack runs middleware on all the HTTP

@@ -4,6 +4,7 @@ import AuthenticationService from '#apps/authentication/services/authentication_
 import User from '#apps/users/models/user'
 import {
   createAuthenticationValidator,
+  resetPasswordValidator,
   signinAuthenticationValidator,
 } from '../validators/authentication.js'
 import MailService from '../services/mail_service.js'
@@ -118,6 +119,15 @@ export default class AuthenticationController {
     if (payload.sub === undefined) return response.status(401).send({ message: 'Unauthorized' })
     const user = await this.userService.findById(payload.sub.toString())
     await this.mailService.sendSignUpMail(user)
+
+    return response.send({
+      message: 'mail send',
+    })
+  }
+
+  async sendResetPasswordEmail({ response, request }: HttpContext) {
+    const req = await request.validateUsing(resetPasswordValidator)
+    await this.mailService.sendResetPasswordMail(req)
 
     return response.send({
       message: 'mail send',

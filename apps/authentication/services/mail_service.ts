@@ -4,6 +4,9 @@ import env from '#start/env'
 import mail from '@adonisjs/mail/services/main'
 import AuthenticationService from './authentication_service.js'
 import { inject } from '@adonisjs/core'
+import { ResetPasswordValidator } from '#apps/authentication/validators/authentication'
+import UserNotFoundException from '../exceptions/user_not_found_exception.js'
+import logger from '@adonisjs/core/services/logger'
 @inject()
 export default class MailService {
   constructor(private authenticationService: AuthenticationService) {}
@@ -104,8 +107,16 @@ export default class MailService {
     this.sendMail(user.email, subject, htmlMessage)
   }
 
-  async sendResetPasswordMail(user: User) {
+  async sendResetPasswordMail(resetPasswordValidator: ResetPasswordValidator) {
     const subject: string = 'Réinitialisation de votre mot de passe'
+    let user: User
+    try {
+      user = await User.findByOrFail('email', resetPasswordValidator.email)
+    } catch (err) {
+      logger.error(err)
+      throw new UserNotFoundException('User not found', { status: 404 })
+    }
+
     const verificationToken: Token = await this.authenticationService.createToken(user)
 
     const htmlMessage: string =

@@ -10,6 +10,7 @@ router
     router.post('/signup', [AuthenticationController, 'signup'])
     router.post('/verify', [AuthenticationController, 'verifyEmail'])
     router.post('/refresh', [AuthenticationController, 'refresh'])
+    router.post('/reset-password', [AuthenticationController, 'sendResetPasswordEmail'])
 
     router
       .group(() => {
