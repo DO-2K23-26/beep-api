@@ -13,5 +13,13 @@ export const updatePasswordValidator = vine.compile(
   })
 )
 
+export const resetPasswordVerifyValidator = vine.compile(
+  vine.object({
+    token: vine.string(),
+    newPassword: vine.string(),
+  })
+)
+
 export type CreateVerifySchema = Infer<typeof createVerifyValidator>
 export type UpdatePasswordValidator = Infer<typeof updatePasswordValidator>
+export type ResetPasswordVerifyValidator = Infer<typeof resetPasswordVerifyValidator>

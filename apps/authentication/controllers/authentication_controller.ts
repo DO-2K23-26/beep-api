@@ -1,21 +1,22 @@
-import type { HttpContext } from '@adonisjs/core/http'
-import { inject } from '@adonisjs/core'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
+import {
+  createVerifyValidator,
+  resetPasswordVerifyValidator,
+  updatePasswordValidator,
+} from '#apps/authentication/validators/verify'
+import StorageService from '#apps/storage/services/storage_service'
 import User from '#apps/users/models/user'
+import UserService from '#apps/users/services/user_service'
+import { inject } from '@adonisjs/core'
+import type { HttpContext } from '@adonisjs/core/http'
+import redis from '@adonisjs/redis/services/main'
+import transmit from '@adonisjs/transmit/services/main'
+import MailService from '../services/mail_service.js'
 import {
   createAuthenticationValidator,
   resetPasswordValidator,
   signinAuthenticationValidator,
 } from '../validators/authentication.js'
-import MailService from '../services/mail_service.js'
-import UserService from '#apps/users/services/user_service'
-import {
-  createVerifyValidator,
-  updatePasswordValidator,
-} from '#apps/authentication/validators/verify'
-import redis from '@adonisjs/redis/services/main'
-import transmit from '@adonisjs/transmit/services/main'
-import StorageService from '#apps/storage/services/storage_service'
 
 @inject()
 export default class AuthenticationController {
@@ -150,5 +151,13 @@ export default class AuthenticationController {
     await this.authenticationService.updateNewPassword(payload.email, validator)
 
     return response.send({ message: 'Password updated successfully.' })
+  }
+
+  async verifyResetPassword({ response, request }: HttpContext) {
+    const schematoken = await request.validateUsing(resetPasswordVerifyValidator)
+
+    await this.authenticationService.verifyResetPassword(schematoken.token, schematoken.newPassword)
+
+    return response.status(200).send({ message: 'Your password has been updated.' })
   }
 }

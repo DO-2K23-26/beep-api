@@ -1,3 +1,5 @@
+import { CreateAuthenticationSchema } from '#apps/authentication/validators/authentication'
+import { UpdatePasswordValidator } from '#apps/authentication/validators/verify'
 import Token from '#apps/users/models/token'
 import User from '#apps/users/models/user'
 import env from '#start/env'
@@ -6,8 +8,6 @@ import logger from '@adonisjs/core/services/logger'
 import jwt from 'jsonwebtoken'
 import { DateTime } from 'luxon'
 import crypto from 'node:crypto'
-import { UpdatePasswordValidator } from '#apps/authentication/validators/verify'
-import { CreateAuthenticationSchema } from '#apps/authentication/validators/authentication'
 
 export default class AuthenticationService {
   DEFAULT_PP_URL = 'default_profile_picture.png'
@@ -88,5 +88,19 @@ export default class AuthenticationService {
     // Si les mdp correspondent on maj
     user.password = validator.newPassword
     await user.save()
+  }
+
+  async verifyResetPassword(token: string, newPassword: string): Promise<boolean> {
+    const tokenEntity = await Token.query().where('token', token).firstOrFail()
+    let user = await User.findOrFail(tokenEntity.ownerId)
+
+    if (tokenEntity.desactivatedAt < DateTime.now()) return false
+
+    if (user === null) return false
+
+    user.password = newPassword
+    await user.save()
+
+    return true
   }
 }

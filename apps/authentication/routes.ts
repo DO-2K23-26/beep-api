@@ -11,6 +11,7 @@ router
     router.post('/verify', [AuthenticationController, 'verifyEmail'])
     router.post('/refresh', [AuthenticationController, 'refresh'])
     router.post('/reset-password', [AuthenticationController, 'sendResetPasswordEmail'])
+    router.post('/verify-reset-password', [AuthenticationController, 'verifyResetPassword'])
 
     router
       .group(() => {
