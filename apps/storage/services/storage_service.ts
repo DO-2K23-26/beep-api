@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs'
 import Attachment from '#apps/storage/models/attachment'
 import env from '#start/env'
 import { MultipartFile } from '@adonisjs/core/bodyparser'
+import FileNotFoundException from '#apps/storage/exceptions/file_not_found_exception'
 
 export default class StorageService {
   S3Driver: S3Driver
@@ -54,7 +55,12 @@ export default class StorageService {
   }
 
   async transmit(fileName: string) {
-    return await this.S3Driver.getObjects(this.BUCKET_NAME, fileName)
+    try {
+      const file = await this.S3Driver.getObjects(this.BUCKET_NAME, fileName)
+      return file
+    } catch {
+      throw new FileNotFoundException('File not found', { status: 404 })
+    }
   }
 
   async storeProfilePicture(profilePicture: MultipartFile, id: string) {
