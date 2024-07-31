@@ -95,6 +95,7 @@ export default class MessageService {
     return Message.query()
       .where('channelId', channelId)
       .preload('owner')
+      .preload('attachments')
       .preload('parentMessage', (query) => {
         query.preload('owner')
       })
