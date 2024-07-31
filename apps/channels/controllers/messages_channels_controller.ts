@@ -1,6 +1,10 @@
 import MessagePolicy from '#apps/messages/policies/message_policy'
 import MessageService from '#apps/messages/services/message_service'
-import { createMessageValidator, updateMessageValidator } from '#apps/messages/validators/message'
+import {
+  createMessageValidator,
+  pinMessageValidator,
+  updateMessageValidator,
+} from '#apps/messages/validators/message'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import transmit from '@adonisjs/transmit/services/main'
@@ -34,21 +38,17 @@ export default class MessagesChannelsController {
   /**
    * Pin a message
    */
-  async pin({ params, bouncer }: HttpContext) {
+  async pin({ params, bouncer, request, auth, response }: HttpContext) {
+    const payload = auth.use('jwt').payload
     const channelId = params.channelId
     const messageId = params.messageId
-    const message = await this.messageService.show(messageId)
-    const channel = await this.channelService.findById({
-      params: { id: channelId },
-      messages: undefined,
-      users: undefined,
+    const req = await request.validateUsing(pinMessageValidator)
+    await bouncer.with(MessagePolicy).authorize('pin' as never, messageId, channelId)
+    const message = await this.messageService.pinning(messageId, req, payload!.sub as string)
+    transmit.broadcast(`channels/${message.channelId}/messages`, {
+      messageId: message.id,
     })
-    const server = await this.serverService.findById(channel.serverId)
-    await bouncer.with(MessagePolicy).authorize('pin' as never, message, server)
-    transmit.broadcast(`channels/${params.channelId}/messages`, {
-      messageId: params.messageId,
-    })
-    return this.messageService.pin(messageId)
+    return response.send(message)
   }
 
   /**
@@ -112,14 +112,5 @@ export default class MessagesChannelsController {
       messageId: params.messageId,
     })
     return this.messageService.destroy(messageId)
-  }
-
-  /**
-   * Find and delete a message knowuing the content 'Le message avec l'ID ${message.id} a été épinglé.'
-   */
-  async findAndDelete({ params }: HttpContext) {
-    const messageId = params.messageId
-    const content = 'The message with ID ' + messageId + ' is pinned.'
-    return this.messageService.findAndDelete(content)
   }
 }

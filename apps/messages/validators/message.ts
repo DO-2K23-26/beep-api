@@ -24,5 +24,12 @@ export const updateMessageValidator = vine.compile(
   })
 )
 
+export const pinMessageValidator = vine.compile(
+  vine.object({
+    action: vine.string().in(['pin', 'unpin']),
+  })
+)
+
 export type CreateMessagesSchema = Infer<typeof createMessageValidator>
 export type UpdateMessagesSchema = Infer<typeof updateMessageValidator>
+export type PinMessagesSchema = Infer<typeof pinMessageValidator>

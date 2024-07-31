@@ -1,6 +1,11 @@
+import BadPinningException from '#apps/channels/exceptions/bad_pinning_exception'
 import Channel from '#apps/channels/models/channel'
 import Message from '#apps/messages/models/message'
-import { CreateMessagesSchema, UpdateMessagesSchema } from '#apps/messages/validators/message'
+import {
+  CreateMessagesSchema,
+  PinMessagesSchema,
+  UpdateMessagesSchema,
+} from '#apps/messages/validators/message'
 // import Attachment from '#apps/storage/models/attachment'
 import StorageService from '#apps/storage/services/storage_service'
 import { CreateStorageSchema } from '#apps/storage/validators/storage'
@@ -17,7 +22,7 @@ export default class MessageService {
   }
 
   async findPinned(channelId: string) {
-    const channel = await Channel.find(channelId)
+    const channel = await Channel.findOrFail(channelId)
     if (!channel) {
       throw new Error('Channel not found')
     }
@@ -29,10 +34,27 @@ export default class MessageService {
       .orderBy('created_at', 'desc')
   }
 
-  async pin(messageId: string) {
+  async pinning(messageId: string, pinningRequest: PinMessagesSchema, userId: string) {
+    const displayedMessage = 'I just pinned a message !'
+    const isPinnning = pinningRequest.action === 'pin'
     const message = await Message.findOrFail(messageId)
-    message.pinned = !message.pinned
-    await message.save()
+    if (isPinnning && isPinnning !== message.pinned) {
+      message.pinned = isPinnning
+      await this.create(
+        { content: displayedMessage, attachments: undefined, parentMessageId: undefined },
+        userId,
+        message.channelId
+      )
+      await message.save()
+    } else if (!isPinnning && isPinnning !== message.pinned) {
+      message.pinned = isPinnning
+      await message.save()
+    } else if (isPinnning) {
+      throw new BadPinningException('Message is already pinned', { status: 409 })
+    } else {
+      throw new BadPinningException('Message is already unpinned', { status: 409 })
+    }
+
     return message
   }
 
@@ -50,7 +72,6 @@ export default class MessageService {
         }
         await this.storageService.store(dataAttachments, createdMessage)
       }
-    } else {
     }
     return createdMessage
   }
@@ -141,7 +162,4 @@ export default class MessageService {
     return updatedAttachement
   }
   */
-  async findAndDelete(messageContent: string) {
-    return Message.query().where('content', messageContent).delete()
-  }
 }

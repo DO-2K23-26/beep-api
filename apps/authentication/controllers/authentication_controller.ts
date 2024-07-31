@@ -99,10 +99,10 @@ export default class AuthenticationController {
 
     await redis.hset(
       'userStates',
-      payload!.sub as string,
+      payload.sub as string,
       JSON.stringify({
-        id: payload!.sub,
-        username: user.username as string,
+        id: payload.sub,
+        username: user.username,
         expiresAt: Date.now() + 1200 * 1000, // Nouveau timestamp d'expiration
       })
     )
