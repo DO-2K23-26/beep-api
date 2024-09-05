@@ -26,14 +26,14 @@ spec:
               containerPort: {{ .Values.image.port }}
               protocol: TCP
           envFrom:
-            - configMapRef:
-                name: {{ .Values.configService }}
+          - configMapRef:
+              name: {{ .Values.configService }}
           envFrom:
-            - configMapRef:
-                name: {{ .Values.configMapName }}
+          - configMapRef:
+              name: {{ .Values.configMapName }}
           envFrom:
-            - secretRef:
-                name: app-secret-{{ .Release.Namespace }}
+          - secretRef:
+              name: app-secret-{{ .Release.Namespace }}
           env:
             - name: DB_PASSWORD
               valueFrom:
