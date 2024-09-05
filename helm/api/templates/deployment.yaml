@@ -20,6 +20,7 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           ports:
             - name: http
               containerPort: {{ .Values.image.port }}
@@ -27,6 +28,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.image.configMapName }}
+          envFrom:
+            - secretRef:
+                name: app-secret-{{ .Release.Namespace }}
           env:
             - name: DB_PASSWORD
               valueFrom:

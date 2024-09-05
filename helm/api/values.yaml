@@ -1,5 +1,10 @@
 replicaCount: 1
 
+frontendUrl: "https://beep.do-2023.fr/"
+
+secret:
+  appKey: "complete with the app key for the correct environment: prod or sta"
+
 imagePullSecrets:
   - name: beep-registry
 

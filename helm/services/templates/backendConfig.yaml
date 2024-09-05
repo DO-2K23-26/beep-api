@@ -4,13 +4,6 @@ metadata:
   name: {{ .Values.image.configMapName }}
 data:
   # kv format
-  TZ: "UTC+01:00"
-  PORT: "80"
-  HOST: "0.0.0.0"
-  LOG_LEVEL: "info"
-  APP_KEY: "G9e1d_eQQQpnbiEAeBa7uqYXwRgtecNL"
-  NODE_ENV: "production"
-  SESSION_DRIVER: "cookie"
   DB_HOST: "{{ .Release.Name }}-postgresql"
   DB_PORT: "{{ .Values.env.dbPort }}"
   DB_USER: "{{ .Values.env.dbUser }}"
@@ -20,4 +13,4 @@ data:
   S3_BUCKET_NAME: "{{ .Values.minio.defaultBuckets }}"
   REDIS_HOST: "{{ .Release.Name }}-redis-master"
   REDIS_PORT: "6379"
-  FRONTEND_URL: "{{ .Values.env.frontendUrl }}"
+
