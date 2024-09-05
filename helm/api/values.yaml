@@ -1,6 +1,8 @@
 replicaCount: 1
 
 frontendUrl: "https://beep.do-2023.fr/"
+configMapName: backend-config
+configService: beep-services
 
 secret:
   appKey: "complete with the app key for the correct environment: prod or sta"
@@ -13,7 +15,6 @@ image:
   pullPolicy: Always
   tag: 056b6d57
   port: 80
-  configMapName: backend-config
   smtpSecretName: beep-smtp-server
 
 service:

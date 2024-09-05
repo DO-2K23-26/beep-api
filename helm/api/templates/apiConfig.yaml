@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.image.configMapName }}
+  name: {{ .Values.configMapName }}
 data:
   # kv format
   TZ: 'UTC+01:00'
