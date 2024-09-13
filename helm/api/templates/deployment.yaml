@@ -54,22 +54,22 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.image.smtpSecretName }}
-                  key: host
+                  key: {{ .Values.smtp.hostKey }}
             - name: SMTP_PORT
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.image.smtpSecretName }}
-                  key: port
+                  key: {{ .Values.smtp.portKey }}
             - name: SMTP_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.image.smtpSecretName }}
-                  key: username
+                  key: {{ .Values.smtp.userKey }}
             - name: SMTP_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.image.smtpSecretName }}
-                  key: password
+                  key: {{ .Values.smtp.passwordKey }}
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
