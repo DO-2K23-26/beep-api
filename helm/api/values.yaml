@@ -1,7 +1,7 @@
 replicaCount: 1
 
 #Frontend production url
-frontendUrl: 'https://beep.ovh/'
+frontendUrl: https://beep.ovh/
 
 secret:
   # This default secret is for the production environment
@@ -18,7 +18,6 @@ image:
   pullPolicy: Always
   tag: 056b6d57
   port: 80
-  smtpSecretName: beep-smtp-server
 
 service:
   port: 80
@@ -29,14 +28,14 @@ ingress:
   annotations: { traefik.ingress.kubernetes.io/router.entrypoints: web }
   hosts:
     # Production url
-    - host: 'api.beep.ovh'
+    - host: api.beep.ovh
       paths: ['/']
 
 # Values below should be the same for all environments or they can be
 # provided by the infrastructure
 # Unless you know what you are doing, you should not change these values
 smtp:
-  existingSecret: beep-smtp-server
+  existingSecret: smtp-secret
   hostKey: host
   portKey: port
   userKey: user

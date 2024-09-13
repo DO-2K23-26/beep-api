@@ -53,22 +53,22 @@ spec:
             - name: SMTP_HOST
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.image.smtpSecretName }}
+                  name: {{ .Values.smtp.existingSecret }}
                   key: {{ .Values.smtp.hostKey }}
             - name: SMTP_PORT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.image.smtpSecretName }}
+                  name: {{ .Values.smtp.existingSecret }}
                   key: {{ .Values.smtp.portKey }}
             - name: SMTP_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.image.smtpSecretName }}
+                  name: {{ .Values.smtp.existingSecret }}
                   key: {{ .Values.smtp.userKey }}
             - name: SMTP_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.image.smtpSecretName }}
+                  name: {{ .Values.smtp.existingSecret }}
                   key: {{ .Values.smtp.passwordKey }}
 
           resources:
