@@ -1,14 +1,20 @@
 replicaCount: 1
 
-imagePullSecrets:
-  - name: beep-registry
+#Frontend production url
+frontendUrl: 'https://beep.ovh/'
+
+secret:
+  # This default secret is for the production environment
+  appKey: AgBM5HBVNk6VL150/1PpO783VRl2/yu07bCAaVpmBvcPWmC0u42546fpZ6SRPuz58uACtmWUwR4tf0Z/jTmnqeQ28X59MTQDG3R1WEBKifBWSBIco9cpN0vXT0zXzKukA022ZRsjPyf2A3zDxeWngITDElq/Q6iOfUKYyFiwKNf70zIKi7vRYil/6O3e2LaOjDgwlLSr4E+DaKVv8rVdZjVBaJcMchxM4a+x0TNyIdq8IUHssnHvwGryJOzQFpkMoInOk5BeBqRWBJ1x/3g9CJlnfj9kVePh4rivIi2ABW4Bq+O81H1TFOHkFhVR9u7SPS5k4s/YcoJ3xFnC6hrSTDb6fIEFz3qXONMgvY/bgA6apPG+i212GflHlmso64N02Zp3iCtu2NiE4rLddwMkGKU3Hw2cHSldTDkgAm9/gTV61yA/RgFSSH9NxA1WEb2eFCMz5XbSzpJBF2Nk3nUXtJ2+Av4SxYEwczZgdASCKuCXsI+ABBBTY8ikXU8mJEOGasp4R7Iq2adMp3xmiJs8CptI6EwBAc4AtWO3P3V664meOfHnsMe1Uf50gyD5VbEo68ywxLPi59J5Sf6mpGv4E+i15QlkXS1WXeBntj9U6fodnIS12wEfuXVTysAiAWgQBS0hvbuBGmzA1IR+izdiknt8/KdDu2DIVL3Lv/rZpM0gvDDO5wW/ejCJmUfym3ZZTFYA3nXVopkRnttGZQ4TngnZ6QTUGQ==
+
+# imagePullSecrets:
+#   - name: beep-registry
 
 image:
   repository: milou666/beep-api
   pullPolicy: Always
   tag: 056b6d57
   port: 80
-  configMapName: backend-config
   smtpSecretName: beep-smtp-server
 
 service:
@@ -19,7 +25,28 @@ ingress:
   enabled: true
   annotations: { traefik.ingress.kubernetes.io/router.entrypoints: web }
   hosts:
-    - host: 'if you see this, it means that the ingress is not working properly'
+    # Production url
+    - host: 'api.beep.ovh'
       paths: ['/']
 
-servicesReleaseName: beep-services
+# Values below should be the same for all environments or they can be
+# provided by the infrastructure
+# Unless you know what you are doing, you should not change these values
+minio:
+  existingSecret: minio-secret
+  userKey: minio-user
+  passwordKey: minio-password
+
+postgresql:
+  existingSecret: postgresql-secret
+  passwordKey: postgres-password
+
+redis:
+  existingSecret: redis-secret
+  passwordKey: redis-password
+
+configService: beep-services
+
+app:
+  existingSecret: app-secret
+  configMap: backend-config

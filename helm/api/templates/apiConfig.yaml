@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMapName }}
+data:
+  # kv format
+  TZ: 'UTC+01:00'
+  PORT: '80'
+  HOST: '0.0.0.0'
+  LOG_LEVEL: 'info'
+  SESSION_DRIVER: 'cookie'
+  NODE_ENV: 'production'
+  FRONTEND_URL: '{{ .Values.frontendUrl }}'
