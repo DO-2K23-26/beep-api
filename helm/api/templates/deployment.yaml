@@ -14,17 +14,14 @@ spec:
       labels:
         {{- include "beep-backend-files.selectorLabels" . | nindent 8 }}
     spec:
-      # imagePullSecrets:
-      #   {{- toYaml .Values.imagePullSecrets | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-
           ports:
-            - name: http
-              containerPort: {{ .Values.image.port }}
-              protocol: TCP
+          - name: http
+            containerPort: {{ .Values.image.port }}
+            protocol: TCP
           envFrom:
           - secretRef:
               name: {{ .Values.app.existingSecret }}
