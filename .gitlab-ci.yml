@@ -50,7 +50,7 @@ lint:
 build-publish-image:
   stage: build
   rules:
-    - if: $CI_COMMIT_TAG 
+    - if: $CI_COMMIT_TAG
   image:
     name: gcr.io/kaniko-project/executor:v1.14.0-debug
     entrypoint: ['']
@@ -84,27 +84,5 @@ package-publish-helm:
     - cat helm/api/values.yaml
     - helm package helm/api --version $VERSION --app-version $VERSION
     - 'curl --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@$CHART_NAME-$VERSION.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/$DEPLOY_VARIABLE/charts"'
-  environment:
-    name: $DEPLOY_VARIABLE
-
-publish-services:
-  stage: deploy
-  image: alpine/helm:latest
-  dependencies:
-    - package-publish-helm
-  script:
-    - wget https://github.com/mikefarah/yq/releases/download/v4.13.2/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
-    - current_version=$(yq e '.version' helm/services/Chart.yaml)
-    - IFS='.' read -ra version_parts <<< "$current_version"
-    - major=$((version_parts[0] + 1))
-    - new_version="$major.${version_parts[1]}.${version_parts[2]}"
-    - yq e -i ".version = \"$new_version\"" helm/services/Chart.yaml
-    - helm dependency update helm/services
-    - helm package helm/services
-    - 'curl --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@beep-services-$new_version.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/$DEPLOY_VARIABLE/charts"'
-  rules:
-    - if: $CI_COMMIT_TAG
-    - changes:
-        - helm/services/Chart.yaml
   environment:
     name: $DEPLOY_VARIABLE

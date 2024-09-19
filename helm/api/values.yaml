@@ -1,7 +1,7 @@
 replicaCount: 1
 
 #Frontend production url
-frontendUrl: https://beep.ovh/
+frontendUrl: https://beep.ovh
 
 secret:
   # This default secret is for the production environment
