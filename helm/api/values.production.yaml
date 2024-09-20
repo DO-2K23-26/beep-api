@@ -1,5 +1,3 @@
-replicaCount: 1
-
 #Frontend production url
 frontendUrl: https://beep.ovh
 
@@ -13,49 +11,11 @@ secret:
     username: AgB5+FAyRKo1ZIEAXBoUqxSdANWN0tJc4VBXrX9irpKahLjxSlv3G9zLWJC/vZylzST1PovQktcocC3ZGfgoFiJqpu74LxputGIOKV7G6YT3Ez18/RVP74sY2iegd6z8i3y+jEO22s9VnQkEuAiFNEwOGg5TmtkciyZG922ex727ZqZUpCg9NR3O73/r9qNSaOPMmm1b7hSJBccdyf9nAwfgCr63fFmwb5Xj486FGT03KJgFuq3HN9yAz0d7zL55kHXHdpvPfYdIn/AxxrFkzrA76pxvLO5hsSY6TBC4NyAPPD2bKBaq7oSNg1nKOSUNOLYnH4SvDHmL2fc49uOgTQUJ8MSxh+keNwq6lVuUs8/iwh7caRZyHTy0TNUnRhmCWCC3PuTiTLcRE56fpRb2XCoIBG5k9Ai2SiB45ARZoCpYvef7T8bX1/Cwk5C4vpXEZshWHSrLU+u+3+EpyenNqZ1BperUArudX391o7rem1wEyVWaIwKcGJ6DvBfsYDFWLnmCPv6iseF8Prt96hxllVvLppnMhgCpAIW9/hFYpgTstfPhAbA9z9FOh0dNjIi+jeRX1ajgKY+jUsw+NF+hg4wIVmvWHuJWHo78zMg/i/YHgsvyJUZF2mK8/1SkO7ll1vZ2yFDtn7YUpg8W0oYjwSXdO+zDS7bD448EBcG5iBpSI6UJzcsQFbiczvfSmjMYlu/NttKRMBlSIky6wwR1yNX74jr+WrSTXy6oDSvSo0Td
     password: AgCSoAoRUdt5e/k3envP5X8OskkIPmFH7ipmdpbQck/PbrYdRHU12jJDF6R6IPxo4CRG8G5ZDw9CYQyoSYrfbEo7WorJo3bE1Y7wYJ7QiCwoDWeVeKsag2gs2Ukv/IccATFyvsW0Kj6sf07RVGJbetY5oV9NQ4/u3uPVUJpjfPYlTiCrPmixytQVTfgc0z2TtX73q6Kdlf5/0grRSGmvQ3VaJkcdfaUE0V0jmBcitx2o+umowB3+oIvLlkY6m0BOMy+dp/6ECpLLR6153m+8b3HoH96S4II6pCMbdIfswGEo6R6lyOf8Okxf7NnAhPKYadcpAaFRkfx2awyJLAwmLc9voajSnDsw+cqBiDPMre/jR19IHjhq18E5h4HvLr1RD3OZHGBbXv4kKtvF5awZov/uY7lyaGW0usvcQQub+d9rs9jzs9l9R0sXEbVjm7C/2XTlzIwbxTuPM9Ptg+QP1H+YWzMaquMlTFALaTwhN2QdY9kwxloEmHYlBpHBK5dvXhnZEWHzIFQgeKxX07yHB5VDKZJSwryWRicUi80y2tL49Ax3B3c9t6oeta2zvcJWlbj0y7sVUCspltxs14bvlMKo6DggBXqJcmUyW/PTMMPtK3Lnaghjl+IlCeAVO3QzTVAXI25AEUKvr0ttCWfC1kfSQV3Dv6WZ69us9Ngbi5hXB7hw5iMuBoJh2NYpEqt5JfYNWVIQuwXbTGZ47iJfMaYh5G76N+2msS41UGyJfq+56kKk2jc/y+U1
 
-image:
-  repository: milou666/beep-api
-  pullPolicy: Always
-  tag: 056b6d57
-  port: 80
-
-service:
-  port: 80
-  type: ClusterIP
-
 ingress:
-  enabled: true
-  annotations: { traefik.ingress.kubernetes.io/router.entrypoints: web }
   hosts:
     # Production url
     - host: api.beep.ovh
       paths: ['/']
 
-# Values below should be the same for all environments or they can be
-# provided by the infrastructure
-# Unless you know what you are doing, you should not change these values
-smtp:
-  existingSecret: smtp-secret
-  hostKey: host
-  portKey: port
-  userKey: user
-  passwordKey: password
-
-minio:
-  existingSecret: minio-secret
-  userKey: minio-user
-  passwordKey: minio-password
-
-postgresql:
-  existingSecret: postgresql-secret
-  passwordKey: postgres-password
-
-redis:
-  existingSecret: redis-secret
-  passwordKey: redis-password
-
-configService: beep-services-config
-
-app:
-  existingSecret: app-secret
-  configMap: backend-config
+image:
+  repository: milou666/beep-api
