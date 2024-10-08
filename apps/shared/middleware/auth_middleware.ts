@@ -30,7 +30,7 @@ export default class AuthMiddleware {
   ) {
     await ctx.auth.authenticateUsing(options.guards, { loginRoute: this.redirectTo })
 
-    const jwt = ctx.auth.use('jwt').payload
+    const jwt = ctx.auth.user as JwtPayloadContract
 
     if (!jwt) {
       throw new authErrors.E_INVALID_CREDENTIALS()
