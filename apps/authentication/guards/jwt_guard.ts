@@ -17,7 +17,8 @@ export interface JwtPayloadContract extends JwtPayload {
 }
 
 export class JwtGuard<UserProvider extends UserProviderContract<User>>
-  implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]> {
+  implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]>
+{
   declare [symbols.GUARD_KNOWN_EVENTS]: {}
   #userProvider: UserProvider
   #options: JwtGuardOptions
