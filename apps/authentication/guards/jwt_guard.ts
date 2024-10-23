@@ -4,7 +4,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import User from '#apps/users/models/user'
-//@ts-ignore
+//@ts-expect-error  Provider is not exported by the module
 import { UserProviderContract } from '@adonisjs/auth/types/core'
 import Role from '#apps/users/models/role'
 
@@ -17,9 +17,8 @@ export interface JwtPayloadContract extends JwtPayload {
 }
 
 export class JwtGuard<UserProvider extends UserProviderContract<User>>
-  implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]>
-{
-  declare [symbols.GUARD_KNOWN_EVENTS]: {}
+  implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]> {
+  declare [symbols.GUARD_KNOWN_EVENTS]: object
   #userProvider: UserProvider
   #options: JwtGuardOptions
   #ctx: HttpContext
@@ -31,7 +30,7 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
     this.#ctx = ctx
   }
 
-  driverName: 'jwt' = 'jwt'
+  driverName = 'jwt' as const
 
   authenticationAttempted: boolean = false
   isAuthenticated: boolean = false
@@ -126,7 +125,7 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
       }) as JwtPayloadContract
 
       return verifyToken
-    } catch (e) {
+    } catch {
       throw new errors.E_UNAUTHORIZED_ACCESS('Unauthorized access', {
         guardDriverName: this.driverName,
       })
@@ -141,8 +140,6 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
   }
 
   authenticateAsClient(
-    _user: UserProvider[typeof symbols.PROVIDER_REAL_USER],
-    ..._args: any[]
   ): Promise<AuthClientResponse> {
     return Promise.resolve({})
   }

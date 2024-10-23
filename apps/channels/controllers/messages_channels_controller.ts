@@ -1,3 +1,5 @@
+import ChannelService from '#apps/channels/services/channel_service'
+import { ShowChannelSchema } from '#apps/channels/validators/channel'
 import MessagePolicy from '#apps/messages/policies/message_policy'
 import MessageService from '#apps/messages/services/message_service'
 import {
@@ -5,19 +7,16 @@ import {
   pinMessageValidator,
   updateMessageValidator,
 } from '#apps/messages/validators/message'
+import ServerService from '#apps/servers/services/server_service'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import transmit from '@adonisjs/transmit/services/main'
-import ServerService from '#apps/servers/services/server_service'
-import ChannelService from '#apps/channels/services/channel_service'
-import { ShowChannelSchema } from '#apps/channels/validators/channel'
 
 @inject()
 export default class MessagesChannelsController {
   constructor(
-    private messageService: MessageService,
-    private channelService: ChannelService,
-    private serverService: ServerService
+    private readonly messageService: MessageService,
+    private readonly channelService: ChannelService,
+    private readonly serverService: ServerService
   ) {}
   /**
    * Display a list of resource
@@ -45,9 +44,6 @@ export default class MessagesChannelsController {
     const req = await request.validateUsing(pinMessageValidator)
     await bouncer.with(MessagePolicy).authorize('pin' as never, messageId, channelId)
     const message = await this.messageService.pinning(messageId, req, payload!.sub as string)
-    transmit.broadcast(`channels/${message.channelId}/messages`, {
-      messageId: message.id,
-    })
     return response.send(message)
   }
 
@@ -59,13 +55,9 @@ export default class MessagesChannelsController {
     const channelId = params.channelId
 
     const data = await request.validateUsing(createMessageValidator)
+    const newMessage = await this.messageService.create(data, payload!.sub as string, channelId)
 
-    return this.messageService.create(data, payload!.sub as string, channelId).then((message) => {
-      transmit.broadcast(`channels/${params.channelId}/messages`, {
-        messageId: params.messageId,
-      })
-      return message
-    })
+    return newMessage
   }
 
   /**
@@ -76,10 +68,9 @@ export default class MessagesChannelsController {
     const receivedMessage = await request.validateUsing(updateMessageValidator)
     const message = await this.messageService.show(messageId)
     await bouncer.with(MessagePolicy).authorize('edit' as never, message)
-    transmit.broadcast(`channels/${params.channelId}/messages`, {
-      messageId: messageId,
-    })
-    return this.messageService.update(receivedMessage, messageId)
+    const updatedMessage = await this.messageService.update(receivedMessage, messageId)
+
+    return updatedMessage
   }
 
   /**
@@ -97,7 +88,7 @@ export default class MessagesChannelsController {
     const messageId = params.messageId
     const message = await this.messageService.show(messageId)
 
-    let showChannelSchema: ShowChannelSchema = {
+    const showChannelSchema: ShowChannelSchema = {
       params: {
         id: message.channelId,
       },
@@ -108,9 +99,7 @@ export default class MessagesChannelsController {
 
     const server = await this.serverService.findById(channel.serverId)
     await bouncer.with(MessagePolicy).authorize('delete' as never, message, server)
-    transmit.broadcast(`channels/${params.channelId}/messages`, {
-      messageId: params.messageId,
-    })
+
     return this.messageService.destroy(messageId)
   }
 }

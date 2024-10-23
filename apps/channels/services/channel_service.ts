@@ -15,6 +15,7 @@ import User from '#apps/users/models/user'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
+import logger from '@adonisjs/core/services/logger'
 
 export interface PayloadJWTSFUConnection {
   channelSn?: string
@@ -23,7 +24,7 @@ export interface PayloadJWTSFUConnection {
 
 @inject()
 export default class ChannelService {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService) { }
 
   async findAll(data: IndexChannelSchema): Promise<Channel[]> {
     return Channel.query()
@@ -106,17 +107,16 @@ export default class ChannelService {
 
     for (const channel of channelIds) {
       const channelData = await redis.hgetall(channel)
-      let occupiedChannel: OccupiedChannel
-      let users: CachedUser[] = []
+      const users: CachedUser[] = []
       for (const userId in channelData) {
-        let username = channelData[userId]
+        const username = channelData[userId]
         let payload = await redis.hget(`users:${serverId}`, userId)
         if (!payload) {
           payload = '{"muted": false, "voiceMuted": false, "camera": false}'
         }
         try {
           const mutedState = JSON.parse(payload)
-          let user: CachedUser = {
+          const user: CachedUser = {
             id: userId,
             username: username,
             muted: mutedState.muted,
@@ -126,10 +126,10 @@ export default class ChannelService {
           }
           users.push(user)
         } catch (e) {
-          // TODO: handle error
+          logger.error(e)
         }
       }
-      occupiedChannel = { channelId: channel.split(':')[3], users: users }
+      const occupiedChannel = { channelId: channel.split(':')[3], users: users }
       occupiedChannels.push(occupiedChannel)
     }
     return occupiedChannels
@@ -163,15 +163,14 @@ export default class ChannelService {
       this.changeMutedStatus(userId, serverId, payload)
       const tokenPayload: PayloadJWTSFUConnection = { channelSn, userSn }
       return this.generateToken(tokenPayload)
-    } catch (error) {
-      // TODO: handle error
+    } catch {
       return ''
     }
   }
 
   async changeMutedStatus(
     userId: string,
-    serverId: any,
+    serverId: string,
     payload: { muted: boolean; voiceMuted: boolean; camera: boolean }
   ) {
     redis.hset(`users:${serverId}`, userId, JSON.stringify(payload))
@@ -196,8 +195,7 @@ export default class ChannelService {
       transmit.broadcast(`servers/${serverId}/movement`, { message: 'user left' })
       const payload: PayloadJWTSFUConnection = { userSn }
       return this.generateToken(payload)
-    } catch (error) {
-      // TODO: handle error
+    } catch {
       return ''
     }
   }

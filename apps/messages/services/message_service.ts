@@ -1,21 +1,22 @@
 import BadPinningException from '#apps/channels/exceptions/bad_pinning_exception'
 import Channel from '#apps/channels/models/channel'
 import Message from '#apps/messages/models/message'
+import { ActionSignalMessage, SignalMessage } from '#apps/messages/models/signaling'
+
 import {
   CreateMessagesSchema,
   PinMessagesSchema,
   UpdateMessagesSchema,
 } from '#apps/messages/validators/message'
-// import Attachment from '#apps/storage/models/attachment'
 import StorageService from '#apps/storage/services/storage_service'
 import { CreateStorageSchema } from '#apps/storage/validators/storage'
-// import { CreateStorageSchema, UpdateStorageSchema } from '#apps/storage/validators/storage'
 import { inject } from '@adonisjs/core'
-// import { MultipartFile } from '@adonisjs/core/bodyparser'
+import redis from '@adonisjs/redis/services/main'
+import transmit from '@adonisjs/transmit/services/main'
 
 @inject()
 export default class MessageService {
-  constructor(protected storageService: StorageService) {}
+  constructor(protected storageService: StorageService) { }
 
   async findAll() {
     return Message.query()
@@ -38,17 +39,14 @@ export default class MessageService {
     const displayedMessage = 'I just pinned a message !'
     const isPinnning = pinningRequest.action === 'pin'
     const message = await Message.findOrFail(messageId)
-    if (isPinnning && isPinnning !== message.pinned) {
+    if (isPinnning !== message.pinned) {
       message.pinned = isPinnning
       await this.create(
         { content: displayedMessage, attachments: undefined, parentMessageId: undefined },
         userId,
         message.channelId
       )
-      await message.save()
-    } else if (!isPinnning && isPinnning !== message.pinned) {
-      message.pinned = isPinnning
-      await message.save()
+      await this.update(message, message.id)
     } else if (isPinnning) {
       throw new BadPinningException('Message is already pinned', { status: 409 })
     } else {
@@ -65,7 +63,7 @@ export default class MessageService {
       channelId: channelId,
     })
     if (message.attachments) {
-      for (let attachment of message.attachments) {
+      for (const attachment of message.attachments) {
         const dataAttachments: CreateStorageSchema = {
           messageId: createdMessage.id,
           attachment: attachment,
@@ -73,6 +71,16 @@ export default class MessageService {
         await this.storageService.store(dataAttachments, createdMessage)
       }
     }
+    await createdMessage.load('attachments')
+    const signalMessage: SignalMessage = {
+      message: createdMessage,
+      action: ActionSignalMessage.create,
+    }
+    transmit.broadcastExcept(
+      `channels/${channelId}/messages`,
+      JSON.stringify(signalMessage),
+      ownerId
+    )
     return createdMessage
   }
 
@@ -83,12 +91,22 @@ export default class MessageService {
   async update(updatedMessage: UpdateMessagesSchema, messageId: string) {
     const message = await Message.findOrFail(messageId)
     await message.merge(updatedMessage).save()
-    // this.updateFilesOfMessage(message, updatedMessage)
+    const signalMessage: SignalMessage = {
+      message: message,
+      action: ActionSignalMessage.update,
+    }
+    transmit.broadcast(`channels/${message.channelId}/messages`, JSON.stringify(signalMessage))
     return message
   }
 
-  destroy(id: string) {
-    return Message.query().where('id', id).delete()
+  async destroy(id: string) {
+    const message = await Message.findOrFail(id)
+    const signalMessage: SignalMessage = {
+      message: message,
+      action: ActionSignalMessage.delete,
+    }
+    transmit.broadcast(`channels/${message.channelId}/messages`, JSON.stringify(signalMessage))
+    return message.delete()
   }
 
   findAllByChannelId(channelId: string) {
@@ -102,6 +120,9 @@ export default class MessageService {
       .orderBy('created_at', 'desc')
   }
 
+  setSignalingChannel(userId: string, transmitId: string) {
+    redis.setex(`signalingChannel:${userId}`, transmitId, 3600)
+  }
   /*
   async updateFilesOfMessage(
     updatedMessage: Message,

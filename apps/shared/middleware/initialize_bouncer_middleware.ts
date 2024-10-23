@@ -28,7 +28,7 @@ export default class InitializeBouncerMiddleware {
 declare module '@adonisjs/core/http' {
   export interface HttpContext {
     bouncer: Bouncer<
-      // @ts-ignore
+      // @ts-expect-error Not unknnown
       Exclude<HttpContext['auth']['user'], undefined>,
       typeof abilities,
       typeof policies

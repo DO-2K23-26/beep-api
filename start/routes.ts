@@ -9,6 +9,7 @@
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
+import transmit from '@adonisjs/transmit/services/main'
 
 router
   .get('/', async ({ auth }) => {
@@ -16,3 +17,5 @@ router
     return payload
   })
   .use(middleware.auth())
+
+transmit.registerRoutes()

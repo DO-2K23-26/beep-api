@@ -2,13 +2,12 @@ import Server from '#apps/servers/models/server'
 import User from '#apps/users/models/user'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
 import StorageService from '#apps/storage/services/storage_service'
-import { assert } from 'node:console'
 import { inject } from '@adonisjs/core'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 
 @inject()
 export default class ServerService {
-  constructor(private storageService: StorageService) {}
+  constructor(private storageService: StorageService) { }
 
   async findAll(page: number = 1, limit: number = 10): Promise<Server[]> {
     const pageServers = await Server.query().paginate(page, limit)
@@ -32,7 +31,7 @@ export default class ServerService {
     { name, description, visibility, icon }: CreateServerSchema,
     ownerId: string
   ): Promise<Server> {
-    assert(visibility === 'public' || visibility === 'private') // assert that the name is either 'public' or 'private', if not the case validator failed
+
 
     const checkIfServerExists = await Server.query().where('name', name).first()
     if (checkIfServerExists) {
@@ -112,11 +111,7 @@ export default class ServerService {
 
   async join(serverId: string, userId: string): Promise<Server> {
     const server = await Server.findOrFail(serverId)
-    try {
-      await server.related('users').attach([userId])
-    } catch (e) {
-      // TODO: handle error
-    }
+    await server.related('users').attach([userId])
     return server
   }
   async discover(page: number = 1, limit: number = 10): Promise<Server[]> {

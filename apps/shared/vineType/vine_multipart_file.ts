@@ -34,8 +34,8 @@ const isMultipartFileArray = vine.createRule((value: unknown, _, field: FieldCon
 /**
  * Creating vineMultipartFile class
  */
-export class VineMultipartFile extends BaseLiteralType<MultipartFile, MultipartFile> {
-  constructor(options?: FieldOptions, validations?: Validation<any>[]) {
+export class VineMultipartFile extends BaseLiteralType<MultipartFile, MultipartFile, MultipartFile> {
+  constructor(options?: FieldOptions, validations?: Validation<unknown>[]) {
     super(options, validations || [isMultipartFileArray()])
   }
 

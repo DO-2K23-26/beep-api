@@ -86,7 +86,7 @@ export default class MailService {
       await mail.send((message) => {
         message.to(email).from(emailApp, 'Beep').subject(subject).html(emailBody)
       })
-    } catch (error) {
+    } catch {
       // TODO: handle error
     }
   }

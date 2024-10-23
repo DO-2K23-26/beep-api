@@ -28,19 +28,18 @@ export default class MessagePolicy extends BasePolicy {
 
   @allowGuest()
   async delete(_user: User | null, message: Message, server: Server): Promise<AuthorizerResponse> {
-    let isServerAdmin: boolean
-    isServerAdmin = server.ownerId === this.payload.sub
+    const isServerAdmin = server.ownerId === this.payload.sub
 
     return message.ownerId === this.payload.sub || isServerAdmin
   }
 
   @allowGuest()
   async pin(_user: User | null, messageId: string, channelId: string): Promise<AuthorizerResponse> {
-    let message = await Message.findOrFail(messageId)
-    let channel = await Channel.findOrFail(channelId)
-    let server = await Server.findOrFail(channel.serverId)
+    const message = await Message.findOrFail(messageId)
+    const channel = await Channel.findOrFail(channelId)
+    const server = await Server.findOrFail(channel.serverId)
 
-    let isServerAdmin: boolean = server.ownerId === this.payload.sub
+    const isServerAdmin: boolean = server.ownerId === this.payload.sub
     return message.ownerId === this.payload.sub || isServerAdmin
   }
 }

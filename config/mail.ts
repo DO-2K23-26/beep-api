@@ -8,12 +8,11 @@ const mailConfig = defineConfig({
    * The mailers object can be used to configure multiple mailers
    * each using a different transport or same transport with different
    * options.
-   */
+  */
   mailers: {
     smtp: transports.smtp({
       host: env.get('SMTP_HOST'),
       port: env.get('SMTP_PORT'),
-      secure: true,
       /**
        * Uncomment the auth block if your SMTP
        * server needs authentication
@@ -24,11 +23,13 @@ const mailConfig = defineConfig({
         pass: env.get('SMTP_PASSWORD'),
       },
     }),
+
   },
 })
 
 export default mailConfig
 
 declare module '@adonisjs/mail/types' {
-  export interface MailersList extends InferMailers<typeof mailConfig> {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  export interface MailersList extends InferMailers<typeof mailConfig> { }
 }

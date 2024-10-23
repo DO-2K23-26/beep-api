@@ -9,7 +9,7 @@ import { type HttpContext, type Response } from '@adonisjs/core/http'
 
 @inject()
 export default class StoragesController {
-  constructor(private storageService: StorageService) {}
+  constructor(private storageService: StorageService) { }
   /**
    * Handle form submission for the edit action
    */
@@ -55,7 +55,7 @@ export default class StoragesController {
     const payload = await this.storageService.transmit(id)
     if (payload.Body) {
       response.type('application/octet-stream')
-      //@ts-ignore
+      //@ts-expect-error Working fine from the beginning. Why changing a winning team ?
       return response.stream(payload.Body)
     }
     return response.notFound()

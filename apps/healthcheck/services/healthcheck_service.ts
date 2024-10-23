@@ -15,7 +15,7 @@ export default class HealthcheckService {
     try {
       await this.S3Driver.uploadFile(this.BUCKET_NAME, 'healthcheck', 'ok', 2)
       return true
-    } catch (error) {
+    } catch {
       return false
     }
   }
@@ -29,7 +29,7 @@ export default class HealthcheckService {
     try {
       await db.rawQuery('SELECT 1')
       return true
-    } catch (error) {
+    } catch {
       return false
     }
   }

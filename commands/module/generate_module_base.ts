@@ -42,6 +42,7 @@ export default class GenerateModuleBase extends BaseCommand {
       await codemods.updateRcFile((rcFile) => {
         rcFile.addPreloadFile(`#apps/${this.name}/routes`)
       })
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // TODO: Handle error
     }

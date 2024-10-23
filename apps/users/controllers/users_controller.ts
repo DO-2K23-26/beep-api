@@ -12,13 +12,14 @@ import {
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
+import { JwtPayloadContract } from '#apps/authentication/guards/jwt_guard'
 
 @inject()
 export default class UsersController {
   constructor(
     protected userService: UserService,
     protected authenticationService: AuthenticationService
-  ) {}
+  ) { }
 
   async index({ response, request }: HttpContext) {
     const userIds = await request.validateUsing(getMultipleUserValidator)
@@ -62,7 +63,7 @@ export default class UsersController {
       payload!.sub as string,
       JSON.stringify({
         id: payload!.sub,
-        username: (payload as any).username as string,
+        username: (payload as JwtPayloadContract).username as string,
         expiresAt: Date.now() + 1200 * 1000, // Timestamp now + 20 minutes
       })
     )

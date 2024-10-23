@@ -13,6 +13,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * The method is used for handling errors and returning
    * response to the client
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async handle(error: any, ctx: HttpContext) {
     if (error instanceof authErrors.E_UNAUTHORIZED_ACCESS) {
       ctx.response.status(401).send({

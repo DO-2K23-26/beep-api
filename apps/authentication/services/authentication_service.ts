@@ -69,7 +69,7 @@ export default class AuthenticationService {
   async verifyEmail(token: string): Promise<boolean> {
     const tokenEntity = await Token.query().where('token', token).firstOrFail()
 
-    let user = await User.findOrFail(tokenEntity.ownerId)
+    const user = await User.findOrFail(tokenEntity.ownerId)
 
     if (user.verifiedAt !== null) return true
 
@@ -92,7 +92,7 @@ export default class AuthenticationService {
 
   async verifyResetPassword(token: string, newPassword: string): Promise<boolean> {
     const tokenEntity = await Token.query().where('token', token).firstOrFail()
-    let user = await User.findOrFail(tokenEntity.ownerId)
+    const user = await User.findOrFail(tokenEntity.ownerId)
 
     if (tokenEntity.desactivatedAt < DateTime.now()) return false
 

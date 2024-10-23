@@ -41,6 +41,7 @@ export class S3Driver {
     return S3Driver.instance
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async uploadFile(bucket: string, key: string, body: any, length: number) {
     const command = new PutObjectCommand({
       Bucket: bucket,

@@ -14,7 +14,7 @@ export default class UserService {
   constructor(
     protected mailService: MailService,
     protected storageService: StorageService
-  ) {}
+  ) { }
   async findAll() {
     return User.query().preload('roles')
   }
@@ -28,7 +28,7 @@ export default class UserService {
   async findById(userId: string): Promise<User> {
     try {
       return await User.query().where('id', userId).firstOrFail()
-    } catch (error) {
+    } catch {
       throw new HttpException('No user has been found with this ID.', { status: 404 })
     }
   }
@@ -46,14 +46,10 @@ export default class UserService {
 
   async update(updatedUser: UpdateUserValidator, userId: string) {
     const user = await User.findOrFail(userId)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ['profilePicture']: file, ...restOfObject } = updatedUser
 
     if (updatedUser?.profilePicture?.tmpPath) {
-      // The goal is to use this service in the end
-      // const key = 'profilePictures/' + userId + '/' + updatedUser.profilePicture.clientName
-      // const buffer = Buffer.from(readFileSync(updatedUser.profilePicture.tmpPath))
-      // console.log(key)
-      // drive.put(key, buffer)
       const key = await this.storageService.storeProfilePicture(updatedUser.profilePicture, user.id)
       user.merge({ profilePicture: key })
     }
@@ -67,7 +63,7 @@ export default class UserService {
   }
 
   async storeEmailChangeToken(userId: string, oldEmail: string, newEmail: string) {
-    const id = crypto.randomUUID()
+    const id = generateSnowflake()
     const key = `change_email:${id}`
     const payload = {
       id: id,

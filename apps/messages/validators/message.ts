@@ -8,7 +8,7 @@ import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
  */
 export const createMessageValidator = vine.compile(
   vine.object({
-    content: vine.string(),
+    content: vine.string().optional(),
     attachments: vine.array(new VineMultipartFile()).optional(),
     parentMessageId: vine.string().optional(),
   })
@@ -21,6 +21,7 @@ export const createMessageValidator = vine.compile(
 export const updateMessageValidator = vine.compile(
   vine.object({
     content: vine.string(),
+    pinned: vine.boolean().optional(),
   })
 )
 
