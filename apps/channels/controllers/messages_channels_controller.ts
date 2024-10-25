@@ -4,13 +4,14 @@ import MessagePolicy from '#apps/messages/policies/message_policy'
 import MessageService from '#apps/messages/services/message_service'
 import {
   createMessageValidator,
+  getMessagesValidator,
   pinMessageValidator,
   updateMessageValidator,
 } from '#apps/messages/validators/message'
 import ServerService from '#apps/servers/services/server_service'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-
+import Message from '#apps/messages/models/message'
 @inject()
 export default class MessagesChannelsController {
   constructor(
@@ -21,9 +22,16 @@ export default class MessagesChannelsController {
   /**
    * Display a list of resource
    */
-  async index({ params }: HttpContext) {
+  async index({ params, request }: HttpContext) {
     const channelId: string = params.channelId
-    return this.messageService.findAllByChannelId(channelId)
+    const queryStrings = await request.validateUsing(getMessagesValidator)
+    let messages: Message[];
+    if (!queryStrings?.before && !queryStrings?.limit) {
+      messages = await this.messageService.findAllByChannelId(channelId)
+    } else {
+      messages = await this.messageService.getPaginated(channelId, queryStrings)
+    }
+    return messages
   }
 
   /**
@@ -50,11 +58,14 @@ export default class MessagesChannelsController {
   /**
    * Handle form submission for the create action
    */
-  async store({ auth, request, params }: HttpContext) {
+  async store({ auth, request, params, response }: HttpContext) {
     const payload = auth.use('jwt').payload
     const channelId = params.channelId
 
     const data = await request.validateUsing(createMessageValidator)
+    if (!data.attachments && !data.content) {
+      return response.badRequest({ message: 'Content or attachments are required' })
+    }
     const newMessage = await this.messageService.create(data, payload!.sub as string, channelId)
 
     return newMessage

@@ -5,6 +5,7 @@ import { ActionSignalMessage, SignalMessage } from '#apps/messages/models/signal
 
 import {
   CreateMessagesSchema,
+  GetMessagesValidator,
   PinMessagesSchema,
   UpdateMessagesSchema,
 } from '#apps/messages/validators/message'
@@ -72,6 +73,7 @@ export default class MessageService {
       }
     }
     await createdMessage.load('attachments')
+
     const signalMessage: SignalMessage = {
       message: createdMessage,
       action: ActionSignalMessage.create,
@@ -84,8 +86,11 @@ export default class MessageService {
     return createdMessage
   }
 
-  show(id: string) {
-    return Message.query().preload('attachments').where('id', id).firstOrFail()
+  async show(id: string) {
+    return Message.query()
+      .preload('attachments')
+      .preload("owner", (query) => { query.select('id', 'username') })
+      .where('id', id).firstOrFail()
   }
 
   async update(updatedMessage: UpdateMessagesSchema, messageId: string) {
@@ -112,13 +117,37 @@ export default class MessageService {
   findAllByChannelId(channelId: string) {
     return Message.query()
       .where('channelId', channelId)
-      .preload('owner')
-      .preload('attachments')
       .preload('parentMessage', (query) => {
-        query.preload('owner')
+        query.preload('owner', (query) => {
+          query.select('id', 'username')
+        })
       })
       .orderBy('created_at', 'desc')
   }
+
+  async getPaginated(channelId: string, options?: GetMessagesValidator) {
+    const limit = options?.limit ?? 100
+
+    const baseQuery = Message.query()
+      .where('channelId', channelId)
+      .preload('attachments')
+      .preload('parentMessage')
+      .preload('parentMessage', (query) => {
+        query.preload('owner', (query) => {
+          query.select('id', 'username')
+        })
+      })
+      .orderBy('created_at', 'desc').limit(limit)
+
+
+    if (options?.before) {
+      const beforeMessage = await Message.findByOrFail('id', options.before)
+      return baseQuery.where('created_at', '<', beforeMessage.createdAt.toString()).exec()
+    }
+
+    return baseQuery.exec()
+  }
+
 
   setSignalingChannel(userId: string, transmitId: string) {
     redis.setex(`signalingChannel:${userId}`, transmitId, 3600)

@@ -31,6 +31,13 @@ export const pinMessageValidator = vine.compile(
   })
 )
 
+export const getMessagesValidator = vine.compile(
+  vine.object({
+    limit: vine.number().optional(),
+    before: vine.string().optional()
+  })
+)
+export type GetMessagesValidator = Infer<typeof getMessagesValidator>
 export type CreateMessagesSchema = Infer<typeof createMessageValidator>
 export type UpdateMessagesSchema = Infer<typeof updateMessageValidator>
 export type PinMessagesSchema = Infer<typeof pinMessageValidator>
