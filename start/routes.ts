@@ -8,14 +8,18 @@
 */
 
 import router from '@adonisjs/core/services/router'
-import { middleware } from './kernel.js'
 import transmit from '@adonisjs/transmit/services/main'
+import swagger from "#config/swagger";
+import AutoSwagger from "adonis-autoswagger";
 
-router
-  .get('/', async ({ auth }) => {
-    const payload = auth.use('jwt').payload
-    return payload
-  })
-  .use(middleware.auth())
+
+// returns swagger in YAML
+router.get('/swagger', async () => {
+  return AutoSwagger.default.docs(router.toJSON(), swagger)
+})
+
+router.get('/docs', async () => {
+  return AutoSwagger.default.scalar('/swagger')
+})
 
 transmit.registerRoutes()
