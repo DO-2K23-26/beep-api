@@ -14,7 +14,7 @@ export default class UserService {
   constructor(
     protected mailService: MailService,
     protected storageService: StorageService
-  ) { }
+  ) {}
   async findAll() {
     return User.query().preload('roles')
   }

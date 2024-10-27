@@ -9,7 +9,7 @@ import { type HttpContext, type Response } from '@adonisjs/core/http'
 
 @inject()
 export default class StoragesController {
-  constructor(private storageService: StorageService) { }
+  constructor(private storageService: StorageService) {}
   /**
    * Handle form submission for the edit action
    */

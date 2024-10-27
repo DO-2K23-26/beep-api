@@ -19,7 +19,7 @@ export default class UsersController {
   constructor(
     protected userService: UserService,
     protected authenticationService: AuthenticationService
-  ) { }
+  ) {}
 
   async index({ response, request }: HttpContext) {
     const userIds = await request.validateUsing(getMultipleUserValidator)

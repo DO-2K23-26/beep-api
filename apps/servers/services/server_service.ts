@@ -7,7 +7,7 @@ import { generateSnowflake } from '#apps/shared/services/snowflake'
 
 @inject()
 export default class ServerService {
-  constructor(private storageService: StorageService) { }
+  constructor(private storageService: StorageService) {}
 
   async findAll(page: number = 1, limit: number = 10): Promise<Server[]> {
     const pageServers = await Server.query().paginate(page, limit)
@@ -31,8 +31,6 @@ export default class ServerService {
     { name, description, visibility, icon }: CreateServerSchema,
     ownerId: string
   ): Promise<Server> {
-
-
     const checkIfServerExists = await Server.query().where('name', name).first()
     if (checkIfServerExists) {
       throw new Error('Server already exists')

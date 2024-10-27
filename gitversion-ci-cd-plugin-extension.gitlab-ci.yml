@@ -1,7 +1,7 @@
 .gitversion_function:
   image:
     name: gittools/gitversion
-    entrypoint: [""]
+    entrypoint: ['']
   stage: .pre
   variables:
     GIT_STRATEGY: fetch

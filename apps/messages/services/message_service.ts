@@ -17,7 +17,7 @@ import transmit from '@adonisjs/transmit/services/main'
 
 @inject()
 export default class MessageService {
-  constructor(protected storageService: StorageService) { }
+  constructor(protected storageService: StorageService) {}
 
   async findAll() {
     return Message.query()
@@ -89,8 +89,11 @@ export default class MessageService {
   async show(id: string) {
     return Message.query()
       .preload('attachments')
-      .preload("owner", (query) => { query.select('id', 'username') })
-      .where('id', id).firstOrFail()
+      .preload('owner', (query) => {
+        query.select('id', 'username')
+      })
+      .where('id', id)
+      .firstOrFail()
   }
 
   async update(updatedMessage: UpdateMessagesSchema, messageId: string) {
@@ -137,8 +140,8 @@ export default class MessageService {
           query.select('id', 'username')
         })
       })
-      .orderBy('created_at', 'desc').limit(limit)
-
+      .orderBy('created_at', 'desc')
+      .limit(limit)
 
     if (options?.before) {
       const beforeMessage = await Message.findByOrFail('id', options.before)
@@ -147,7 +150,6 @@ export default class MessageService {
 
     return baseQuery.exec()
   }
-
 
   setSignalingChannel(userId: string, transmitId: string) {
     redis.setex(`signalingChannel:${userId}`, transmitId, 3600)

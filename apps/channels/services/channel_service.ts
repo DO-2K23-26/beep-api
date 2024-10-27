@@ -24,7 +24,7 @@ export interface PayloadJWTSFUConnection {
 
 @inject()
 export default class ChannelService {
-  constructor(private userService: UserService) { }
+  constructor(private userService: UserService) {}
 
   async findAll(data: IndexChannelSchema): Promise<Channel[]> {
     return Channel.query()

@@ -9,9 +9,8 @@
 
 import router from '@adonisjs/core/services/router'
 import transmit from '@adonisjs/transmit/services/main'
-import swagger from "#config/swagger";
-import AutoSwagger from "adonis-autoswagger";
-
+import swagger from '#config/swagger'
+import AutoSwagger from 'adonis-autoswagger'
 
 // returns swagger in YAML
 router.get('/swagger', async () => {

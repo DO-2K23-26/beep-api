@@ -25,7 +25,7 @@ export default class MessagesChannelsController {
   async index({ params, request }: HttpContext) {
     const channelId: string = params.channelId
     const queryStrings = await request.validateUsing(getMessagesValidator)
-    let messages: Message[];
+    let messages: Message[]
     if (!queryStrings?.before && !queryStrings?.limit) {
       messages = await this.messageService.findAllByChannelId(channelId)
     } else {

@@ -1,6 +1,7 @@
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
-const MessagesChannelsController = () => import('#apps/channels/controllers/messages_channels_controller')
+const MessagesChannelsController = () =>
+  import('#apps/channels/controllers/messages_channels_controller')
 
 router
   .group(() => {
