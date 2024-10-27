@@ -10,8 +10,10 @@
     "dev": "node ace serve --watch",
     "test": "node ace test",
     "lint": "eslint .",
+    "prettier": "prettier --check .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
   },
   "imports": {
     "#apps/*": "./apps/*.js",
@@ -48,6 +50,7 @@
     "@types/node": "^22.7.9",
     "eslint": "^9.13.0",
     "globals": "^15.11.0",
+    "husky": "^9.1.6",
     "pino-pretty": "11.3.0",
     "prettier": "^3.2.4",
     "ts-node": "^10.9.2",
