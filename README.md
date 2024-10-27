@@ -9,6 +9,7 @@ The Beep API is the backend of the Beep app.
 3. [Architecture](#architecture)
 4. [Routing description](#routing-description)
 5. [Start the app in development mode](#start-the-app-in-development-mode)
+6. [Husky pre-commit hooks](#pre-commit-with-husky)
 
 ## Technologies used
 
@@ -68,29 +69,29 @@ Finally Dokku is integrated with the existing Docker setup to streamline the dep
 
 Following below are all the routes described in the API
 
-| Route                                 | Method | Prefix        | Middleware | Controller              | Action       | Description                               |
-|---------------------------------------|--------|---------------|------------|-------------------------|--------------|-------------------------------------------|
-| /authentication/login                 | POST   | /authentication |            | AuthenticationController | login        | Logs in a user.                           |
-| /authentication/register              | POST   | /authentication |            | AuthenticationController | register     | Registers a new user.                     |
-| /authentication/verify                | POST   | /authentication |            | AuthenticationController | verifyEmail  | Verifies user email.                      |
-| /authentication/refresh               | POST   | /authentication |            | AuthenticationController | refresh      | Refreshes user authentication token.     |
-| /authentication/send-email            | POST   | /authentication | auth       | AuthenticationController | sendEmail    | Sends email (authenticated route).        |
-| /channels                            | GET    | /channels     | auth       | ChannelsController      | index        | Retrieves all channels.                   |
-| /channels/:id                        | GET    | /channels     | auth       | ChannelsController      | show         | Retrieves a specific channel by ID.      |
-| /channels                            | POST   | /channels     | auth       | ChannelsController      | store        | Creates a new channel.                    |
-| /channels                            | PATCH  | /channels     | auth       | ChannelsController      | update       | Updates an existing channel.              |
-| /channels/:id/join                   | POST   | /channels     | auth       | ChannelsController      | join         | Allows a user to join a specific channel.|
-| /channels/:id/leave                  | POST   | /channels     | auth       | ChannelsController      | leave        | Allows a user to leave a specific channel.|
-| /messages                            | GET    | /messages     | auth       | MessageController       | index        | Retrieves all messages.                   |
-| /messages                            | POST   | /messages     | auth       | MessageController       | store        | Stores a new message.                     |
-| /messages/channel/:channelId         | GET    | /messages     | auth       | MessageController       | index        | Retrieves messages for a specific channel.|
-| /messages/:id                        | GET    | /messages     | auth       | MessageController       | show         | Retrieves a specific message by ID.      |
-| /messages/:id                        | PUT    | /messages     | auth       | MessageController       | update       | Updates an existing message.              |
-| /messages/:id                        | DELETE | /messages     | auth       | MessageController       | destroy      | Deletes a message by ID.                 |
-| /storage/files/:id                   | GET    | /storage/files | auth       | FilesController         | show         | Retrieves a file by ID.                  |
-| /storage/files                       | POST   | /storage/files | auth       | FilesController         | store        | Stores a new file.                        |
-| /storage/files/:id                   | PUT    | /storage/files | auth       | FilesController         | update       | Updates an existing file.                |
-| /storage/files/:id                   | DELETE | /storage/files | auth       | FilesController         | destroy      | Deletes a file by ID.                    |
+| Route                        | Method | Prefix          | Middleware | Controller               | Action      | Description                                |
+| ---------------------------- | ------ | --------------- | ---------- | ------------------------ | ----------- | ------------------------------------------ |
+| /authentication/login        | POST   | /authentication |            | AuthenticationController | login       | Logs in a user.                            |
+| /authentication/register     | POST   | /authentication |            | AuthenticationController | register    | Registers a new user.                      |
+| /authentication/verify       | POST   | /authentication |            | AuthenticationController | verifyEmail | Verifies user email.                       |
+| /authentication/refresh      | POST   | /authentication |            | AuthenticationController | refresh     | Refreshes user authentication token.       |
+| /authentication/send-email   | POST   | /authentication | auth       | AuthenticationController | sendEmail   | Sends email (authenticated route).         |
+| /channels                    | GET    | /channels       | auth       | ChannelsController       | index       | Retrieves all channels.                    |
+| /channels/:id                | GET    | /channels       | auth       | ChannelsController       | show        | Retrieves a specific channel by ID.        |
+| /channels                    | POST   | /channels       | auth       | ChannelsController       | store       | Creates a new channel.                     |
+| /channels                    | PATCH  | /channels       | auth       | ChannelsController       | update      | Updates an existing channel.               |
+| /channels/:id/join           | POST   | /channels       | auth       | ChannelsController       | join        | Allows a user to join a specific channel.  |
+| /channels/:id/leave          | POST   | /channels       | auth       | ChannelsController       | leave       | Allows a user to leave a specific channel. |
+| /messages                    | GET    | /messages       | auth       | MessageController        | index       | Retrieves all messages.                    |
+| /messages                    | POST   | /messages       | auth       | MessageController        | store       | Stores a new message.                      |
+| /messages/channel/:channelId | GET    | /messages       | auth       | MessageController        | index       | Retrieves messages for a specific channel. |
+| /messages/:id                | GET    | /messages       | auth       | MessageController        | show        | Retrieves a specific message by ID.        |
+| /messages/:id                | PUT    | /messages       | auth       | MessageController        | update      | Updates an existing message.               |
+| /messages/:id                | DELETE | /messages       | auth       | MessageController        | destroy     | Deletes a message by ID.                   |
+| /storage/files/:id           | GET    | /storage/files  | auth       | FilesController          | show        | Retrieves a file by ID.                    |
+| /storage/files               | POST   | /storage/files  | auth       | FilesController          | store       | Stores a new file.                         |
+| /storage/files/:id           | PUT    | /storage/files  | auth       | FilesController          | update      | Updates an existing file.                  |
+| /storage/files/:id           | DELETE | /storage/files  | auth       | FilesController          | destroy     | Deletes a file by ID.                      |
 
 ## Start the app in development mode
 
@@ -112,3 +113,19 @@ Launch all seeders
 ```bash
 node ace db:seed
 ```
+
+## Pre-commit with husky
+
+### What's husky?
+
+[Husky](https://typicode.github.io/husky/) is a tool that makes it easy to manage Git hooks, such as pre-commit hooks, to automate tasks before committing code. By using Husky, we can ensure that our code adheres to project quality standards before being pushed to the repository.
+
+### Our pre-commit file
+
+In our project, the pre-commit hook runs a series of commands to guarantee code quality and consistency before each commit. Here are the commands we've configured:
+
+- `pnpm run prettier`: Checks the code formatting based on the rules defined in Prettier.
+- `pnpm run lint`: Runs ESLint to verify that the code follows style conventions and detects potential issues.
+- `pnpm run typescript`: Verifies types to ensure that the code complies with the defined TypeScript types.
+
+> **Note**: If `pnpm run prettier` fails, you can run `pnpm run format` to automatically fix the formatting.
