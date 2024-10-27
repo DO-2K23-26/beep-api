@@ -4,6 +4,7 @@ README.md
 test.ts
 .env
 .env.*
+.git
 docker*
 .gitlab-ci.yml
 .prettierignore
