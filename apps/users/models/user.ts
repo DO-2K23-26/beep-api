@@ -2,7 +2,6 @@ import Channel from '#apps/channels/models/channel'
 import Message from '#apps/messages/models/message'
 import Server from '#apps/servers/models/server'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
-import Role from '#apps/users/models/role'
 import { withAuthFinder } from '@adonisjs/auth'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { compose } from '@adonisjs/core/helpers'
@@ -54,8 +53,8 @@ export default class User extends compose(BaseModel, AuthFinder) {
   })
   declare servers: ManyToMany<typeof Server>
 
-  @manyToMany(() => Role)
-  declare roles: ManyToMany<typeof Role>
+  // @manyToMany(() => Role)
+  // declare roles: ManyToMany<typeof Role>
 
   @column()
   declare verifiedAt: DateTime | null

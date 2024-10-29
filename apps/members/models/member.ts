@@ -3,18 +3,12 @@ import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 import User from '#apps/users/models/user'
 import Server from '#apps/servers/models/server'
-import Role from '#apps/users/models/role'
+import Role from '#apps/role/models/role'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 
 export default class Member extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
-
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
 
   @column()
   declare nickname: string
@@ -39,6 +33,15 @@ export default class Member extends BaseModel {
 
   @column()
   declare userId: string
+
+  @column()
+  declare joinedAt: DateTime | null
+
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 
   @belongsTo(() => User, {
     foreignKey: 'userId',

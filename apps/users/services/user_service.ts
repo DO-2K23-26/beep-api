@@ -3,7 +3,7 @@ import HttpException from '#apps/shared/exceptions/http_exception'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import StorageService from '#apps/storage/services/storage_service'
 import User from '#apps/users/models/user'
-import { UpdateUserValidator } from '#apps/users/validators/users'
+import { GetUsersSchema, UpdateUserValidator } from '#apps/users/validators/users'
 import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
 import jwt from 'jsonwebtoken'
@@ -14,10 +14,13 @@ export default class UserService {
   constructor(
     protected mailService: MailService,
     protected storageService: StorageService
-  ) {}
-  async findAll() {
-    return User.query().preload('roles')
+  ) { }
+
+  async findAll({ page = 1, limit = 10 }: GetUsersSchema) {
+    return User.query()
+      .paginate(page, limit)
   }
+
   async findFrom(userIds: string[]) {
     return User.query().whereIn('id', userIds)
   }
@@ -25,6 +28,7 @@ export default class UserService {
   async findAllToDisplay() {
     return User.query().select('id', 'username')
   }
+
   async findById(userId: string): Promise<User> {
     try {
       return await User.query().where('id', userId).firstOrFail()

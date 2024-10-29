@@ -18,6 +18,13 @@ export const confirmEmailUpdateValidator = vine.compile(
   })
 )
 
+export const getUsersValidator = vine.compile(
+  vine.object({
+    page: vine.number().optional(),
+    limit: vine.number().optional(),
+  })
+)
+
 export const updateUserValidator = vine.compile(
   vine.object({
     username: vine.string().optional(),
@@ -36,3 +43,4 @@ export const getMultipleUserValidator = vine.compile(
 
 export type UpdateUserValidator = Infer<typeof updateUserValidator>
 export type GetMultipleUserValidator = Infer<typeof getMultipleUserValidator>
+export type GetUsersSchema = Infer<typeof getUsersValidator>

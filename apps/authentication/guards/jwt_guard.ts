@@ -6,7 +6,6 @@ import { DateTime } from 'luxon'
 import User from '#apps/users/models/user'
 //@ts-expect-error  Provider is not exported by the module
 import { UserProviderContract } from '@adonisjs/auth/types/core'
-import Role from '#apps/users/models/role'
 
 export type JwtGuardOptions = {
   secret: string
@@ -17,8 +16,7 @@ export interface JwtPayloadContract extends JwtPayload {
 }
 
 export class JwtGuard<UserProvider extends UserProviderContract<User>>
-  implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]>
-{
+  implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]> {
   declare [symbols.GUARD_KNOWN_EVENTS]: object
   #userProvider: UserProvider
   #options: JwtGuardOptions
@@ -53,7 +51,7 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
           .toMillis() / 1000
       ),
       resource_access: {
-        roles: user.roles.map((role: Role) => role.label),
+        roles: [],//user.roles.map((role: Role) => role.label),
       },
       username: user.username,
       firstName: user.firstName,
@@ -140,8 +138,43 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
     return null
   }
 
-  authenticateAsClient(): Promise<AuthClientResponse> {
-    return Promise.resolve({})
+
+  async createPayload(user: UserProvider[typeof symbols.PROVIDER_REAL_USER], roles: string[]) {
+    return {
+      sub: user.id,
+      exp: Math.floor(
+        DateTime.now()
+          .plus({
+            minute: 15,
+          })
+          .toMillis() / 1000
+      ),
+      resource_access: {
+        roles: roles,
+      },
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      audited_account: !!user.verifiedAt,
+    }
+  }
+
+  async authenticateAsClient(
+    user: UserProvider[typeof symbols.PROVIDER_REAL_USER],
+    roles: string[],
+  ): Promise<AuthClientResponse> {
+    const payload = await this.createPayload(user, roles)
+
+    const token = jwt.sign(payload, this.#options.secret)
+
+    this.user = payload
+
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    }
   }
 
   GUARD_KNOWN_EVENTS: unknown
