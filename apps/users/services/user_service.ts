@@ -1,5 +1,4 @@
 import MailService from '#apps/authentication/services/mail_service'
-import HttpException from '#apps/shared/exceptions/http_exception'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import StorageService from '#apps/storage/services/storage_service'
 import User from '#apps/users/models/user'
@@ -8,17 +7,17 @@ import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
 import jwt from 'jsonwebtoken'
 import { ChangeEmailToken } from '../models/change_email_token.js'
+import UserNotFoundException from '../exceptions/user_not_found_exception.js'
 
 @inject()
 export default class UserService {
   constructor(
     protected mailService: MailService,
     protected storageService: StorageService
-  ) { }
+  ) {}
 
   async findAll({ page = 1, limit = 10 }: GetUsersSchema) {
-    return User.query()
-      .paginate(page, limit)
+    return User.query().paginate(page, limit)
   }
 
   async findFrom(userIds: string[]) {
@@ -30,11 +29,7 @@ export default class UserService {
   }
 
   async findById(userId: string): Promise<User> {
-    try {
-      return await User.query().where('id', userId).firstOrFail()
-    } catch {
-      throw new HttpException('No user has been found with this ID.', { status: 404 })
-    }
+    return User.query().where('id', userId).preload('members').firstOrFail()
   }
 
   async create(data: {
@@ -49,7 +44,12 @@ export default class UserService {
   }
 
   async update(updatedUser: UpdateUserValidator, userId: string) {
-    const user = await User.findOrFail(userId)
+    const user = await User.findOrFail(userId).catch(() => {
+      throw new UserNotFoundException('User not found', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ['profilePicture']: file, ...restOfObject } = updatedUser
 

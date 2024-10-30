@@ -5,6 +5,7 @@ import Server from '#apps/servers/models/server'
 import ExpiredInvitationException from '#exceptions/expired_invitation_exception'
 import UnusableInvitationException from '#exceptions/unusable_invitation_exception'
 import PrivateServerException from '#exceptions/private_server_exception'
+import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
 
 export default class InvitationService {
   /**
@@ -48,7 +49,12 @@ export default class InvitationService {
       invitation.state = 'unusable'
     }
 
-    const server = await Server.findOrFail(invitation.serverId)
+    const server = await Server.findOrFail(invitation.serverId).catch(() => {
+      throw new ServerNotFoundException('Server not found', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
 
     const existingUser = await server.related('users').query().where('user_id', userId).first()
     if (!existingUser) {
@@ -63,7 +69,12 @@ export default class InvitationService {
   }
 
   async joinPublic(userId: string, serverId: string): Promise<Server> {
-    const server = await Server.findOrFail(serverId)
+    const server = await Server.findOrFail(serverId).catch(() => {
+      throw new ServerNotFoundException('Server not found', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
 
     if (server.visibility === 'private') {
       throw new PrivateServerException('Server is private', {

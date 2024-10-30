@@ -1,9 +1,9 @@
 import Server from '#apps/servers/models/server'
-import User from '#apps/users/models/user'
-import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
-import StorageService from '#apps/storage/services/storage_service'
-import { inject } from '@adonisjs/core'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
+import StorageService from '#apps/storage/services/storage_service'
+import User from '#apps/users/models/user'
+import { inject } from '@adonisjs/core'
+import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
 
 @inject()
 export default class ServerService {
@@ -107,11 +107,6 @@ export default class ServerService {
     await server.save()
   }
 
-  async join(serverId: string, userId: string): Promise<Server> {
-    const server = await Server.findOrFail(serverId)
-    await server.related('users').attach([userId])
-    return server
-  }
   async discover(page: number = 1, limit: number = 10): Promise<Server[]> {
     const pageServers = await Server.query().where('visibility', 'public').paginate(page, limit)
     return pageServers.all()

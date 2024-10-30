@@ -1,2 +1,1 @@
-export default class RoleService {
-}
+export default class RoleService {}

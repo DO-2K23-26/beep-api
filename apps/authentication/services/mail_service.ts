@@ -5,8 +5,8 @@ import mail from '@adonisjs/mail/services/main'
 import AuthenticationService from './authentication_service.js'
 import { inject } from '@adonisjs/core'
 import { ResetPasswordValidator } from '#apps/authentication/validators/authentication'
-import UserNotFoundException from '../exceptions/user_not_found_exception.js'
 import logger from '@adonisjs/core/services/logger'
+import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
 @inject()
 export default class MailService {
   constructor(private authenticationService: AuthenticationService) {}

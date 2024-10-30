@@ -21,6 +21,8 @@ export default class ServerInvitationsController {
     return invitation
   }
 
+  // [DEPRECATED]
+  // Use ServerController.joinPrivate instead
   async joinPrivate({ auth, params }: HttpContext) {
     const userPayload = auth.use('jwt').payload as Payload
     const invitationId = params.invitationId
@@ -28,7 +30,8 @@ export default class ServerInvitationsController {
     return invitation
   }
 
-  //permet à un utilisateur de rejoindre un serveur
+  // [DEPRECATED]
+  // Use ServerController.joinPublic instead
   async joinPublic({ auth, response, params }: HttpContext) {
     const userPayload = auth.use('jwt').payload as Payload
     const serverId = params.serverId

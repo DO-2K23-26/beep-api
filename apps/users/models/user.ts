@@ -12,6 +12,7 @@ import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 import Token from './token.js'
 import Invitation from '#apps/invitations/models/invitation'
+import Member from '#apps/members/models/member'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -47,6 +48,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
     pivotTable: 'channels_users',
   })
   declare channels: ManyToMany<typeof Channel>
+
+  @hasMany(() => Member)
+  declare members: HasMany<typeof Member>
 
   @manyToMany(() => Server, {
     pivotTable: 'servers_users',

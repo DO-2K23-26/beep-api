@@ -1,20 +1,24 @@
-import User from '#apps/users/models/user'
+import { MemberFromFactory } from '#database/factories/member_factory'
+import { ServerFactory } from '#database/factories/server_factory'
+import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
 test.group('Users servers list', () => {
-  test('must return the user\'s list of servers', async ({ assert, client }) => {
-    const user = await User.findByOrFail('username', 'nathael')
+  test("must return the user's list of servers", async ({ assert, client }) => {
+    const user = await UserFactory.make()
+    const server = await ServerFactory.make()
+    await MemberFromFactory(server.id, user.id).make()
 
     const response = await client.get('/v1/users/@me/servers').loginAs(user)
     response.assertStatus(200)
 
     assert.isArray(response.body())
     assert.lengthOf(response.body(), 1)
-    assert.equal(response.body()[0].name, 'Test[01]')
+    assert.equal(response.body()[0].name, server.name)
   }).tags(['users:servers', 'users'])
 
   test('must return 200 if the user is logged in', async ({ assert, client }) => {
-    const user = await User.firstOrFail()
+    const user = await UserFactory.make()
 
     const response = await client.get('/v1/users/@me/servers').loginAs(user)
     response.assertStatus(200)

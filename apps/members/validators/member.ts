@@ -8,7 +8,7 @@ import { Infer } from '@vinejs/vine/types'
 export const createMemberValidator = vine.compile(
   vine.object({
     nick: vine.string().trim(),
-    roles: vine.array(vine.string())
+    roles: vine.array(vine.string()),
   })
 )
 
@@ -16,9 +16,7 @@ export const createMemberValidator = vine.compile(
  * Validator to validate the payload when updating
  * an existing member.ts.
  */
-export const updateMemberValidator = vine.compile(
-  vine.object({})
-)
+export const updateMemberValidator = vine.compile(vine.object({}))
 
 export type CreateMembersSchema = Infer<typeof createMemberValidator>
 export type UpdateMembersSchema = Infer<typeof updateMemberValidator>

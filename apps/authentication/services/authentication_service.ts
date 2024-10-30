@@ -1,5 +1,6 @@
 import { CreateAuthenticationSchema } from '#apps/authentication/validators/authentication'
 import { UpdatePasswordValidator } from '#apps/authentication/validators/verify'
+import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
 import Token from '#apps/users/models/token'
 import User from '#apps/users/models/user'
 import env from '#start/env'
@@ -69,7 +70,12 @@ export default class AuthenticationService {
   async verifyEmail(token: string): Promise<boolean> {
     const tokenEntity = await Token.query().where('token', token).firstOrFail()
 
-    const user = await User.findOrFail(tokenEntity.ownerId)
+    const user = await User.findOrFail(tokenEntity.ownerId).catch(() => {
+      throw new UserNotFoundException('User not found', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
 
     if (user.verifiedAt !== null) return true
 
@@ -92,7 +98,9 @@ export default class AuthenticationService {
 
   async verifyResetPassword(token: string, newPassword: string): Promise<boolean> {
     const tokenEntity = await Token.query().where('token', token).firstOrFail()
-    const user = await User.findOrFail(tokenEntity.ownerId)
+    const user = await User.findOrFail(tokenEntity.ownerId).catch(() => {
+      throw new UserNotFoundException()
+    })
 
     if (tokenEntity.desactivatedAt < DateTime.now()) return false
 

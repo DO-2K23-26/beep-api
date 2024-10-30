@@ -7,10 +7,8 @@ export default class extends BaseSchema {
     this.schema.dropTableIfExists('role_permissions')
     this.schema.dropTableIfExists('member_roles')
 
-
     this.schema.alterTable('members', (table) => {
       table.dropColumn('id')
-
     })
 
     this.schema.alterTable('members', (table) => {
@@ -31,9 +29,9 @@ export default class extends BaseSchema {
   }
 
   async down(): Promise<void> {
-    this.schema.createTable('role_user', () => { })
-    this.schema.createTable('role_permissions', () => { })
-    this.schema.createTable('member_roles', () => { })
+    this.schema.createTable('role_user', () => {})
+    this.schema.createTable('role_permissions', () => {})
+    this.schema.createTable('member_roles', () => {})
 
     this.schema.dropTableIfExists(this.tableName)
   }

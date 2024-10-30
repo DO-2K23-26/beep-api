@@ -11,9 +11,11 @@ router
       .group(() => {
         router.get('/', [UsersController, 'index'])
 
-        router.group(() => {
-          router.get('/servers', [UserServersController, 'index'])
-        }).prefix('/@me')
+        router
+          .group(() => {
+            router.get('/servers', [UserServersController, 'index'])
+          })
+          .prefix('/@me')
       })
       .prefix('/v1/users')
 

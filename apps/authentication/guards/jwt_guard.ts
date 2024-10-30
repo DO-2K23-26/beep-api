@@ -16,7 +16,8 @@ export interface JwtPayloadContract extends JwtPayload {
 }
 
 export class JwtGuard<UserProvider extends UserProviderContract<User>>
-  implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]> {
+  implements GuardContract<UserProvider[typeof symbols.PROVIDER_REAL_USER]>
+{
   declare [symbols.GUARD_KNOWN_EVENTS]: object
   #userProvider: UserProvider
   #options: JwtGuardOptions
@@ -51,7 +52,7 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
           .toMillis() / 1000
       ),
       resource_access: {
-        roles: [],//user.roles.map((role: Role) => role.label),
+        roles: [], //user.roles.map((role: Role) => role.label),
       },
       username: user.username,
       firstName: user.firstName,
@@ -138,7 +139,6 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
     return null
   }
 
-
   async createPayload(user: UserProvider[typeof symbols.PROVIDER_REAL_USER], roles: string[]) {
     return {
       sub: user.id,
@@ -162,7 +162,7 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
 
   async authenticateAsClient(
     user: UserProvider[typeof symbols.PROVIDER_REAL_USER],
-    roles: string[],
+    roles: string[]
   ): Promise<AuthClientResponse> {
     const payload = await this.createPayload(user, roles)
 
@@ -173,7 +173,7 @@ export class JwtGuard<UserProvider extends UserProviderContract<User>>
     return {
       headers: {
         Authorization: `Bearer ${token}`,
-      }
+      },
     }
   }
 

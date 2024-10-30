@@ -24,7 +24,7 @@ export default class AuthenticationController {
     private authenticationService: AuthenticationService,
     private mailService: MailService,
     private userService: UserService
-  ) { }
+  ) {}
 
   async signin({ request, response, auth }: HttpContext) {
     const { email, password } = await request.validateUsing(signinAuthenticationValidator)

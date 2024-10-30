@@ -1,4 +1,3 @@
-
 import PermissionResolver from '#apps/shared/services/permissions/permission_resolver'
 import User from '#apps/users/models/user'
 import { allowGuest, BasePolicy } from '@adonisjs/bouncer'
@@ -8,9 +7,7 @@ import { JwtPayload } from 'jsonwebtoken'
 
 @inject()
 export default class UserPolicy extends BasePolicy {
-  constructor(
-    protected permissionResolver: PermissionResolver,
-  ) {
+  constructor(protected permissionResolver: PermissionResolver) {
     super()
   }
 
@@ -23,9 +20,7 @@ export default class UserPolicy extends BasePolicy {
   }
 
   async view(payload: JwtPayload): Promise<AuthorizerResponse> {
-    return this.permissionResolver
-      .createResolve(payload.resource_access)
-      .verifyAccess('view-users')
+    return this.permissionResolver.createResolve(payload.resource_access).verifyAccess('view-users')
   }
 
   async store(payload: JwtPayload): Promise<AuthorizerResponse> {
@@ -35,9 +30,7 @@ export default class UserPolicy extends BasePolicy {
   }
 
   async delete(payload: JwtPayload): Promise<AuthorizerResponse> {
-    return this.permissionResolver
-      .createResolve(payload.resource_access)
-      .verifyAccess('view-users')
+    return this.permissionResolver.createResolve(payload.resource_access).verifyAccess('view-users')
   }
 
   @allowGuest()
