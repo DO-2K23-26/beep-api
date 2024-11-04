@@ -9,7 +9,7 @@ export const MemberFactory = factory
     const user = await UserFactory.make()
 
     return Member.create({
-      nickname: faker.internet.userName(),
+      nickname: faker.internet.username(),
       avatar: faker.image.avatar(),
       deaf: false,
       mute: false,
@@ -26,7 +26,7 @@ export const MemberFactoryWithServer = (serverId: string) =>
       const user = await UserFactory.make()
 
       return Member.create({
-        nickname: faker.internet.userName(),
+        nickname: faker.internet.username(),
         avatar: faker.image.avatar(),
         deaf: false,
         mute: false,
@@ -45,7 +45,7 @@ export const MemberFactoryWithUser = (userId: string) =>
       const server = await ServerFactory.make()
 
       return Member.create({
-        nickname: faker.internet.userName(),
+        nickname: faker.internet.username(),
         avatar: faker.image.avatar(),
         deaf: false,
         mute: false,
@@ -60,7 +60,7 @@ export const MemberFromFactory = (serverId: string, userId: string) =>
   factory
     .define(Member, async ({ faker }) => {
       return Member.create({
-        nickname: faker.internet.userName(),
+        nickname: faker.internet.username(),
         avatar: faker.image.avatar(),
         deaf: false,
         mute: false,

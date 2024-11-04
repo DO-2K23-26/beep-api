@@ -29,7 +29,6 @@ export default class AuthenticationController {
   async signin({ request, response, auth }: HttpContext) {
     const { email, password } = await request.validateUsing(signinAuthenticationValidator)
     const user = await User.verifyCredentials(email.toLocaleLowerCase(), password)
-    //await user.load('roles')
 
     const tokens = await auth.use('jwt').generate(user)
 
@@ -73,7 +72,6 @@ export default class AuthenticationController {
       return response.status(403).send({ message: 'A user already exists with this username.' })
 
     const user: User = await this.authenticationService.registerUser(schemaUser)
-    await user.load('roles')
     await this.mailService.sendSignUpMail(user)
 
     if (schemaUser.profilePicture) {
@@ -84,7 +82,7 @@ export default class AuthenticationController {
       await user.save()
     }
 
-    return { user }
+    return response.status(201).send(user)
   }
 
   async refresh({ response, request, auth }: HttpContext) {

@@ -10,7 +10,7 @@ export const UserFactory = factory
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       serialNumber: faker.number.int().toString(),
-      username: faker.internet.userName(),
+      username: faker.internet.username(),
       verifiedAt: DateTime.now(),
       profilePicture: faker.image.avatarGitHub(),
     })
