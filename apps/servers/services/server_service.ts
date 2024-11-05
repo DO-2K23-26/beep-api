@@ -1,9 +1,12 @@
 import Server from '#apps/servers/models/server'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import StorageService from '#apps/storage/services/storage_service'
+import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
 import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
+import Member from '#apps/members/models/member'
+import ServerAlreadyExistsException from '../exceptions/server_already_exists_exception.js'
 
 @inject()
 export default class ServerService {
@@ -33,29 +36,41 @@ export default class ServerService {
   ): Promise<Server> {
     const checkIfServerExists = await Server.query().where('name', name).first()
     if (checkIfServerExists) {
-      throw new Error('Server already exists')
+      throw new ServerAlreadyExistsException('Server already exists', {
+        status: 400,
+        code: 'E_SERVER_ALREADY_EXISTS',
+      })
     }
 
+    const user = await User.findOrFail(ownerId).catch(() => {
+      throw new UserNotFoundException('User not found', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
     const sn = generateSnowflake()
     const server = await Server.create({
       banner: '',
       icon: '',
       name: name,
-      description: description,
+      description: description ?? '',
       visibility: visibility as 'public' | 'private',
       ownerId: ownerId,
       serialNumber: sn,
+    })
+    Member.create({
+      userId: ownerId,
+      serverId: server.id,
+      avatar: user.profilePicture,
+      nickname: user.username,
     })
 
     let path: string | null = null
 
     if (icon) {
       path = await this.storageService.updatePicture(icon, server.id)
-    } else {
-      throw new Error('No icon provided')
+      server.icon = path
     }
-
-    server.icon = path
 
     return server.save()
   }

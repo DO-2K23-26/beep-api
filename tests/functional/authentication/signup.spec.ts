@@ -13,7 +13,6 @@ test.group('Authentication signup', () => {
     const result = await client.post('/authentication/signup').json(payload)
 
     result.assertStatus(201)
-    expect(result.body())
     expect(result.body()).toEqual(
       expect.objectContaining({
         username: payload.username,

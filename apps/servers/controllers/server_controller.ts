@@ -1,23 +1,19 @@
 import { Payload } from '#apps/authentication/contracts/payload'
 import ServerService from '#apps/servers/services/server_service'
-import { inject } from '@adonisjs/core'
-import type { HttpContext } from '@adonisjs/core/http'
 import {
-  indexServerValidator,
   createServerValidator,
-  updateServerValidator,
+  indexServerValidator,
   updateBannerValidator,
   updatePictureValidator,
+  updateServerValidator,
 } from '#apps/servers/validators/server'
+import { inject } from '@adonisjs/core'
+import type { HttpContext } from '@adonisjs/core/http'
 import ServerPolicy from '../policies/server_policy.js'
-import InvitationService from '#apps/invitations/services/invitation_service'
 
 @inject()
 export default class ServersController {
-  constructor(
-    private serverService: ServerService,
-    private invitationService: InvitationService
-  ) {}
+  constructor(private serverService: ServerService) {}
 
   /**
    * Display a list of resource
@@ -54,12 +50,11 @@ export default class ServersController {
   /**
    * Handle form submission for the create action
    */
-  async store({ auth, request }: HttpContext) {
+  async store({ auth, request, response }: HttpContext) {
     const payload = await request.validateUsing(createServerValidator)
     const userPayload = auth.use('jwt').payload as Payload
     const server = await this.serverService.create(payload, userPayload.sub)
-    await this.invitationService.join(userPayload.sub.toString(), server.id)
-    return server
+    return response.status(201).send(server)
   }
 
   /**
