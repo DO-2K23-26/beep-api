@@ -9,6 +9,7 @@ import logger from '@adonisjs/core/services/logger'
 import jwt from 'jsonwebtoken'
 import { DateTime } from 'luxon'
 import crypto from 'node:crypto'
+import redis from '@adonisjs/redis/services/main'
 
 export default class AuthenticationService {
   DEFAULT_PP_URL = 'default_profile_picture.png'
@@ -110,5 +111,12 @@ export default class AuthenticationService {
     await user.save()
 
     return true
+  }
+
+  async generateQRCodeToken() {
+    const token = crypto.randomBytes(100).toString('hex')
+    await redis.set(`qr-code:${token}`, 'false', 'EX', 300)
+
+    return token
   }
 }

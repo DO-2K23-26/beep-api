@@ -158,4 +158,10 @@ export default class AuthenticationController {
 
     return response.status(200).send({ message: 'Your password has been updated.' })
   }
+
+  async generateQRCodeToken({ response }: HttpContext) {
+    const token = await this.authenticationService.generateQRCodeToken()
+
+    return response.status(200).send({ token: token })
+  }
 }
