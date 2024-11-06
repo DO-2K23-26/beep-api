@@ -10,7 +10,7 @@ export const createServerValidator = vine.compile(
   vine.object({
     name: vine.string().minLength(1),
     visibility: vine.string().in(['public', 'private']),
-    icon: new VineMultipartFile().nullable().optional(),
+    icon: vine.file().optional().nullable(),
     description: vine.string().optional(),
   })
 )

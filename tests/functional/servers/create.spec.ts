@@ -4,9 +4,8 @@ import { test } from '@japa/runner'
 test.group('Servers create', () => {
   test('must return a 201 when create', async ({ client, expect }) => {
     const payload = {
-      name: 'My Server',
+      name: 'My Server 123',
       visibility: 'public',
-      icon: null,
       description: 'This is a test server',
     }
     const user = await UserFactory.make()

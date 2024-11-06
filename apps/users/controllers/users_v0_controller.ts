@@ -1,15 +1,15 @@
-import { type HttpContext } from '@adonisjs/core/http'
-import { inject } from '@adonisjs/core'
-import UserService from '#apps/users/services/user_service'
-import UserPolicy from '#apps/users/policies/user_policy'
+import AuthenticationService from '#apps/authentication/services/authentication_service'
 import User from '#apps/users/models/user'
+import UserPolicy from '#apps/users/policies/user_policy'
+import UserService from '#apps/users/services/user_service'
 import {
   confirmEmailUpdateValidator,
   emailUpdateValidator,
   getMultipleUserValidator,
   updateUserValidator,
 } from '#apps/users/validators/users'
-import AuthenticationService from '#apps/authentication/services/authentication_service'
+import { inject } from '@adonisjs/core'
+import { type HttpContext } from '@adonisjs/core/http'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 import { JwtPayload } from 'jsonwebtoken'
@@ -53,6 +53,7 @@ export default class UsersController {
     return response.send({
       id: user.id,
       username: user.username,
+      profilePicture: user.profilePicture,
     })
   }
 

@@ -54,7 +54,7 @@ export default class ServersController {
     const payload = await request.validateUsing(createServerValidator)
     const userPayload = auth.use('jwt').payload as Payload
     const server = await this.serverService.create(payload, userPayload.sub)
-    return response.status(201).send(server)
+    return response.created(server)
   }
 
   /**
