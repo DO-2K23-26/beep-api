@@ -124,18 +124,43 @@ export default class AuthenticationService {
     return token
   }
 
-  async validateQRCodeToken(token: string, tokens: { accessToken: string; refreshToken: string }): Promise<boolean> {
+  async validateQRCodeToken(
+    token: string,
+    jwts: { accessToken: string; refreshToken: string }
+  ): Promise<boolean> {
     const isValid = await redis.get(`qr-code:${token}`)
 
     if (isValid === 'pending') {
       await redis.set(`qr-code:${token}`, 'validated', 'EX', 300)
-      await redis.set(`qr-code:${token}:accessToken`, `${tokens.refreshToken}`, 'EX', 300)
-      await redis.set(`qr-code:${token}:refreshToken`, `${tokens.refreshToken}`, 'EX', 300)
+      await redis.set(`qr-code:${token}:accessToken`, `${jwts.accessToken}`, 'EX', 300)
+      await redis.set(`qr-code:${token}:refreshToken`, `${jwts.refreshToken}`, 'EX', 300)
 
-      transmit.broadcast(`qr-code/${token}`, "success")
+      transmit.broadcast(`qr-code/${token}`, 'success')
       return true
     }
 
     return false
+  }
+
+  async retrieveQRCodeJWTs(
+    token: string
+  ): Promise<{ accessToken: string; refreshToken: string } | null> {
+    const isValid = await redis.get(`qr-code:${token}`)
+    if (isValid !== 'validated') {
+      return null
+    }
+
+    const accessToken = (await redis.get(`qr-code:${token}:accessToken`)) ?? ''
+    const refreshToken = (await redis.get(`qr-code:${token}:refreshToken`)) ?? ''
+
+    await redis.del(`qr-code:${token}`)
+    await redis.del(`qr-code:${token}:accessToken`)
+    await redis.del(`qr-code:${token}:refreshToken`)
+
+    if (!accessToken || !refreshToken) {
+      return null
+    }
+
+    return { accessToken, refreshToken }
   }
 }

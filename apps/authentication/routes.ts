@@ -13,6 +13,7 @@ router
     router.post('/reset-password', [AuthenticationController, 'sendResetPasswordEmail'])
     router.post('/verify-reset-password', [AuthenticationController, 'verifyResetPassword'])
     router.post('/qr-code/:token', [AuthenticationController, 'validateQRCodeToken'])
+    router.get('/qr-code/:token', [AuthenticationController, 'retrieveQRCodeJWTs'])
     router.get('/qr-code', [AuthenticationController, 'generateQRCodeToken'])
 
     router

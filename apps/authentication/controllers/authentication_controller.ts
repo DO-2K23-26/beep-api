@@ -140,7 +140,7 @@ export default class AuthenticationController {
     await this.mailService.sendSignUpMail(user)
 
     return response.send({
-      message: 'mail send',
+      message: 'mail sende',
     })
   }
 
@@ -188,10 +188,21 @@ export default class AuthenticationController {
   async validateQRCodeToken({ auth, response, params, request }: HttpContext) {
     const refreshToken = request.cookie('beep.refresh_token')
     if (!refreshToken) return response.status(401).send({ isValid: false })
-    const tokens = await this.getTokens(refreshToken, auth)
+    const jwts = await this.getTokens(refreshToken, auth)
     const token = params.token
-    const isValid = await this.authenticationService.validateQRCodeToken(token, tokens)
+    const isValid = await this.authenticationService.validateQRCodeToken(token, jwts)
 
-    return isValid ? response.status(200).send({ isValid: true }) : response.status(401).send({ isValid: false })
+    return isValid
+      ? response.status(200).send({ isValid: true })
+      : response.status(401).send({ isValid: false })
+  }
+
+  async retrieveQRCodeJWTs({ response, params }: HttpContext) {
+    const token = params.token
+
+    const jwts = await this.authenticationService.retrieveQRCodeJWTs(token)
+    if (!jwts) return response.status(401).send({ isValid: false })
+
+    return response.status(200).send({ isValid: true, ...jwts })
   }
 }
