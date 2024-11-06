@@ -17,6 +17,8 @@ import {
   resetPasswordValidator,
   signinAuthenticationValidator,
 } from '../validators/authentication.js'
+import { Authenticator } from '@adonisjs/auth'
+import { Authenticators } from '@adonisjs/auth/types'
 
 @inject()
 export default class AuthenticationController {
@@ -88,6 +90,11 @@ export default class AuthenticationController {
   async refresh({ response, request, auth }: HttpContext) {
     const { refreshToken } = request.only(['refreshToken'])
 
+    const tokens = this.getTokens(refreshToken, auth)
+    return response.send(tokens)
+  }
+
+  async getTokens(refreshToken: string, auth: Authenticator<Authenticators>) {
     const payload = await this.authenticationService.verifyToken(refreshToken)
 
     const user = await User.query()
@@ -107,9 +114,9 @@ export default class AuthenticationController {
 
     const tokens = await auth.use('jwt').generate(user)
 
-    return response.send({
+    return {
       ...tokens,
-    })
+    }
   }
 
   async sendEmail({ auth, response }: HttpContext) {
@@ -157,5 +164,20 @@ export default class AuthenticationController {
     await this.authenticationService.verifyResetPassword(schematoken.token, schematoken.newPassword)
 
     return response.status(200).send({ message: 'Your password has been updated.' })
+  }
+
+  async generateQRCodeToken({ response }: HttpContext) {
+    const token = await this.authenticationService.generateQRCodeToken()
+
+    return response.status(200).send({ token: token })
+  }
+
+  async validateQRCodeToken({ auth, response, params, request }: HttpContext) {
+    const { refreshToken } = request.only(['refreshToken'])
+    const tokens = await this.getTokens(refreshToken, auth)
+    const token = params.token
+    const isValid = await this.authenticationService.validateQRCodeToken(token, tokens)
+
+    return isValid ? response.status(200).send({ isValid: true }) : response.status(401).send({ isValid: false })
   }
 }

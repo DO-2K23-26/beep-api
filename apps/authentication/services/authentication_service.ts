@@ -9,6 +9,8 @@ import logger from '@adonisjs/core/services/logger'
 import jwt from 'jsonwebtoken'
 import { DateTime } from 'luxon'
 import crypto from 'node:crypto'
+import redis from '@adonisjs/redis/services/main'
+import transmit from '@adonisjs/transmit/services/main'
 
 export default class AuthenticationService {
   DEFAULT_PP_URL = 'default_profile_picture.png'
@@ -110,5 +112,27 @@ export default class AuthenticationService {
     await user.save()
 
     return true
+  }
+
+  async generateQRCodeToken() {
+    const token = crypto.randomBytes(100).toString('hex')
+    await redis.set(`qr-code:${token}`, 'pending', 'EX', 300)
+
+    return token
+  }
+
+  async validateQRCodeToken(token: string, tokens: { accessToken: string; refreshToken: string }): Promise<boolean> {
+    const isValid = await redis.get(`qr-code:${token}`)
+
+    if (isValid === 'pending') {
+      await redis.set(`qr-code:${token}`, 'validated', 'EX', 300)
+      await redis.set(`qr-code:${token}:accessToken`, `${tokens.refreshToken}`, 'EX', 300)
+      await redis.set(`qr-code:${token}:refreshToken`, `${tokens.refreshToken}`, 'EX', 300)
+
+      transmit.broadcast(`qr-code/${token}`, "validated")
+      return true
+    }
+
+    return false
   }
 }
