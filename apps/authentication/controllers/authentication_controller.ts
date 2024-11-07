@@ -46,6 +46,9 @@ export default class AuthenticationController {
       message: 'update user connected',
     })
 
+    response.cookie('beep.access_token', tokens.accessToken)
+    response.cookie('beep.refresh_token', tokens.refreshToken)
+
     return response.send({
       user,
       tokens,
@@ -86,7 +89,11 @@ export default class AuthenticationController {
   }
 
   async refresh({ response, request, auth }: HttpContext) {
-    const { refreshToken } = request.only(['refreshToken'])
+    let { refreshToken } = request.only(['refreshToken'])
+
+    if (!refreshToken) {
+      refreshToken = request.cookie('beep.refresh_token')
+    }
 
     const payload = await this.authenticationService.verifyToken(refreshToken)
 
@@ -106,6 +113,9 @@ export default class AuthenticationController {
     )
 
     const tokens = await auth.use('jwt').generate(user)
+
+    response.cookie('beep.access_token', tokens.accessToken)
+    response.cookie('beep.refresh_token', tokens.refreshToken)
 
     return response.send({
       ...tokens,

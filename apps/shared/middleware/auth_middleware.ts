@@ -11,7 +11,7 @@ export default class AuthMiddleware {
   /**
    * The URL to redirect to, when authentication fails
    */
-  redirectTo = '/login'
+  redirectTo = '/authentication/signin'
 
   async userIsAudited(jwt: JwtPayloadContract) {
     if (!jwt.audited_account) {
