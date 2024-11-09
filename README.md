@@ -10,6 +10,7 @@ The Beep API is the backend of the Beep app.
 4. [Routing description](#routing-description)
 5. [Start the app in development mode](#start-the-app-in-development-mode)
 6. [Husky pre-commit hooks](#pre-commit-with-husky)
+7. [Launching tests](#launching-tests)
 
 ## Technologies used
 
@@ -129,3 +130,29 @@ In our project, the pre-commit hook runs a series of commands to guarantee code 
 - `pnpm run typescript`: Verifies types to ensure that the code complies with the defined TypeScript types.
 
 > **Note**: If `pnpm run prettier` fails, you can run `pnpm run format` to automatically fix the formatting.
+
+## Launching Test
+
+If you have your docker compose for the backend up please execute:
+
+```bash
+docker compose down
+```
+
+Launch data base test:
+
+```bash
+docker compose -f docker-compose-test.yml up -d
+```
+
+Launch tests:
+
+```bash
+pnpm test
+```
+
+If you want to down the docker compose for tests:
+
+```bash
+docker compose -f docker-compose-test.yml down
+```

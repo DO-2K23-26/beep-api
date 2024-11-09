@@ -60,10 +60,7 @@ export const joinChannelValidator = vine.compile(
   })
 )
 
-export type CreateChannelSchema = {
-  name: string
-  type: 'voice' | 'text'
-}
+export type CreateChannelSchema = Infer<typeof createChannelValidator>
 export type UpdateChannelSchema = Infer<typeof updateChannelValidator>
 export type ShowChannelSchema = Infer<typeof showChannelValidator>
 export type SubscribeChannelSchema = Infer<typeof joinChannelValidator>

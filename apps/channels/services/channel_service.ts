@@ -16,6 +16,9 @@ import { generateSnowflake } from '#apps/shared/services/snowflake'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
 import logger from '@adonisjs/core/services/logger'
+import ChannelNotFoundException from '#apps/channels/exceptions/channel_not_found_exception'
+import Server from '#apps/servers/models/server'
+import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
 
 export interface PayloadJWTSFUConnection {
   channelSn?: string
@@ -64,7 +67,11 @@ export default class ChannelService {
   }
 
   async findAllByServer(serverId: string): Promise<Channel[]> {
-    return Channel.query().where('server_id', serverId)
+    const server = await Server.findOrFail(serverId).catch(() => {
+      throw new ServerNotFoundException('Server not found', { status: 404, code: 'E_ROWNOTFOUND' })
+    })
+    await server.load('channels')
+    return server.channels
   }
 
   async create(
@@ -73,13 +80,27 @@ export default class ChannelService {
     userId: string
   ): Promise<Channel> {
     const sn = generateSnowflake()
-    const channel = await Channel.create({ ...newChannel, serverId: serverId, serialNumber: sn })
+    const type = newChannel.type as 'voice' | 'text'
+    const channel = await Channel.create({
+      name: newChannel.name,
+      type: type,
+      serverId: serverId,
+      serialNumber: sn,
+    })
     await channel.related('users').attach([userId])
     return channel
   }
 
   async update(id: string, payload: UpdateChannelSchema): Promise<Channel> {
-    return Channel.updateOrCreate({ id }, payload)
+    const channel = await Channel.findOrFail(id).catch(() => {
+      throw new ChannelNotFoundException('Channel not found', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
+    channel.merge(payload)
+
+    return channel.save()
   }
 
   async deleteById(channelId: string): Promise<void> {

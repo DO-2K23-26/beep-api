@@ -4,17 +4,19 @@ import { createChannelValidator, updateChannelValidator } from '#apps/channels/v
 import { mutedValidator } from '#apps/users/validators/muted_validator'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-
+import ServerChannelPolicy from '#apps/servers/policies/server_channel_policy'
 @inject()
 export default class ServerChannelsController {
   constructor(private channelService: ChannelService) {}
 
   //recupere les channels d'un server
-  async findByServerId({ params }: HttpContext) {
+  async findByServerId({ params, bouncer }: HttpContext) {
+    await bouncer.with(ServerChannelPolicy).authorize('view' as never, params.serverId)
     return this.channelService.findAllByServer(params.serverId)
   }
 
-  async findByChannelId({ params }: HttpContext) {
+  async findByChannelId({ params, bouncer }: HttpContext) {
+    await bouncer.with(ServerChannelPolicy).authorize('view' as never, params.serverId)
     return this.channelService.findById({
       params: { id: params.channelId as string },
       messages: undefined,
@@ -23,27 +25,21 @@ export default class ServerChannelsController {
   }
 
   // Creates a channel in a server
-  async createChannel({ auth, request, params }: HttpContext) {
+  async createChannel({ auth, request, params, response, bouncer }: HttpContext) {
     const receivedChannel = await request.validateUsing(createChannelValidator)
-    const type = receivedChannel.type as 'voice' | 'text'
+    await bouncer.with(ServerChannelPolicy).authorize('create' as never, params.serverId)
     const userPayload = auth.use('jwt').payload as Payload
     const serverId = params.serverId
-    const channel = await this.channelService.create(
-      { name: receivedChannel.name, type: type },
-      serverId,
-      userPayload.sub
-    )
-    return channel
+    const channel = await this.channelService.create(receivedChannel, serverId, userPayload.sub)
+    return response.created(channel)
   }
 
   // Updates a chan (name, description...)
-  async updateChannel({ request, params }: HttpContext) {
+  async updateChannel({ request, params, response, bouncer }: HttpContext) {
     const receivedChannel = await request.validateUsing(updateChannelValidator)
-    const channel = await this.channelService.update(params.channelId, {
-      name: receivedChannel.name,
-      description: receivedChannel.description,
-    })
-    return channel // Returns the updated channel.
+    await bouncer.with(ServerChannelPolicy).authorize('update' as never, params.serverId)
+    const channel = await this.channelService.update(params.channelId, receivedChannel)
+    return response.send(channel)
   }
 
   // Deletes a channel from a server

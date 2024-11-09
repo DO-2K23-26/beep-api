@@ -99,7 +99,10 @@ export default class AuthenticationService {
   async verifyResetPassword(token: string, newPassword: string): Promise<boolean> {
     const tokenEntity = await Token.query().where('token', token).firstOrFail()
     const user = await User.findOrFail(tokenEntity.ownerId).catch(() => {
-      throw new UserNotFoundException()
+      throw new UserNotFoundException('User not found', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
     })
 
     if (tokenEntity.desactivatedAt < DateTime.now()) return false

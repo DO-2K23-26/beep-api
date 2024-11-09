@@ -43,7 +43,12 @@ export default class MessageService {
     if (isPinnning !== message.pinned) {
       message.pinned = isPinnning
       await this.create(
-        { content: displayedMessage, attachments: undefined, parentMessageId: undefined },
+        {
+          content: displayedMessage,
+          attachments: undefined,
+          parentMessageId: undefined,
+          transmitClientId: undefined,
+        },
         userId,
         message.channelId
       )
@@ -59,7 +64,8 @@ export default class MessageService {
 
   async create(message: CreateMessagesSchema, ownerId: string, channelId: string) {
     const createdMessage = await Message.create({
-      ...message,
+      content: message.content,
+      parentMessageId: message.parentMessageId,
       ownerId: ownerId,
       channelId: channelId,
     })
@@ -78,11 +84,10 @@ export default class MessageService {
       message: createdMessage,
       action: ActionSignalMessage.create,
     }
-    transmit.broadcastExcept(
-      `channels/${channelId}/messages`,
-      JSON.stringify(signalMessage),
-      ownerId
-    )
+    if (message.transmitClientId !== undefined) {
+      signalMessage.transmitClientId = message.transmitClientId
+    }
+    transmit.broadcast(`channels/${channelId}/messages`, JSON.stringify(signalMessage))
     return createdMessage
   }
 

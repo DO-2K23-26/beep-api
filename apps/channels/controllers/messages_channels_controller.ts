@@ -68,7 +68,7 @@ export default class MessagesChannelsController {
     }
     const newMessage = await this.messageService.create(data, payload!.sub as string, channelId)
 
-    return newMessage
+    return response.created(newMessage)
   }
 
   /**

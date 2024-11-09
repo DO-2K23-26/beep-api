@@ -17,7 +17,7 @@ test.group('Servers create', () => {
         description: payload.description,
       })
     )
-  })
+  }).tags(['servers:create'])
   test('must add the use creating the server as member', async ({ client, expect }) => {
     const payload = {
       name: 'My Server 2',
@@ -38,7 +38,7 @@ test.group('Servers create', () => {
         userId: user.id,
       })
     )
-  })
+  }).tags(['servers:create'])
   test('must return a 201 when creating a server without description', async ({ client }) => {
     const user = await UserFactory.make()
     const payload = {
@@ -48,7 +48,16 @@ test.group('Servers create', () => {
     }
     const result = await client.post('/servers').json(payload).loginAs(user)
     result.assertStatus(201)
-  })
+  }).tags(['servers:create'])
+  test('must return a 401 when not authenticated', async ({ client }) => {
+    const payload = {
+      name: 'My Server 3',
+      visibility: 'public',
+      icon: null,
+    }
+    const result = await client.post('/servers').json(payload)
+    result.assertStatus(401)
+  }).tags(['servers:create'])
   test('must return a 422 when creating a server without name', async ({ client }) => {
     const user = await UserFactory.make()
     const payload = {
@@ -58,5 +67,5 @@ test.group('Servers create', () => {
     }
     const result = await client.post('/servers').json(payload).loginAs(user)
     result.assertStatus(422)
-  })
+  }).tags(['servers:create'])
 })
