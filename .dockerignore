@@ -4,3 +4,14 @@ README.md
 test.ts
 .env
 .env.*
+docker*
+.gitlab-ci.yml
+.prettierignore
+.gitlab/
+.husky/
+helm/
+.vscode/
+architecture.png
+GitVersion.yml
+gitversion-ci-cd-plugin-extension.gitlab-ci.yml
+.editorconfig
