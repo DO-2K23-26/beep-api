@@ -91,7 +91,7 @@ export default class ServersController {
 
   // Retrive all users of a server
   async getAllUsers({ params, bouncer }: HttpContext) {
-    await bouncer.with(ServerPolicy).authorize('show' as never, params.serverId)
+    await bouncer.with(ServerPolicy).authorize('view' as never, params.serverId)
     const serverUsers: Member[] = await this.serverService.findUsersByServerId(params.serverId)
 
     return serverUsers
