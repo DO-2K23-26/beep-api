@@ -81,12 +81,12 @@ export default class ServerService {
     return server.ownerId
   }
 
-  async findUsersByServerId(serverId: string): Promise<User[]> {
+  async findUsersByServerId(serverId: string): Promise<Member[]> {
     // Rechercher le serveur par id et précharger les utilisateurs associés
-    const server = await Server.query().where('id', serverId).preload('users').firstOrFail()
+    const server = await Server.query().where('id', serverId).preload('members').firstOrFail()
 
     // Retourner la liste des utilisateurs
-    return server.users
+    return server.members
   }
 
   // async timeout(serverId: string, userId: string): Promise<void> {

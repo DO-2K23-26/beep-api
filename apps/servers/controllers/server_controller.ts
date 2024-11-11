@@ -10,11 +10,11 @@ import {
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import ServerPolicy from '../policies/server_policy.js'
-import User from '#apps/users/models/user'
+import Member from '#apps/members/models/member'
 
 @inject()
 export default class ServersController {
-  constructor(private serverService: ServerService) { }
+  constructor(private serverService: ServerService) {}
 
   /**
    * Display a list of resource
@@ -88,13 +88,9 @@ export default class ServersController {
   }
 
   // Retrive all users of a server
-  async getAllUsers({ params, auth, response }: HttpContext) {
-    const userPayload = auth.use('jwt').payload as Payload
-    const serverUsers: User[] = await this.serverService.findUsersByServerId(params.serverId)
-
-    if (!serverUsers.find((user) => user.id === userPayload.sub)) {
-      return response.status(403).send({ message: 'You are not allowed to access this server' })
-    }
+  async getAllUsers({ params, bouncer }: HttpContext) {
+    await bouncer.with(ServerPolicy).authorize('show' as never, params.serverId)
+    const serverUsers: Member[] = await this.serverService.findUsersByServerId(params.serverId)
 
     return serverUsers
   }

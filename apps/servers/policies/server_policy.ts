@@ -6,6 +6,8 @@ import { inject } from '@adonisjs/core'
 import { HttpContext } from '@adonisjs/core/http'
 import { JwtPayload } from 'jsonwebtoken'
 import Server from '#apps/servers/models/server'
+import ServerService from '../services/server_service.js'
+import Member from '#apps/members/models/member'
 
 @inject()
 export default class ServerPolicy extends BasePolicy {
@@ -13,10 +15,18 @@ export default class ServerPolicy extends BasePolicy {
 
   constructor(
     protected permissionResolver: PermissionResolver,
+    protected serverService: ServerService,
     protected ctx: HttpContext
   ) {
     super()
     this.payload = ctx.auth.use('jwt').payload! as JwtPayload
+  }
+
+  @allowGuest()
+  async show(_: User, _serverId: string): Promise<AuthorizerResponse> {
+    const serverUsers: Member[] = await this.serverService.findUsersByServerId(_serverId)
+
+    return !!serverUsers.find((user) => user.userId === this.payload.sub)
   }
 
   @allowGuest()
