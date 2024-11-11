@@ -11,6 +11,7 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import ServerPolicy from '../policies/server_policy.js'
 import Member from '#apps/members/models/member'
+import ServerMemberPolicy from '../policies/server_member_policy.js'
 
 @inject()
 export default class ServersController {
@@ -61,7 +62,8 @@ export default class ServersController {
   /**
    * Show individual record
    */
-  async show({ params }: HttpContext) {
+  async show({ params, bouncer }: HttpContext) {
+    await bouncer.with(ServerMemberPolicy).authorize('view' as never, params.serverId)
     return this.serverService.findById(params.serverId)
   }
 

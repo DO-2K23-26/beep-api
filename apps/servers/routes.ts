@@ -31,7 +31,7 @@ router
   .group(() => {
     router
       .group(() => {
-        router.get('/', [ServerController, 'index'])
+        router.get('/', [ServerController, 'index']) // [DEPRECATED]
         router.get('/discover', [ServerController, 'discover'])
         router.post('/', [ServerController, 'store'])
         router.post('/leave', [ServerChannelsController, 'leaveChannel']).prefix('channels')
@@ -65,7 +65,7 @@ router
             router.get('/', [ServerController, 'show'])
             router.patch('/', [ServerController, 'update'])
             router.get('/owner', [ServerController, 'getOwner'])
-            router.get('/users', [ServerController, 'getAllUsers'])
+            router.get('/users', [ServerController, 'getAllUsers']) // [DEPRECATED]
             router.post('/join', [ServerInvitationsController, 'joinPublic'])
             router.get('/streaming/users', [ServerChannelsController, 'streamingUsers'])
             router.delete('/', [ServerController, 'destroy'])
