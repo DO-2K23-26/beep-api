@@ -106,6 +106,8 @@ export default class UserService {
       lastName: undefined,
       email: email,
       profilePicture: undefined,
+      description: undefined,
+      status: undefined,
     }
     return this.update(changeEmailValidator, userId)
   }

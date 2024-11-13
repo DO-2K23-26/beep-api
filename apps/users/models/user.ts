@@ -69,6 +69,14 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 
+  //description of the user 190 char
+  @column()
+  declare description: string
+
+  //status of the user 100 char
+  @column()
+  declare status: string
+
   @hasMany(() => Message)
   declare messages: HasMany<typeof Message>
 

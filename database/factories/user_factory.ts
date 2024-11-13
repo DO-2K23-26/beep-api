@@ -13,6 +13,7 @@ export const UserFactory = factory
       username: faker.internet.username(),
       verifiedAt: DateTime.now(),
       profilePicture: faker.image.avatarGitHub(),
+      description: faker.person.bio(),
     })
   })
   .build()
