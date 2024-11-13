@@ -30,7 +30,9 @@ export const updateUserValidator = vine.compile(
     firstName: vine.string().optional(),
     lastName: vine.string().optional(),
     email: vine.string().email().optional(),
-    profilePicture: vine.file().nullable().optional(),
+    profilePicture: new VineMultipartFile().nullable().optional(),
+    description: vine.string().optional(),
+    status: vine.string().optional(),
   })
 )
 
