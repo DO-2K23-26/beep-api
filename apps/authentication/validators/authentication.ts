@@ -9,6 +9,13 @@ export const signinAuthenticationValidator = vine.compile(
   })
 )
 
+export const signinWithQRCodeAuthenticationValidator = vine.compile(
+  vine.object({
+    token: vine.string(),
+    passKey: vine.string(),
+  })
+)
+
 export const resetPasswordValidator = vine.compile(
   vine.object({
     email: vine.string().email(),

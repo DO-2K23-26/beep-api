@@ -119,48 +119,41 @@ export default class AuthenticationService {
 
   async generateQRCodeToken() {
     const token = crypto.randomBytes(100).toString('hex')
-    await redis.set(`qr-code:${token}`, 'pending', 'EX', 300)
+    await redis.set(`qr-code:${token}`, 'generated', 'EX', 300)
 
     return token
   }
 
-  async validateQRCodeToken(
-    token: string,
-    jwts: { accessToken: string; refreshToken: string }
-  ): Promise<boolean> {
+  async validateQRCodeToken(token: string, userid: string): Promise<boolean> {
     const isValid = await redis.get(`qr-code:${token}`)
-
     if (isValid === 'pending') {
+      const passKey = crypto.randomBytes(50).toString('hex')
       await redis.set(`qr-code:${token}`, 'validated', 'EX', 300)
-      await redis.set(`qr-code:${token}:accessToken`, `${jwts.accessToken}`, 'EX', 300)
-      await redis.set(`qr-code:${token}:refreshToken`, `${jwts.refreshToken}`, 'EX', 300)
-
-      transmit.broadcast(`qr-code/${token}`, 'success')
+      await redis.set(`qr-code:${token}:user`, userid, 'EX', 300)
+      await redis.set(`qr-code:${token}:passkey`, passKey, 'EX', 300)
+      transmit.broadcast(`qr-code/${token}`, `${passKey}`)
       return true
     }
 
     return false
   }
 
-  async retrieveQRCodeJWTs(
-    token: string
-  ): Promise<{ accessToken: string; refreshToken: string } | null> {
+  async retrieveUserQRCode(token: string, passKey: string): Promise<User | null> {
     const isValid = await redis.get(`qr-code:${token}`)
     if (isValid !== 'validated') {
       return null
     }
-
-    const accessToken = (await redis.get(`qr-code:${token}:accessToken`)) ?? ''
-    const refreshToken = (await redis.get(`qr-code:${token}:refreshToken`)) ?? ''
-
-    await redis.del(`qr-code:${token}`)
-    await redis.del(`qr-code:${token}:accessToken`)
-    await redis.del(`qr-code:${token}:refreshToken`)
-
-    if (!accessToken || !refreshToken) {
+    const passKeyStored = await redis.get(`qr-code:${token}:passkey`)
+    if (passKeyStored !== passKey) {
       return null
     }
-
-    return { accessToken, refreshToken }
+    const userId = await redis.get(`qr-code:${token}:user`)
+    await redis.del(`qr-code:${token}:user`)
+    await redis.del(`qr-code:${token}`)
+    await redis.del(`qr-code:${token}:passkey`)
+    const user = await User.findOrFail(userId).catch(() => {
+      throw new UserNotFoundException()
+    })
+    return user
   }
 }
