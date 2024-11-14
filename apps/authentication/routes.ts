@@ -17,6 +17,7 @@ router
       .group(() => {
         router.patch('/password', [AuthenticationController, 'updatePassword'])
         router.post('/send-email', [AuthenticationController, 'sendEmail'])
+        router.post('/logout', [AuthenticationController, 'logout'])
       })
       .use(middleware.auth())
   })

@@ -168,4 +168,16 @@ export default class AuthenticationController {
 
     return response.status(200).send({ message: 'Your password has been updated.' })
   }
+
+  async logout({ auth, response }: HttpContext) {
+    const payload = auth.use('jwt').payload!
+    await redis.hdel('userStates', payload.sub as string)
+    transmit.broadcast('users/state', {
+      message: 'update user connected',
+    })
+    // clean cookies
+    response.clearCookie('beep.access_token')
+    response.clearCookie('beep.refresh_token')
+    return response.send({ message: 'User disconnected' })
+  }
 }
