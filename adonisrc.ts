@@ -64,6 +64,7 @@ export default defineConfig({
     () => import('#apps/healthcheck/routes'),
     () => import('#apps/members/routes'),
     () => import('#apps/role/routes'),
+    () => import('#apps/friends/routes'),
   ],
 
   /*
