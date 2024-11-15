@@ -6,8 +6,9 @@ import { GetUsersSchema, UpdateUserValidator } from '#apps/users/validators/user
 import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
 import jwt from 'jsonwebtoken'
-import { ChangeEmailToken } from '../models/change_email_token.js'
-import UserNotFoundException from '../exceptions/user_not_found_exception.js'
+import { ChangeEmailToken } from '#apps/users/models/change_email_token'
+import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
+import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_already_exists_exeption'
 
 @inject()
 export default class UserService {
@@ -57,7 +58,15 @@ export default class UserService {
       const key = await this.storageService.storeProfilePicture(updatedUser.profilePicture, user.id)
       user.merge({ profilePicture: key })
     }
-    await user.merge(restOfObject).save()
+    await user
+      .merge(restOfObject)
+      .save()
+      .catch(() => {
+        throw new UsernameAlreadyExistsExeption('Username already exists', {
+          status: 400,
+          code: 'E_USERNAMEALREADYEXISTS',
+        })
+      })
     return user
   }
 

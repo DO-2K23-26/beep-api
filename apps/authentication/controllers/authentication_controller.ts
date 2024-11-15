@@ -57,23 +57,6 @@ export default class AuthenticationController {
 
   async signup({ request, response }: HttpContext) {
     const schemaUser = await request.validateUsing(createAuthenticationValidator)
-
-    const existingUserEmail: User | null = await this.authenticationService.getUserByEmail(
-      schemaUser.email.toLocaleLowerCase()
-    )
-
-    if (existingUserEmail !== null)
-      return response
-        .status(403)
-        .send({ message: 'A user already exists with this email address.' })
-
-    const existingUserUsername: User | null = await this.authenticationService.getUserByUsername(
-      schemaUser.username
-    )
-
-    if (existingUserUsername !== null)
-      return response.status(403).send({ message: 'A user already exists with this username.' })
-
     const user: User = await this.authenticationService.registerUser(schemaUser)
     await this.mailService.sendSignUpMail(user)
 
@@ -85,7 +68,7 @@ export default class AuthenticationController {
       await user.save()
     }
 
-    return response.status(201).send(user)
+    return response.created(user)
   }
 
   async refresh({ response, request, auth }: HttpContext) {

@@ -1,6 +1,8 @@
 import { CreateAuthenticationSchema } from '#apps/authentication/validators/authentication'
 import { UpdatePasswordValidator } from '#apps/authentication/validators/verify'
+import EmailAlreadyExistsExeption from '#apps/users/exceptions/email_already_exists_exeption'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
+import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_already_exists_exeption'
 import Token from '#apps/users/models/token'
 import User from '#apps/users/models/user'
 import env from '#start/env'
@@ -28,6 +30,22 @@ export default class AuthenticationService {
   }
 
   async registerUser(schemaUser: CreateAuthenticationSchema): Promise<User> {
+    const usernameExists = await User.findBy('username', schemaUser.username)
+    if (usernameExists) {
+      throw new UsernameAlreadyExistsExeption('Username already exists', {
+        code: 'E_USERNAME_ALREADY_EXISTS',
+        status: 400,
+      })
+    }
+
+    const emailExists = await User.findBy('email', schemaUser.email.toLowerCase())
+    if (emailExists) {
+      throw new EmailAlreadyExistsExeption('User already exists', {
+        code: 'E_MAIL_ALREADY_EXISTS',
+        status: 400,
+      })
+    }
+
     const user = await User.create({
       username: schemaUser.username,
       firstName: schemaUser.firstname,

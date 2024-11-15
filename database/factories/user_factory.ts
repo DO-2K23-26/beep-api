@@ -5,7 +5,7 @@ import { DateTime } from 'luxon'
 export const UserFactory = factory
   .define(User, async ({ faker }) => {
     return User.create({
-      email: faker.internet.email(),
+      email: faker.internet.email().toLowerCase(),
       password: faker.internet.password(),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),

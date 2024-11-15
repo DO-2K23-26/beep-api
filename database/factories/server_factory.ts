@@ -4,7 +4,7 @@ import Server from '#apps/servers/models/server'
 export const ServerFactory = factory
   .define(Server, async ({ faker }) => {
     return Server.create({
-      name: faker.lorem.word(),
+      name: faker.internet.displayName(),
       description: faker.lorem.sentence(),
     })
   })
@@ -14,7 +14,7 @@ export const ServerFactoryWithOwner = (ownerId: string) =>
   factory
     .define(Server, async ({ faker }) => {
       return Server.create({
-        name: faker.lorem.word(),
+        name: faker.internet.displayName(),
         description: faker.lorem.sentence(),
         ownerId,
       })
