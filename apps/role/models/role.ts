@@ -12,7 +12,7 @@ export default class Role extends BaseModel {
   declare name: string
 
   @column()
-  declare permissions: string
+  declare permissions: number // Permissions are hexadecimals
 
   @column()
   declare color: number
@@ -20,6 +20,7 @@ export default class Role extends BaseModel {
   @column()
   declare serverId: string
 
+  // Define the parent relationship (a role belongs to a server)
   @belongsTo(() => Server)
   declare server: BelongsTo<typeof Server>
 
@@ -29,6 +30,8 @@ export default class Role extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 
+  // Generate a snowflake unique ID for the role.
+  // Snowflake IDs can be sorted by creation date.
   @beforeCreate()
   public static async generateUuid(model: Role) {
     if (model.$dirty.id) {
