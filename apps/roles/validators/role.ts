@@ -17,6 +17,21 @@ export const createRoleValidator = vine.compile(
   vine.object({
     name: vine.string(),
     permissions: vine.number().max(maxPermValue), // Permissions cannot exceed max existing value.
+    color: vine.number().optional(),
+  })
+)
+
+/**
+ * Validator to validate the show action
+ */
+export const showRoleValidator = vine.compile(
+  vine.object({
+    name: vine.string().optional(),
+    permissions: vine.boolean().optional(),
+    color: vine.boolean().optional(),
+    params: vine.object({
+      id: vine.string().uuid({ version: [4] }),
+    }),
   })
 )
 
@@ -32,4 +47,5 @@ export const updateRoleValidator = vine.compile(
 )
 
 export type CreateRoleSchema = Infer<typeof createRoleValidator>
+export type ShowRoleSchema = Infer<typeof showRoleValidator>
 export type UpdateRoleSchema = Infer<typeof updateRoleValidator>
