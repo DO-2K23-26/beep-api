@@ -1,5 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-import Role from '#apps/role/models/role'
+import Role from '#apps/roles/models/role'
 import User from '#apps/users/models/user'
 
 export default class extends BaseSchema {
