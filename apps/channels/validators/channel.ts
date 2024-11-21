@@ -22,7 +22,6 @@ export const updateChannelValidator = vine.compile(
   vine.object({
     name: vine.string().minLength(1).optional(), // The name is optional for the update, but if provided, it must be non-empty
     description: vine.string().minLength(1).optional(), // Same principle applies to the description
-    // It is not permitted/possible to update the type of a channel ; its id, its serverId, etc.
   })
 )
 
