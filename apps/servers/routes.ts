@@ -5,6 +5,7 @@ import router from '@adonisjs/core/services/router'
 const ServerController = () => import('#apps/servers/controllers/server_controller')
 const ServerChannelsController = () =>
   import('#apps/servers/controllers/server_channels_controller')
+const ServerRolesController = () => import('#apps/servers/controllers/server_roles_controller')
 const ServerInvitationsController = () =>
   import('#apps/servers/controllers/server_invitations_controller')
 const ServerMembersController = () => import('#apps/servers/controllers/server_members_controller')
@@ -39,6 +40,15 @@ router
         router.post('/leave', [ServerChannelsController, 'leaveChannel']).prefix('channels')
         router
           .group(() => {
+            router
+              .group(() => {
+                router.post('/', [ServerRolesController, 'create'])
+                router.get('/', [ServerRolesController, 'index'])
+                router.get('/:roleId', [ServerRolesController, 'show'])
+                router.put('/:roleId', [ServerRolesController, 'update'])
+                router.delete('/:roleId', [ServerRolesController, 'destroy'])
+              })
+              .prefix('roles')
             router
               .group(() => {
                 router.get('/', [ServerChannelsController, 'findByServerId'])
