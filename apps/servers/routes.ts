@@ -56,7 +56,6 @@ router
                 router.put('/:channelId', [ServerChannelsController, 'updateChannel'])
                 router.delete('/:channelId', [ServerChannelsController, 'deleteChannel'])
                 router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
-
                 router
                   .group(() => {
                     router.post('/join', [ServerChannelsController, 'joinChannel'])
@@ -87,10 +86,10 @@ router
             router.get('/streaming/users', [ServerChannelsController, 'streamingUsers'])
             router.delete('/', [ServerController, 'destroy'])
             router.post('/mic', [ServerChannelsController, 'changeMutedStatus']).prefix('users')
-            router.get('/webhooks', [ServerWebhooksController, 'findByServerId'])
           })
           .prefix('/:serverId')
       })
       .prefix('servers')
   })
+
   .use(middleware.auth())
