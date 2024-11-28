@@ -1,11 +1,12 @@
 import vine from '@vinejs/vine'
 import { Infer } from '@vinejs/vine/types'
+import { InvitationStatus } from '#apps/invitations/models/status'
 
 /**
  * Validator to validate the payload when creating
  * a new invitation.ts.
  */
-export const createInvitationValidator = vine.compile(
+export const createServerInvitationValidator = vine.compile(
   vine.object({
     isUnique: vine.boolean(),
     expiration: vine.date({
@@ -14,11 +15,19 @@ export const createInvitationValidator = vine.compile(
   })
 )
 
-/**
- * Validator to validate the payload when updating
- * an existing invitation.ts.
- */
-export const updateInvitationValidator = vine.compile(vine.object({}))
+export const createFriendInvitationValidator = vine.compile(
+  vine.object({
+    targetId: vine.string().optional().requiredIfMissing('targetUsername'),
+    targetUsername: vine.string().optional().requiredIfMissing('targetId'),
+  })
+)
 
-export type CreateInvitationsSchema = Infer<typeof createInvitationValidator>
-export type UpdateInvitationsSchema = Infer<typeof updateInvitationValidator>
+export const answerInvitationValidator = vine.compile(
+  vine.object({
+    answer: vine.enum(InvitationStatus),
+  })
+)
+
+export type AnswerInvitationSchema = Infer<typeof answerInvitationValidator>
+export type CreateServerInvitationsSchema = Infer<typeof createServerInvitationValidator>
+export type CreateFriendInvitationsSchema = Infer<typeof createFriendInvitationValidator>

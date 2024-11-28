@@ -13,16 +13,19 @@ export default class Invitation extends BaseModel {
   declare creatorId: string
 
   @column()
-  declare serverId: string
+  declare serverId: string | null
 
   @column()
-  declare isUnique: boolean
+  declare targetId: string | null
+
+  @column()
+  declare type: number
+
+  @column()
+  declare status: number
 
   @column()
   declare expiration: DateTime
-
-  @column()
-  declare state: 'usable' | 'unusable'
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -44,4 +47,9 @@ export default class Invitation extends BaseModel {
     foreignKey: 'serverId',
   })
   declare server: BelongsTo<typeof Server>
+
+  @belongsTo(() => User, {
+    foreignKey: 'targetId',
+  })
+  declare target: BelongsTo<typeof User>
 }

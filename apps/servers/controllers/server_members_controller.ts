@@ -15,28 +15,26 @@ export default class ServerMembersController {
   async index({ params, bouncer }: HttpContext) {
     const { serverId } = params
     const server = await this.serverService.findById(serverId)
-
     await bouncer.with(ServerMemberPolicy).authorize('view' as never, server.id)
-
     return this.memberService.findAllByServerId(server.id)
   }
 
   async show({ params, bouncer }: HttpContext) {
     const { serverId, userId } = params
-
     await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
-
     return this.memberService.getMemberByUserIdAndServerId(userId, serverId)
   }
 
-  async joinPublic({ auth, params }: HttpContext) {
-    const userPayload = auth.use('jwt').payload as Payload
-    return this.memberService.joinPublicServer(userPayload.sub, params.serverId)
+  async joinPublic({ auth, params, response }: HttpContext) {
+    const userPayload = auth.user as Payload
+    const member = await this.memberService.createForServer(userPayload.sub, params.serverId)
+    return response.created(member)
   }
 
-  async joinPrivate({ auth, params }: HttpContext) {
-    const userPayload = auth.use('jwt').payload as Payload
+  async joinPrivate({ auth, params, response }: HttpContext) {
+    const userPayload = auth.user as Payload
     const invitationId = params.invitationId
-    return this.memberService.joinPrivateServer(invitationId, userPayload.sub)
+    const member = await this.memberService.createFromInvitation(invitationId, userPayload.sub)
+    return response.created(member)
   }
 }

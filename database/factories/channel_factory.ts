@@ -1,6 +1,6 @@
 import Channel from '#apps/channels/models/channel'
 import factory from '@adonisjs/lucid/factories'
-import { ServerFactory } from './server_factory.js'
+import { ServerFactory } from '#database/factories/server_factory'
 
 export const ChannelFactory = (type: 'text' | 'voice') =>
   factory

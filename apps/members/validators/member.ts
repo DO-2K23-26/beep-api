@@ -8,7 +8,6 @@ import { Infer } from '@vinejs/vine/types'
 export const createMemberValidator = vine.compile(
   vine.object({
     nick: vine.string().trim(),
-    roles: vine.array(vine.string()),
   })
 )
 

@@ -18,7 +18,6 @@ export default class ServersController {
   /**
    * Display a list of resource
    */
-  //Liste les servers en fonction de l'id du user
   async index({ request, auth }: HttpContext) {
     const userPayload = auth.use('jwt').payload as Payload
     const payload = await request.validateUsing(indexServerValidator)
@@ -75,40 +74,15 @@ export default class ServersController {
     return this.serverService.update(params.serverId, payload)
   }
 
-  /**
-   * Delete record
-   */
-  // async destroy({ params }: HttpContext) {}
-
-  //récupère le proprio du serveur
   async getOwner({ params }: HttpContext) {
     const ownerId = await this.serverService.getOwner(params.serverId)
     return { ownerId: ownerId }
   }
 
   async getAllUsers({ params }: HttpContext) {
-    // const userPayload = auth.use('jwt').payload as Payload
-
-    // const userServers: Server[] = await this.serverService.findByUserId(userPayload.sub.toString())
-
-    // console.log(userServers)
-    // if (!userServers.includes(params.serverId)) {
-    //   return response.status(403).send({ message: 'You are not allowed to access this server' })
-    // }
-
     return this.serverService.findUsersByServerId(params.serverId)
   }
 
-  // //permet de savoir si un user est timeout sur un server
-  // async timeout({ request, response }: HttpContext) {
-  //   const data = await request.validateUsing(showServerValidator)
-  //   const timeout = await this.serverService.timeout(data.params.id)
-  //   return response.send(timeout)
-  // }
-
-  //Banner
-
-  //update banner
   async updateBanner({ request, bouncer }: HttpContext) {
     const data = await request.validateUsing(updateBannerValidator)
     const server = await this.serverService.findById(data.params.serverId)
@@ -126,7 +100,6 @@ export default class ServersController {
 
   async destroy({ params, response, auth }: HttpContext) {
     const owner = await this.serverService.getOwner(params.serverId)
-    //TODO: Replace with correct authorization managemen/*  */t
     const userPayload = auth.use('jwt').payload as Payload
     if (owner !== userPayload.sub.toString()) {
       return response.status(403).send({ message: 'You are not allowed to delete this server' })

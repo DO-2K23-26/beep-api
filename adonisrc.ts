@@ -65,6 +65,7 @@ export default defineConfig({
     () => import('#apps/members/routes'),
     () => import('#apps/role/routes'),
     () => import('#apps/friends/routes'),
+    () => import('#apps/invitations/routes'),
   ],
 
   /*

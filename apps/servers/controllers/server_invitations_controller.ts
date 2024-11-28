@@ -1,41 +1,23 @@
 import { Payload } from '#apps/authentication/contracts/payload'
 import InvitationService from '#apps/invitations/services/invitation_service'
-import { createInvitationValidator } from '#apps/invitations/validators/invitation'
+import { createServerInvitationValidator } from '#apps/invitations/validators/invitation'
+import ServerInvitationPolicy from '#apps/servers/policies/server_invitation_policy'
 import { inject } from '@adonisjs/core'
 import { HttpContext } from '@adonisjs/core/http'
 
 @inject()
 export default class ServerInvitationsController {
   constructor(private invitationService: InvitationService) {}
-
-  async createInvitation({ auth, request, params }: HttpContext) {
-    const receivedInvitation = await request.validateUsing(createInvitationValidator)
-    const userPayload = auth.use('jwt').payload as Payload
+  async createInvitation({ auth, request, params, response, bouncer }: HttpContext) {
+    const receivedInvitation = await request.validateUsing(createServerInvitationValidator)
+    const userPayload = auth.user as Payload
     const serverId = params.serverId
-    const invitation = await this.invitationService.create(
+    await bouncer.with(ServerInvitationPolicy).authorize('create' as never, serverId)
+    const invitation = await this.invitationService.createForServer(
       receivedInvitation,
       userPayload.sub,
-      serverId,
-      'usable'
+      serverId
     )
-    return invitation
-  }
-
-  // [DEPRECATED]
-  // Use ServerController.joinPrivate instead
-  async joinPrivate({ auth, params }: HttpContext) {
-    const userPayload = auth.use('jwt').payload as Payload
-    const invitationId = params.invitationId
-    const invitation = await this.invitationService.joinPrivate(invitationId, userPayload.sub)
-    return invitation
-  }
-
-  // [DEPRECATED]
-  // Use ServerController.joinPublic instead
-  async joinPublic({ auth, response, params }: HttpContext) {
-    const userPayload = auth.use('jwt').payload as Payload
-    const serverId = params.serverId
-    await this.invitationService.joinPublic(userPayload.sub.toString(), serverId)
-    return response.send({ message: 'User joined successfully' })
+    return response.created(invitation)
   }
 }

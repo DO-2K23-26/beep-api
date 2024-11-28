@@ -6,7 +6,6 @@ router
   .group(() => {
     router.group(() => {
       router.delete('/:friendId', [FriendsController, 'destroy'])
-      router.post('/:friendId', [FriendsController, 'store'])
     })
   })
   .prefix('friends')

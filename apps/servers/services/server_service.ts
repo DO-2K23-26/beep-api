@@ -1,12 +1,12 @@
+import Member from '#apps/members/models/member'
 import Server from '#apps/servers/models/server'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import StorageService from '#apps/storage/services/storage_service'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
 import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
-import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
-import Member from '#apps/members/models/member'
 import ServerAlreadyExistsException from '../exceptions/server_already_exists_exception.js'
+import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
 
 @inject()
 export default class ServerService {
@@ -75,24 +75,15 @@ export default class ServerService {
     return server.save()
   }
 
-  // get owner of the server and return its id
   async getOwner(serverId: string): Promise<string> {
     const server = await Server.findOrFail(serverId)
     return server.ownerId
   }
 
   async findUsersByServerId(serverId: string): Promise<User[]> {
-    // Rechercher le serveur par id et précharger les utilisateurs associés
     const server = await Server.query().where('id', serverId).preload('users').firstOrFail()
-
-    // Retourner la liste des utilisateurs
     return server.users
   }
-
-  // async timeout(serverId: string, userId: string): Promise<void> {
-  //   const server = await Server.findOrFail(serverId)
-  //   return server.isTimedOut(userId)
-  // }
 
   async update(serverId: string, payload: UpdateServerSchema): Promise<Server> {
     const server = await Server.findOrFail(serverId)

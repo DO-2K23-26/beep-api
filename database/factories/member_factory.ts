@@ -1,7 +1,7 @@
 import factory from '@adonisjs/lucid/factories'
 import Member from '#apps/members/models/member'
-import { ServerFactory } from './server_factory.js'
-import { UserFactory } from './user_factory.js'
+import { ServerFactory } from '#database/factories/server_factory'
+import { UserFactory } from '#database/factories/user_factory'
 
 export const MemberFactory = factory
   .define(Member, async ({ faker }) => {

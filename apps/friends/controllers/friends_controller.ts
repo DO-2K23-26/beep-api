@@ -18,16 +18,9 @@ export default class FriendsController {
     return { message: 'Friend deleted successfully' }
   }
 
-  async store({ auth, params, response }: HttpContext) {
-    const friendId: string = params.friendId
-    const userPayload: JwtPayload = auth.user as JwtPayload
-    const friendship = await this.friendService.createFriendship(friendId, userPayload.sub ?? '')
-    return response.created(friendship)
-  }
-
   async index({ auth }: HttpContext) {
     const payload: JwtPayload = auth.user as JwtPayload
     const user = await this.userService.findById(payload?.sub ?? '')
-    return this.friendService.findAllFriends(user.id)
+    return this.friendService.findByUser(user.id)
   }
 }

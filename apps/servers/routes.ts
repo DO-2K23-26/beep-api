@@ -16,14 +16,15 @@ router
       .group(() => {
         router
           .group(() => {
-            router.post('/join', [ServerMembersController, 'joinPublic'])
-            router.get('/members', [ServerMembersController, 'index'])
-            router.get('/members/:userId', [ServerMembersController, 'show'])
+            router.post('join', [ServerMembersController, 'joinPublic'])
+            router.get('members', [ServerMembersController, 'index'])
+            router.get('members/:userId', [ServerMembersController, 'show'])
+            router.post('invitation', [ServerInvitationsController, 'createInvitation'])
           })
-          .prefix('/:serverId')
-        router.post('/join/:invitationId', [ServerMembersController, 'joinPrivate'])
+          .prefix(':serverId')
+        router.post('join/:invitationId', [ServerMembersController, 'joinPrivate'])
       })
-      .prefix('/v1/servers')
+      .prefix('v1/servers')
   })
   .use(middleware.auth())
 
@@ -35,7 +36,6 @@ router
         router.get('/discover', [ServerController, 'discover'])
         router.post('/', [ServerController, 'store'])
         router.post('/leave', [ServerChannelsController, 'leaveChannel']).prefix('channels')
-        router.post('/join/:invitationId', [ServerInvitationsController, 'joinPrivate'])
         router
           .group(() => {
             router
@@ -66,15 +66,9 @@ router
             router.patch('/', [ServerController, 'update'])
             router.get('/owner', [ServerController, 'getOwner'])
             router.get('/users', [ServerController, 'getAllUsers'])
-            router.post('/join', [ServerInvitationsController, 'joinPublic'])
             router.get('/streaming/users', [ServerChannelsController, 'streamingUsers'])
             router.delete('/', [ServerController, 'destroy'])
             router.post('/mic', [ServerChannelsController, 'changeMutedStatus']).prefix('users')
-            router
-              .group(() => {
-                router.post('/', [ServerInvitationsController, 'createInvitation'])
-              })
-              .prefix('/invitation')
           })
           .prefix('/:serverId')
       })

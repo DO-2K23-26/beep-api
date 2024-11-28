@@ -3,7 +3,7 @@ import { BasePolicy } from '@adonisjs/bouncer'
 import { inject } from '@adonisjs/core'
 import { JwtPayload } from 'jsonwebtoken'
 import Server from '#apps/servers/models/server'
-import ServerNotFoundException from '../exceptions/server_not_found_exception.js'
+import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
 
 @inject()
 export default class ServerChannelPolicy extends BasePolicy {
@@ -19,10 +19,9 @@ export default class ServerChannelPolicy extends BasePolicy {
       const server = await Server.findOrFail(serverId).catch(() => {
         throw new ServerNotFoundException('Server not found', {
           status: 404,
-          code: 'E_ROWNOTFOUND',
+          code: 'E_SERVER_NOT_FOUND',
         })
       })
-      if (!server) return false
       await server.load('members')
       const member = server.members.find((m) => m.userId === payload.sub)
       if (!member) return false

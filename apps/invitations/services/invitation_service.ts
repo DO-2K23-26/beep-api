@@ -1,96 +1,151 @@
-import { DateTime } from 'luxon'
-import Invitation from '../models/invitation.js'
-import { CreateInvitationsSchema } from '../validators/invitation.js'
-import Server from '#apps/servers/models/server'
-import ExpiredInvitationException from '#exceptions/expired_invitation_exception'
-import UnusableInvitationException from '#exceptions/unusable_invitation_exception'
-import PrivateServerException from '#exceptions/private_server_exception'
+import Friend from '#apps/friends/models/friend'
+import FriendService from '#apps/friends/services/friend_service'
+import WrongInvitationFormatException from '#apps/invitations/exceptions/wrong_invitation_format_exception'
+import Invitation from '#apps/invitations/models/invitation'
+import { InvitationStatus } from '#apps/invitations/models/status'
+import { InvitationType } from '#apps/invitations/models/type'
+import {
+  AnswerInvitationSchema,
+  CreateFriendInvitationsSchema,
+  CreateServerInvitationsSchema,
+} from '#apps/invitations/validators/invitation'
 import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
+import Server from '#apps/servers/models/server'
+import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
+import User from '#apps/users/models/user'
+import { DateTime } from 'luxon'
+import UnusableInvitationException from '#apps/invitations/exceptions/unusable_invitation_exception'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class InvitationService {
+  constructor(public friendService: FriendService) {}
   /**
    * Create a new invitation.
    */
-  async create(
-    { isUnique, expiration }: CreateInvitationsSchema,
+  async createForServer(
+    { expiration, isUnique }: CreateServerInvitationsSchema,
     creatorId: string,
-    serverId: string,
-    state: 'usable'
+    serverId: string
   ): Promise<Invitation> {
-    const invitation = await Invitation.create({
-      isUnique: isUnique,
-      expiration: DateTime.fromJSDate(expiration),
-      creatorId: creatorId,
-      serverId: serverId,
-      state: state,
+    await User.findOrFail(creatorId).catch(() => {
+      throw new UserNotFoundException('User not found', { code: 'E_USER_NOT_FOUND', status: 404 })
     })
+    const invitation = new Invitation()
+    invitation.creatorId = creatorId
+
+    const server = await Server.findOrFail(serverId).catch(() => {
+      throw new ServerNotFoundException('Server not found', {
+        code: 'E_SERVER_NOT_FOUND',
+        status: 404,
+      })
+    })
+    if (server.visibility === 'public') {
+      throw new WrongInvitationFormatException('Public server cannot have invitation', {
+        code: 'E_WRONG_INVITATION_FORMAT',
+        status: 400,
+      })
+    }
+    invitation.serverId = serverId
+    invitation.type = InvitationType.SERVER
+    invitation.expiration = DateTime.fromJSDate(expiration)
+    if (isUnique) invitation.status = InvitationStatus.Pending
 
     return invitation.save()
   }
 
-  async joinPrivate(invitationId: string, userId: string): Promise<Invitation> {
-    const invitation = await Invitation.findOrFail(invitationId)
-
-    if (invitation.expiration < DateTime.now()) {
-      throw new ExpiredInvitationException('You are not authorized', {
-        status: 403,
-        code: 'E_UNAUTHORIZED',
+  async createFriend(
+    creatorId: string,
+    { targetId, targetUsername }: CreateFriendInvitationsSchema
+  ): Promise<Invitation> {
+    let friendId = targetId ?? ''
+    if (targetId === undefined) {
+      const target = await User.findByOrFail('username', targetUsername).catch(() => {
+        throw new UserNotFoundException('Target not found', {
+          code: 'E_ROW_NOT_FOUND',
+          status: 404,
+        })
       })
+      friendId = target.id
     }
 
-    if (invitation.state === 'unusable') {
-      throw new UnusableInvitationException('Unusable invitation', {
-        status: 400,
-        code: 'E_UNUSABLEINVITATION',
-      })
-    }
-
-    if (invitation.isUnique) {
-      invitation.state = 'unusable'
-    }
-
-    const server = await Server.findOrFail(invitation.serverId).catch(() => {
-      throw new ServerNotFoundException('Server not found', {
-        status: 404,
-        code: 'E_ROWNOTFOUND',
-      })
+    await User.findOrFail(creatorId).catch(() => {
+      throw new UserNotFoundException('Creator not found', { code: 'E_ROW_NOT_FOUND', status: 404 })
     })
 
-    const existingUser = await server.related('users').query().where('user_id', userId).first()
-    if (!existingUser) {
-      await server.related('users').attach([userId])
-      return invitation.save()
-    } else {
-      throw new UnusableInvitationException('User already in server', {
-        status: 400,
-        code: 'E_UNUSABLEINVITATION',
-      })
-    }
-  }
-
-  async joinPublic(userId: string, serverId: string): Promise<Server> {
-    const server = await Server.findOrFail(serverId).catch(() => {
-      throw new ServerNotFoundException('Server not found', {
-        status: 404,
-        code: 'E_ROWNOTFOUND',
-      })
+    await User.findOrFail(friendId).catch(() => {
+      throw new UserNotFoundException('Target not found', { code: 'E_ROW_NOT_FOUND', status: 404 })
     })
 
-    if (server.visibility === 'private') {
-      throw new PrivateServerException('Server is private', {
-        status: 403,
-        code: 'E_PRIVATESERVER',
+    const friendship = await Friend.query()
+      .where(async (query) => {
+        await query.where('user_id', creatorId).andWhere('friend_id', friendId)
+      })
+      .orWhere(async (query) => {
+        await query.where('user_id', friendId).andWhere('friend_id', creatorId)
+      })
+      .first()
+    if (friendship || creatorId === friendId) {
+      throw new WrongInvitationFormatException("Friendship already exists or can't be created", {
+        code: 'E_WRONG_INVITATION_FORMAT',
+        status: 400,
       })
     }
 
-    await server.related('users').attach([userId])
-    return server
+    const invitation = await Invitation.create({
+      creatorId: creatorId,
+      targetId: friendId,
+      type: InvitationType.FRIEND,
+      status: InvitationStatus.Pending,
+    })
+    return invitation
   }
 
-  async join(userId: string, serverId: string): Promise<Server> {
-    const server = await Server.findOrFail(serverId)
+  async answerFriendInvitation(
+    invitationId: string,
+    { answer }: AnswerInvitationSchema
+  ): Promise<Invitation> {
+    const invitation = await Invitation.findOrFail(invitationId).catch(() => {
+      throw new UnusableInvitationException('Invitation not found', {
+        code: 'E_ROW_NOT_FOUND',
+        status: 404,
+      })
+    })
+    if (invitation.type !== InvitationType.FRIEND) {
+      throw new WrongInvitationFormatException('Wrong invitation type', {
+        code: 'E_WRONG_INVITATION_FORMAT',
+        status: 400,
+      })
+    }
+    if (invitation.status !== InvitationStatus.Pending) {
+      throw new UnusableInvitationException('Invitation already answered', {
+        code: 'E_UNUSABLE_INVITATION',
+        status: 400,
+      })
+    }
+    if (!invitation.targetId) {
+      throw new UnusableInvitationException('Target not found', {
+        code: 'E_ROW_NOT_FOUND',
+        status: 404,
+      })
+    }
+    if (answer === InvitationStatus.Accepted)
+      await this.friendService.createFriendship(invitation.creatorId, invitation.targetId)
+    await invitation.merge({ status: answer }).save()
+    return invitation
+  }
 
-    await server.related('users').attach([userId])
-    return server
+  async getInvitationsForUser(userId: string): Promise<Invitation[]> {
+    await User.findOrFail(userId).catch(() => {
+      throw new UserNotFoundException('User not found', { code: 'E_ROW_NOT_FOUND', status: 404 })
+    })
+    const invitations = await Invitation.query()
+      .select('id', 'creator_id', 'target_id', 'type', 'status', 'created_at')
+      .where('target_id', userId)
+      .orWhere('creator_id', userId)
+      .andWhere('status', InvitationStatus.Pending)
+      .andWhere('type', InvitationType.FRIEND)
+      .orderBy('created_at', 'desc')
+    return invitations
   }
 }
