@@ -72,6 +72,7 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@vinejs/vine": "^3.0.0",
     "adonis-autoswagger": "^3.63.0",
+    "crypto-random-string": "^5.0.0",
     "flydrive": "^1.0.2",
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.4.4",
