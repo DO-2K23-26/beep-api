@@ -5,7 +5,7 @@ import cryptoRandomString from 'crypto-random-string'
 export default class OtpService {
   private otpExpiry = 300 // OTP expires in 5 minutes
 
-  constructor(private mailService: MailService) { }
+  constructor(private mailService: MailService) {}
 
   /**
    * Generate and send OTP for email update

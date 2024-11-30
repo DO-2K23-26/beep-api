@@ -132,10 +132,10 @@ export default class MailService {
   }
 
   /**
-  * Send email to update the email address with OTP
-  * @param email - Recipient's email
-  * @param otp - One-Time Password
-  */
+   * Send email to update the email address with OTP
+   * @param email - Recipient's email
+   * @param otp - One-Time Password
+   */
   public async sendEmailUpdateMail(email: string, otp: string): Promise<void> {
     const subject: string = 'Mise à jour de votre adresse mail'
 
