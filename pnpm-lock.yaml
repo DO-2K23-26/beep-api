@@ -2326,6 +2326,10 @@ packages:
   crypt@0.0.2:
     resolution: {integrity: sha512-mCxBlsHFYh9C+HVpiEacem8FEBnMXgU9gy4zmNC+SXAZNB/1idgp/aulFJ4FgCi7GPEVbfyng092GqL2k2rmow==}
 
+  crypto-random-string@5.0.0:
+    resolution: {integrity: sha512-KWjTXWwxFd6a94m5CdRGW/t82Tr8DoBc9dNnPCAbFI1EBweN6v1tv8y4Y1m7ndkp/nkIBRxUxAzpaBnR2k3bcQ==}
+    engines: {node: '>=14.16'}
+
   css@3.0.0:
     resolution: {integrity: sha512-DG9pFfwOrzc+hawpmqX/dHYHJG+Bsdb0klhyi1sDneOgGOXy9wQIC8hzyVp1e4NRYDBdxcylvywPkkXCHAzTyQ==}
 
@@ -7684,6 +7688,10 @@ snapshots:
       which: 2.0.2
 
   crypt@0.0.2: {}
+
+  crypto-random-string@5.0.0:
+    dependencies:
+      type-fest: 2.19.0
 
   css@3.0.0:
     dependencies:

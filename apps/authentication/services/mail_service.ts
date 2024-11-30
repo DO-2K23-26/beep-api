@@ -131,16 +131,24 @@ export default class MailService {
     this.sendMail(user.email, subject, htmlMessage)
   }
 
-  async sendEmailUpdateMail(email: string, token: string) {
-    const subject: string = 'Mis à jour de votre addresse mail'
+  /**
+  * Send email to update the email address with OTP
+  * @param email - Recipient's email
+  * @param otp - One-Time Password
+  */
+  public async sendEmailUpdateMail(email: string, otp: string): Promise<void> {
+    const subject: string = 'Mise à jour de votre adresse mail'
 
-    const htmlMessage: string =
-      "<p>Bonjour, </p><p>Veuillez trouver ci-dessous un bouton pour mettre à jour votre adresse mail :</p><div style='text-align: center; margin: 40px 0;'><a href='$_URL_TOKEN_$' style='background-color: #4a7ab4; padding: 10px; border-radius: 10px; margin: 0 auto; color: white; text-decoration: none;'>Mettre à jour mon adresse mail</a></div><p>Ce bouton possède une durée de validité de <span style='font-weight: bold; text-decoration: underline;'>$_TEMPS_VALIDITE_TOKEN_$ heures</span> à compter de la réception de ce mail.</p><p>Si vous n'êtes pas l'auteur de cette demande, merci de ne pas tenir compte de ce message.</p>"
-        .replace(
-          '$_URL_TOKEN_$',
-          `${env.get('FRONTEND_URL')}/authentication/confirmation/email/` + token
-        )
-        .replace('$_TEMPS_VALIDITE_TOKEN_$', '24')
-    this.sendMail(email, subject, htmlMessage)
+    const htmlMessage: string = `
+      <p>Bonjour,</p>
+      <p>Veuillez trouver ci-dessous votre code de vérification pour mettre à jour votre adresse mail :</p>
+      <div style='text-align: center; margin: 40px 0;'>
+        <span style='font-size: 20px; font-weight: bold; color: #4a7ab4;'>${otp}</span>
+      </div>
+      <p>Ce code est valide pendant <span style='font-weight: bold; text-decoration: underline;'>5 minutes</span>.</p>
+      <p>Si vous n'êtes pas l'auteur de cette demande, merci de ne pas tenir compte de ce message.</p>
+    `
+
+    await this.sendMail(email, subject, htmlMessage)
   }
 }

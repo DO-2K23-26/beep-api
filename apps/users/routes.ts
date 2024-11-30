@@ -33,6 +33,12 @@ router
         router.post('/disconnect', [UsersControllerV0, 'disconnectUser'])
         router.get('/onlines', [UsersControllerV0, 'onlines'])
         router.get('/display', [UsersControllerV0, 'all'])
+        // route should look like /users/otp/[name of route]
+        router.group(() => {
+          router.post('/generate', 'OtpController.generate')
+          router.post('/verify', 'OtpController.verify')
+        })
+          .prefix('/otp')
         router
           .group(() => {
             router
