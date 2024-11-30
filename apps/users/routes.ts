@@ -8,6 +8,7 @@ const UsersInvitationsController = () =>
 const UsersControllerV0 = () => import('#apps/users/controllers/users_v0_controller')
 const UsersController = () => import('#apps/users/controllers/users_controller')
 const UserServersController = () => import('#apps/users/controllers/user_servers_controller')
+const OtpController = () => import('#apps/users/controllers/otp_controller')
 
 router
   .group(() => {
@@ -36,8 +37,8 @@ router
         // route should look like /users/otp/[name of route]
         router
           .group(() => {
-            router.post('/generate', 'OtpController.generate')
-            router.post('/verify', 'OtpController.verify')
+            router.post('/generate', [OtpController, 'generateOtp']) // Corrected OTP controller method
+            router.post('/verify', [OtpController, 'verifyOtp']) // Corrected OTP controller method
           })
           .prefix('/otp')
         router
