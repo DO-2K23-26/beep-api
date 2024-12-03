@@ -6,11 +6,14 @@ import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_alrea
 import Token from '#apps/users/models/token'
 import User from '#apps/users/models/user'
 import env from '#start/env'
-import { errors } from '@adonisjs/auth'
+import { Authenticator, errors } from '@adonisjs/auth'
 import logger from '@adonisjs/core/services/logger'
 import jwt from 'jsonwebtoken'
 import { DateTime } from 'luxon'
 import crypto from 'node:crypto'
+import redis from '@adonisjs/redis/services/main'
+import transmit from '@adonisjs/transmit/services/main'
+import { Authenticators } from '@adonisjs/auth/types'
 
 export default class AuthenticationService {
   DEFAULT_PP_URL = 'default_profile_picture.png'
@@ -131,5 +134,71 @@ export default class AuthenticationService {
     await user.save()
 
     return true
+  }
+
+  async generateQRCodeToken() {
+    const token = crypto.randomBytes(100).toString('hex')
+    await redis.set(`qr-code:${token}`, 'generated', 'EX', 300)
+
+    return token
+  }
+
+  async validateQRCodeToken(token: string, userid: string): Promise<boolean> {
+    const isValid = await redis.get(`qr-code:${token}`)
+    if (isValid === 'pending') {
+      const passKey = crypto.randomBytes(50).toString('hex')
+      await redis.set(`qr-code:${token}`, 'validated', 'EX', 300)
+      await redis.set(`qr-code:${token}:user`, userid, 'EX', 300)
+      await redis.set(`qr-code:${token}:passkey`, passKey, 'EX', 300)
+      transmit.broadcast(`qr-code/${token}`, `${passKey}`)
+      return true
+    }
+
+    return false
+  }
+
+  async retrieveUserQRCode(token: string, passKey: string): Promise<User | null> {
+    const isValid = await redis.get(`qr-code:${token}`)
+    if (isValid !== 'validated') {
+      return null
+    }
+    const passKeyStored = await redis.get(`qr-code:${token}:passkey`)
+    if (passKeyStored !== passKey) {
+      return null
+    }
+    const userId = await redis.get(`qr-code:${token}:user`)
+    await redis.del(`qr-code:${token}:user`)
+    await redis.del(`qr-code:${token}`)
+    await redis.del(`qr-code:${token}:passkey`)
+    const user = await User.findOrFail(userId).catch(() => {
+      throw new UserNotFoundException('User not found', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
+    return user
+  }
+
+  async handleSignIn(user: User, auth: Authenticator<Authenticators>) {
+    const tokens = await auth.use('jwt').generate(user)
+
+    await redis.hset(
+      'userStates',
+      user.id,
+      JSON.stringify({
+        id: user.id,
+        username: user.username,
+        expiresAt: Date.now() + 1200 * 1000, // Timestamp now + 20 minutes
+      })
+    )
+
+    transmit.broadcast('users/state', {
+      message: 'update user connected',
+    })
+
+    return {
+      user,
+      tokens,
+    }
   }
 }

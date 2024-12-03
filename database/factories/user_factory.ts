@@ -16,3 +16,19 @@ export const UserFactory = factory
     })
   })
   .build()
+
+export const UserFactoryWithPassord = (password: string) =>
+  factory
+    .define(User, async ({ faker }) => {
+      return User.create({
+        email: faker.internet.email().toLowerCase(),
+        password: password,
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
+        serialNumber: faker.number.int().toString(),
+        username: faker.internet.username(),
+        verifiedAt: DateTime.now(),
+        profilePicture: faker.image.avatarGitHub(),
+      })
+    })
+    .build()

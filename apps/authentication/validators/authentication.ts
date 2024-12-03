@@ -4,8 +4,27 @@ import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
 
 export const signinAuthenticationValidator = vine.compile(
   vine.object({
-    email: vine.string(),
-    password: vine.string(),
+    email: vine
+      .string()
+      .email()
+      .optional()
+      .requiredIfAnyMissing(['token', 'passKey'])
+      .requiredIfExists('password'),
+    password: vine
+      .string()
+      .optional()
+      .requiredIfAnyMissing(['token', 'passKey'])
+      .requiredIfExists('email'),
+    token: vine
+      .string()
+      .optional()
+      .requiredIfAnyMissing(['email', 'password'])
+      .requiredIfExists('passKey'),
+    passKey: vine
+      .string()
+      .optional()
+      .requiredIfAnyMissing(['email', 'password'])
+      .requiredIfExists('token'),
   })
 )
 

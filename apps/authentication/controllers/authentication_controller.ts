@@ -10,49 +10,47 @@ import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import redis from '@adonisjs/redis/services/main'
-import transmit from '@adonisjs/transmit/services/main'
 import MailService from '../services/mail_service.js'
 import {
   createAuthenticationValidator,
   resetPasswordValidator,
   signinAuthenticationValidator,
 } from '../validators/authentication.js'
+import { Authenticator } from '@adonisjs/auth'
+import { Authenticators } from '@adonisjs/auth/types'
+import { Payload } from '../contracts/payload.js'
+import { SignIn } from '../contracts/signin.js'
+import transmit from '@adonisjs/transmit/services/main'
 
 @inject()
 export default class AuthenticationController {
   constructor(
-    private authenticationService: AuthenticationService,
-    private mailService: MailService,
-    private userService: UserService
+    private readonly authenticationService: AuthenticationService,
+    private readonly mailService: MailService,
+    private readonly userService: UserService
   ) {}
 
   async signin({ request, response, auth }: HttpContext) {
-    const { email, password } = await request.validateUsing(signinAuthenticationValidator)
-    const user = await User.verifyCredentials(email.toLocaleLowerCase(), password)
-
-    const tokens = await auth.use('jwt').generate(user)
-
-    await redis.hset(
-      'userStates',
-      user.id,
-      JSON.stringify({
-        id: user.id,
-        username: user.username,
-        expiresAt: Date.now() + 1200 * 1000, // Timestamp now + 20 minutes
-      })
+    // (email & password) OR (token & passKey) are required and verified by the validator
+    const { email, password, token, passKey } = await request.validateUsing(
+      signinAuthenticationValidator
     )
+    let payload: SignIn
+    if (token && passKey) {
+      const user = await this.authenticationService.retrieveUserQRCode(token, passKey)
+      if (!user) return response.status(401).send({ message: 'Unauthorized' })
+      payload = await this.authenticationService.handleSignIn(user, auth)
+    } else if (email && password) {
+      const user = await User.verifyCredentials(email.toLocaleLowerCase(), password)
+      payload = await this.authenticationService.handleSignIn(user, auth)
+    } else {
+      return response.status(401).send({ message: 'Unauthorized' })
+    }
 
-    transmit.broadcast('users/state', {
-      message: 'update user connected',
-    })
+    response.cookie('beep.access_token', payload.tokens.accessToken)
+    response.cookie('beep.refresh_token', payload.tokens.refreshToken)
 
-    response.cookie('beep.access_token', tokens.accessToken)
-    response.cookie('beep.refresh_token', tokens.refreshToken)
-
-    return response.send({
-      user,
-      tokens,
-    })
+    return response.status(200).send(payload)
   }
 
   async signup({ request, response }: HttpContext) {
@@ -78,6 +76,17 @@ export default class AuthenticationController {
       refreshToken = request.cookie('beep.refresh_token')
     }
 
+    if (!refreshToken) return response.status(401).send({ message: 'Unauthorized' })
+
+    const tokens = await this.getTokens(refreshToken, auth)
+
+    response.cookie('beep.access_token', tokens.accessToken)
+    response.cookie('beep.refresh_token', tokens.refreshToken)
+
+    return response.send(tokens)
+  }
+
+  async getTokens(refreshToken: string, auth: Authenticator<Authenticators>) {
     const payload = await this.authenticationService.verifyToken(refreshToken)
 
     const user = await User.query()
@@ -97,12 +106,9 @@ export default class AuthenticationController {
 
     const tokens = await auth.use('jwt').generate(user)
 
-    response.cookie('beep.access_token', tokens.accessToken)
-    response.cookie('beep.refresh_token', tokens.refreshToken)
-
-    return response.send({
+    return {
       ...tokens,
-    })
+    }
   }
 
   async sendEmail({ auth, response }: HttpContext) {
@@ -162,5 +168,23 @@ export default class AuthenticationController {
     response.clearCookie('beep.access_token')
     response.clearCookie('beep.refresh_token')
     return response.send({ message: 'User disconnected' })
+  }
+
+  async generateQRCodeToken({ response }: HttpContext) {
+    const token = await this.authenticationService.generateQRCodeToken()
+
+    return response.status(200).send({ token: token })
+  }
+
+  async validateQRCodeToken({ auth, response, params }: HttpContext) {
+    const payload = auth.use('jwt').payload as Payload
+    const token = params.token
+
+    if (!payload?.sub) {
+      return response.status(401).send({ message: 'Unauthorized' })
+    }
+    const isValid = await this.authenticationService.validateQRCodeToken(token, payload.sub)
+
+    return isValid ? response.status(204) : response.status(401).send({ message: 'Unauthorized' })
   }
 }

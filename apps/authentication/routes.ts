@@ -12,9 +12,11 @@ router
     router.post('/refresh', [AuthenticationController, 'refresh'])
     router.post('/reset-password', [AuthenticationController, 'sendResetPasswordEmail'])
     router.post('/verify-reset-password', [AuthenticationController, 'verifyResetPassword'])
+    router.get('/qr-code', [AuthenticationController, 'generateQRCodeToken'])
 
     router
       .group(() => {
+        router.post('/qr-code/:token', [AuthenticationController, 'validateQRCodeToken'])
         router.patch('/password', [AuthenticationController, 'updatePassword'])
         router.post('/send-email', [AuthenticationController, 'sendEmail'])
         router.post('/logout', [AuthenticationController, 'logout'])
