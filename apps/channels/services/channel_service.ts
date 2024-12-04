@@ -80,7 +80,7 @@ export default class ChannelService {
     userId: string
   ): Promise<Channel> {
     const sn = generateSnowflake()
-    const type = newChannel.type as 'voice' | 'text'
+    const type = newChannel.type as 0 | 1 | 2
     const channel = await Channel.create({
       name: newChannel.name,
       type: type,

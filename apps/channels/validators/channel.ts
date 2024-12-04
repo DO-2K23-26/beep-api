@@ -1,5 +1,6 @@
 import vine from '@vinejs/vine'
 import { Infer } from '@vinejs/vine/types'
+import { ChannelType } from '../models/channel_type.js'
 
 /**
  * Validator to validate the payload when creating
@@ -8,7 +9,7 @@ import { Infer } from '@vinejs/vine/types'
 export const createChannelValidator = vine.compile(
   vine.object({
     name: vine.string().minLength(1), // name is not empty and must be given
-    type: vine.string().in(['text', 'voice']),
+    type: vine.enum(ChannelType),
   })
 )
 

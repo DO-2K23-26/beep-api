@@ -9,7 +9,7 @@ test.group('Channels list', () => {
     client,
     expect,
   }) => {
-    const channel = await ChannelFactory('text').create()
+    const channel = await ChannelFactory.create()
     const user = await UserFactory.create()
     const member = await MemberFromFactory(channel.serverId, user.id).create()
 
@@ -26,7 +26,7 @@ test.group('Channels list', () => {
   })
   test('must return 403 when the user is not a member of the server', async ({ client }) => {
     const server = await ServerFactory.create()
-    await ChannelFactory('text').create()
+    await ChannelFactory.create()
     const user = await UserFactory.create()
 
     const response = await client.get(`/servers/${server.id}/channels`).loginAs(user)

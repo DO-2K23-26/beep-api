@@ -1,3 +1,4 @@
+import { ChannelType } from '#apps/channels/models/channel_type'
 import { MemberFromFactory } from '#database/factories/member_factory'
 import { ServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
@@ -10,7 +11,7 @@ test.group('Channels create', () => {
     await MemberFromFactory(server.id, user.id).create()
     const payload = {
       name: 'My Channel',
-      type: 'text',
+      type: ChannelType.text_server,
     }
     const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
     result.assertStatus(201)
@@ -27,7 +28,7 @@ test.group('Channels create', () => {
     const server = await ServerFactory.make()
     const payload = {
       name: 'My Channel',
-      type: 'text',
+      type: ChannelType.text_server,
     }
     const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
     result.assertStatus(403)
@@ -36,7 +37,7 @@ test.group('Channels create', () => {
     const user = await UserFactory.make()
     const server = await ServerFactory.make()
     const payload = {
-      type: 'text',
+      type: ChannelType.text_server,
     }
     const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
     result.assertStatus(422)
