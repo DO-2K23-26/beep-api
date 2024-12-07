@@ -92,6 +92,31 @@ export default class InvitationService {
       })
     }
 
+    const existantInvitation = await Invitation.query()
+
+      .where((query) => {
+        query
+          .where('status', InvitationStatus.Pending)
+          .where('type', InvitationType.FRIEND)
+          .where('target_id', creatorId)
+          .where('creator_id', friendId)
+      })
+      .orWhere((query) => {
+        query
+          .where('status', InvitationStatus.Pending)
+          .where('type', InvitationType.FRIEND)
+          .where('target_id', friendId)
+          .where('creator_id', creatorId)
+      })
+      .first()
+
+    if (existantInvitation) {
+      throw new WrongInvitationFormatException('Invitation already exists', {
+        code: 'E_WRONG_INVITATION_FORMAT',
+        status: 400,
+      })
+    }
+
     const invitation = await Invitation.create({
       creatorId: creatorId,
       targetId: friendId,
@@ -139,13 +164,20 @@ export default class InvitationService {
     await User.findOrFail(userId).catch(() => {
       throw new UserNotFoundException('User not found', { code: 'E_ROW_NOT_FOUND', status: 404 })
     })
-    const invitations = await Invitation.query()
+    const invitations = Invitation.query()
       .select('id', 'creator_id', 'target_id', 'type', 'status', 'created_at')
-      .where('target_id', userId)
-      .orWhere('creator_id', userId)
-      .andWhere('status', InvitationStatus.Pending)
-      .andWhere('type', InvitationType.FRIEND)
+      .where((query) => {
+        query.where('target_id', userId).orWhere('creator_id', userId)
+      })
+      .where('status', InvitationStatus.Pending)
+      .where('type', InvitationType.FRIEND)
       .orderBy('created_at', 'desc')
+      .preload('creator', (query) =>
+        query.select('id', 'username', 'profilePicture').whereNot('id', userId)
+      )
+      .preload('target', (query) =>
+        query.select('id', 'username', 'profilePicture').whereNot('id', userId)
+      )
     return invitations
   }
 }

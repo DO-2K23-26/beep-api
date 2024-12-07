@@ -32,7 +32,7 @@ test.group('Friends', () => {
     })
 
     const friends = friends1.concat(friends2)
-    const response = await client.get('/users/@me/friends').loginAs(user1).send()
+    const response = await client.get('/v1/users/@me/friends').loginAs(user1).send()
     response.assertStatus(200)
     response.assertBodyContains(friends)
   }).tags(['friends:index'])
@@ -40,7 +40,7 @@ test.group('Friends', () => {
   test('must return a 401 when listing friends for a user that does not exist', async ({
     client,
   }) => {
-    const response = await client.get('/users/@me/friends').send()
+    const response = await client.get('/v1/users/@me/friends').send()
     response.assertStatus(401)
   }).tags(['friends:index'])
 

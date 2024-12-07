@@ -19,6 +19,6 @@ export default class InvitationPolicy extends BasePolicy {
       })
     })
 
-    return invitation.targetId === user.sub
+    return invitation.targetId === user.sub || invitation.creatorId === user.sub
   }
 }

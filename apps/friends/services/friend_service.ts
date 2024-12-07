@@ -3,15 +3,13 @@ import UserNotFoundException from '#apps/users/exceptions/user_not_found_excepti
 import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
 import AlreadyFriendsException from '#apps/friends/exceptions/already_friends_exception'
+import FriendshipNotFoundException from '#apps/friends/exceptions/friendship_not_found_exception'
 
 @inject()
 export default class FriendService {
-  async deleteFriendship(friendId: string, userId: string): Promise<void> {
-    const user = await Friend.query()
-      .where('user_id', userId)
-      .where('friend_id', friendId)
-      .firstOrFail()
-    await user.delete()
+  async deleteFriendship(userId: string, friendId: string): Promise<void> {
+    const friendship = await this.findFriendshipOrFail(userId, friendId)
+    await friendship.delete()
   }
 
   async createFriendship(userId: string, friendId: string): Promise<Friend> {
@@ -23,14 +21,7 @@ export default class FriendService {
     })
 
     // Check if the friendship already exists
-    const friendship = await Friend.query()
-      .where(async (query) => {
-        await query.where('user_id', userId).andWhere('friend_id', friendId)
-      })
-      .orWhere(async (query) => {
-        await query.where('user_id', friendId).andWhere('friend_id', userId)
-      })
-      .first()
+    const friendship = await this.findFriendship(userId, friendId)
     if (friendship) {
       throw new AlreadyFriendsException('Already friends', {
         code: 'E_ALREADY_FRIENDS',
@@ -54,5 +45,31 @@ export default class FriendService {
       return friendship.user == undefined ? friendship.friend : friendship.user
     })
     return friendsList
+  }
+
+  async findFriendship(userId1: string, userId2: string): Promise<Friend | null> {
+    return Friend.query()
+      .where(async (query) => {
+        await query.where('user_id', userId1).andWhere('friend_id', userId2)
+      })
+      .orWhere(async (query) => {
+        await query.where('user_id', userId2).andWhere('friend_id', userId1)
+      })
+      .first()
+  }
+  async findFriendshipOrFail(userId1: string, userId2: string): Promise<Friend> {
+    await User.findOrFail(userId1).catch(() => {
+      throw new UserNotFoundException('User not found', { code: 'E_USER_NOT_FOUND', status: 404 })
+    })
+    await User.findOrFail(userId2).catch(() => {
+      throw new UserNotFoundException('User not found', { code: 'E_USER_NOT_FOUND', status: 404 })
+    })
+    const friendship = await this.findFriendship(userId1, userId2)
+    if (friendship) return friendship
+
+    throw new FriendshipNotFoundException('Friendship not found', {
+      code: 'E_FRIENDSHIP_NOT_FOUND',
+      status: 404,
+    })
   }
 }

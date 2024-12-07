@@ -11,8 +11,7 @@ transmit.authorize<{ token: string }>('qr-code/:token', async (_ctx: HttpContext
     }
     await redis.set(`qr-code:${token}`, 'pending', 'EX', 300)
     return true
-  } catch (error) {
-    console.error('Error authorizing token:', error)
+  } catch {
     return false
   }
 })

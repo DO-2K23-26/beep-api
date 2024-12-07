@@ -1,7 +1,7 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import FriendsController from '#apps/friends/controllers/friends_controller'
 
+const UsersFriendsController = () => import('#apps/users/controllers/users_friends_controller')
 const UsersInvitationsController = () =>
   import('#apps/users/controllers/users_invitations_controller')
 const UsersControllerV0 = () => import('#apps/users/controllers/users_v0_controller')
@@ -18,6 +18,7 @@ router
           .group(() => {
             router.get('invitations', [UsersInvitationsController, 'index'])
             router.get('servers', [UserServersController, 'index'])
+            router.get('friends', [UsersFriendsController, 'index'])
           })
           .prefix('@me')
       })
@@ -40,7 +41,6 @@ router
               .prefix('/email')
             router.get('', [UsersControllerV0, 'findMe'])
             router.put('', [UsersControllerV0, 'update'])
-            router.get('friends', [FriendsController, 'index'])
           })
           .prefix('/@me')
         router.get('/:userId', [UsersControllerV0, 'show'])

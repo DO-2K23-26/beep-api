@@ -14,7 +14,7 @@ export default class FriendsController {
   async destroy({ auth, params }: HttpContext) {
     const friendId: string = params.friendId
     const userPayload: JwtPayload = auth.user as JwtPayload
-    await this.friendService.deleteFriendship(friendId, userPayload.sub ?? '')
+    await this.friendService.deleteFriendship(userPayload.sub ?? '', friendId)
     return { message: 'Friend deleted successfully' }
   }
 
