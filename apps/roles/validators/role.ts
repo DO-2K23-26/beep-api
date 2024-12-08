@@ -17,7 +17,7 @@ export const createRoleValidator = vine.compile(
   vine.object({
     name: vine.string(),
     permissions: vine.number().max(maxPermValue), // Permissions cannot exceed max existing value.
-    color: vine.number().optional(),
+    color: vine.number().optional(), // Verify the min and max limits and add to service and test
   })
 )
 
