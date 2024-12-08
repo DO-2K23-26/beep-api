@@ -1,16 +1,17 @@
 import Channel from '#apps/channels/models/channel'
-import { allowGuest, BasePolicy } from '@adonisjs/bouncer'
-import { AuthorizerResponse } from '@adonisjs/bouncer/types'
-import { JwtPayload } from 'jsonwebtoken'
+import ChannelService from '#apps/channels/services/channel_service'
 import PermissionResolver from '#apps/shared/services/permissions/permission_resolver'
-import { HttpContext } from '@adonisjs/core/http'
+import { BasePolicy } from '@adonisjs/bouncer'
+import { AuthorizerResponse } from '@adonisjs/bouncer/types'
 import { inject } from '@adonisjs/core'
-
+import { HttpContext } from '@adonisjs/core/http'
+import { JwtPayload } from 'jsonwebtoken'
 @inject()
-export default class ChannelPolicy extends BasePolicy {
+export default class MessageChannelPolicy extends BasePolicy {
   protected payload: JwtPayload
 
   constructor(
+    protected channelService: ChannelService,
     protected permissionResolver: PermissionResolver,
     protected ctx: HttpContext
   ) {
@@ -18,7 +19,6 @@ export default class ChannelPolicy extends BasePolicy {
     this.payload = ctx.auth.use('jwt').payload! as JwtPayload
   }
 
-  @allowGuest()
   async show(): Promise<AuthorizerResponse> {
     const channel = await Channel.findOrFail(this.ctx.params.id)
     await channel.load('users')
@@ -26,7 +26,6 @@ export default class ChannelPolicy extends BasePolicy {
     return !!ChannelUser
   }
 
-  @allowGuest()
   async index(): Promise<AuthorizerResponse> {
     return await this.permissionResolver
       .createResolve(this.payload.resource_access)

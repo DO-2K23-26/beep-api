@@ -18,6 +18,7 @@ export const MemberFactory = factory
       userId: user.id,
     })
   })
+
   .build()
 
 export const MemberFactoryWithServer = (serverId: string) =>

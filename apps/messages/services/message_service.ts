@@ -1,4 +1,5 @@
 import BadPinningException from '#apps/channels/exceptions/bad_pinning_exception'
+import ChannelNotFoundException from '#apps/channels/exceptions/channel_not_found_exception'
 import Channel from '#apps/channels/models/channel'
 import Message from '#apps/messages/models/message'
 import { ActionSignalMessage, SignalMessage } from '#apps/messages/models/signaling'
@@ -24,10 +25,12 @@ export default class MessageService {
   }
 
   async findPinned(channelId: string) {
-    const channel = await Channel.findOrFail(channelId)
-    if (!channel) {
-      throw new Error('Channel not found')
-    }
+    await Channel.findOrFail(channelId).catch(() => {
+      throw new ChannelNotFoundException('Channel not found', {
+        code: 'E_CHANNEL_NOT_FOUND',
+        status: 404,
+      })
+    })
 
     return Message.query()
       .where('channelId', channelId)

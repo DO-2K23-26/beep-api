@@ -6,7 +6,7 @@ import { test } from '@japa/runner'
 
 test.group('Channels update', () => {
   test('must return 200 when update successfully', async ({ assert, client }) => {
-    const channel = await ChannelFactory.create()
+    const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()
     await MemberFromFactory(channel.serverId, user.id).create()
     const data = { name: 'new name', description: 'new description' }
@@ -19,7 +19,7 @@ test.group('Channels update', () => {
     assert.equal(response.body().description, data.description)
   }).tags(['channels:update'])
   test('must return 200 when update description successfully', async ({ assert, client }) => {
-    const channel = await ChannelFactory.create()
+    const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()
     await MemberFromFactory(channel.serverId, user.id).create()
     const data = { description: 'new description' }
@@ -32,7 +32,7 @@ test.group('Channels update', () => {
     assert.equal(response.body().description, data.description)
   }).tags(['channels:update'])
   test('must return 200 when update name successfully', async ({ assert, client }) => {
-    const channel = await ChannelFactory.create()
+    const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()
     await MemberFromFactory(channel.serverId, user.id).create()
     const data = { name: 'new name' }
@@ -45,7 +45,7 @@ test.group('Channels update', () => {
     assert.equal(response.body().description, channel.description)
   }).tags(['channels:update'])
   test('must return 401 when not logged in', async ({ assert, client }) => {
-    const channel = await ChannelFactory.create()
+    const channel = await ChannelFactory.with('server').create()
     const data = { name: 'new name' }
     const response = await client
       .put(`/servers/${channel.serverId}/channels/${channel.id}`)
@@ -53,7 +53,7 @@ test.group('Channels update', () => {
     assert.equal(response.status(), 401)
   })
   test('must return 403 when user is not a member of server', async ({ assert, client }) => {
-    const channel = await ChannelFactory.create()
+    const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()
     const data = { name: 'new name', description: 'new description' }
     const response = await client

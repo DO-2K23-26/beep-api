@@ -1,6 +1,5 @@
-import ChannelService from '#apps/channels/services/channel_service'
-import { ShowChannelSchema } from '#apps/channels/validators/channel'
-import MessagePolicy from '#apps/messages/policies/message_policy'
+import { Payload } from '#apps/authentication/contracts/payload'
+import MessageChannelPolicy from '#apps/channels/policies/message_channel_policy'
 import MessageService from '#apps/messages/services/message_service'
 import {
   createMessageValidator,
@@ -8,37 +7,31 @@ import {
   pinMessageValidator,
   updateMessageValidator,
 } from '#apps/messages/validators/message'
-import ServerService from '#apps/servers/services/server_service'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import Message from '#apps/messages/models/message'
 @inject()
 export default class MessagesChannelsController {
-  constructor(
-    private readonly messageService: MessageService,
-    private readonly channelService: ChannelService,
-    private readonly serverService: ServerService
-  ) {}
+  constructor(private readonly messageService: MessageService) {}
   /**
    * Display a list of resource
    */
-  async index({ params, request }: HttpContext) {
-    const channelId: string = params.channelId
+  async index({ params, request, bouncer }: HttpContext) {
+    const channelId = params.channelId
+    await bouncer.with(MessageChannelPolicy).authorize('index' as never, channelId)
     const queryStrings = await request.validateUsing(getMessagesValidator)
-    let messages: Message[]
     if (!queryStrings?.before && !queryStrings?.limit) {
-      messages = await this.messageService.findAllByChannelId(channelId)
+      return this.messageService.findAllByChannelId(channelId)
     } else {
-      messages = await this.messageService.getPaginated(channelId, queryStrings)
+      return this.messageService.getPaginated(channelId, queryStrings)
     }
-    return messages
   }
 
   /**
    * Get all pinned messages from a channel
    */
-  async pinned({ params }: HttpContext) {
-    const channelId: string = params.channelId
+  async pinned({ params, bouncer }: HttpContext) {
+    const channelId = params.channelId
+    await bouncer.with(MessageChannelPolicy).authorize('index' as never, channelId)
     return this.messageService.findPinned(channelId)
   }
 
@@ -46,28 +39,26 @@ export default class MessagesChannelsController {
    * Pin a message
    */
   async pin({ params, bouncer, request, auth, response }: HttpContext) {
-    const payload = auth.use('jwt').payload
+    const payload = auth.user as Payload
     const channelId = params.channelId
     const messageId = params.messageId
     const req = await request.validateUsing(pinMessageValidator)
-    await bouncer.with(MessagePolicy).authorize('pin' as never, messageId, channelId)
-    const message = await this.messageService.pinning(messageId, req, payload!.sub as string)
+    await bouncer.with(MessageChannelPolicy).authorize('pin' as never, channelId, messageId)
+    const message = await this.messageService.pinning(messageId, req, payload.sub)
     return response.send(message)
   }
 
   /**
    * Handle form submission for the create action
    */
-  async store({ auth, request, params, response }: HttpContext) {
+  async store({ auth, request, params, response, bouncer }: HttpContext) {
     const payload = auth.use('jwt').payload
     const channelId = params.channelId
-
+    await bouncer.with(MessageChannelPolicy).authorize('store' as never, channelId)
     const data = await request.validateUsing(createMessageValidator)
-    if (!data.attachments && !data.content) {
+    if (!data.attachments && !data.content)
       return response.badRequest({ message: 'Content or attachments are required' })
-    }
     const newMessage = await this.messageService.create(data, payload!.sub as string, channelId)
-
     return response.created(newMessage)
   }
 
@@ -76,41 +67,29 @@ export default class MessagesChannelsController {
    */
   async update({ request, params, bouncer }: HttpContext) {
     const messageId = params.messageId
+    const channelId = params.channelId
+    await bouncer.with(MessageChannelPolicy).authorize('update' as never, channelId, messageId)
     const receivedMessage = await request.validateUsing(updateMessageValidator)
-    const message = await this.messageService.show(messageId)
-    await bouncer.with(MessagePolicy).authorize('edit' as never, message)
-    const updatedMessage = await this.messageService.update(receivedMessage, messageId)
-
-    return updatedMessage
+    return this.messageService.update(receivedMessage, messageId)
   }
 
   /**
    * Show individual record
    */
-  async show({ params }: HttpContext) {
-    const messageId: string = params.messageId
+  async show({ params, bouncer }: HttpContext) {
+    const messageId = params.messageId
+    await bouncer.with(MessageChannelPolicy).authorize('show' as never, params.channelId, messageId)
     return this.messageService.show(messageId)
   }
 
   /**
    * Delete record
    */
-  async destroy({ params, bouncer }: HttpContext) {
+  async destroy({ params, bouncer, response }: HttpContext) {
     const messageId = params.messageId
-    const message = await this.messageService.show(messageId)
-
-    const showChannelSchema: ShowChannelSchema = {
-      params: {
-        id: message.channelId,
-      },
-      users: true,
-      messages: undefined,
-    }
-    const channel = await this.channelService.findById(showChannelSchema)
-
-    const server = await this.serverService.findById(channel.serverId)
-    await bouncer.with(MessagePolicy).authorize('delete' as never, message, server)
-
-    return this.messageService.destroy(messageId)
+    const channelId = params.channelId
+    await bouncer.with(MessageChannelPolicy).authorize('destroy' as never, channelId, messageId)
+    await this.messageService.destroy(messageId)
+    return response.send({ message: 'Message deleted successfully' })
   }
 }

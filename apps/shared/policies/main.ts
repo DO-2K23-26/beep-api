@@ -13,11 +13,9 @@
 */
 
 import { usersPolicies } from '#apps/users/policies'
-import { messagesPolicies } from '#apps/messages/policies'
 import { storagePolicies } from '#apps/storage/policies'
 
 export const policies = {
   ...usersPolicies,
-  ...messagesPolicies,
   ...storagePolicies,
 }

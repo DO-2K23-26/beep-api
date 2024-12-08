@@ -1,6 +1,6 @@
 import { middleware } from '#start/kernel'
 import router from '@adonisjs/core/services/router'
-import InvitationsController from '#apps/invitations/controllers/invitations_controller'
+const InvitationsController = () => import('#apps/invitations/controllers/invitations_controller')
 
 router
   .group(() => {

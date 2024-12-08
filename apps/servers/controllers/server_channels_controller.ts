@@ -17,11 +17,7 @@ export default class ServerChannelsController {
 
   async findByChannelId({ params, bouncer }: HttpContext) {
     await bouncer.with(ServerChannelPolicy).authorize('view' as never, params.serverId)
-    return this.channelService.findById({
-      params: { id: params.channelId as string },
-      messages: undefined,
-      users: undefined,
-    })
+    return this.channelService.findByIdOrFail(params.channelId)
   }
 
   // Creates a channel in a server

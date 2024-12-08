@@ -1,27 +1,25 @@
+import ChannelNotFoundException from '#apps/channels/exceptions/channel_not_found_exception'
 import Channel from '#apps/channels/models/channel'
+import { ChannelType } from '#apps/channels/models/channel_type'
+import { CachedUser, OccupiedChannel } from '#apps/channels/models/occupied_channels'
 import {
   CreateChannelSchema,
-  UpdateChannelSchema,
-  IndexChannelSchema,
-  ShowChannelSchema,
   SubscribeChannelSchema,
+  UpdateChannelSchema,
 } from '#apps/channels/validators/channel'
-import jwt from 'jsonwebtoken'
-import env from '#start/env'
-import redis from '@adonisjs/redis/services/main'
-import transmit from '@adonisjs/transmit/services/main'
-import { CachedUser, OccupiedChannel } from '#apps/channels/models/occupied_channels'
-import User from '#apps/users/models/user'
+import Message from '#apps/messages/models/message'
+import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
+import Server from '#apps/servers/models/server'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
+import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
+import User from '#apps/users/models/user'
 import UserService from '#apps/users/services/user_service'
+import env from '#start/env'
 import { inject } from '@adonisjs/core'
 import logger from '@adonisjs/core/services/logger'
-import ChannelNotFoundException from '#apps/channels/exceptions/channel_not_found_exception'
-import Server from '#apps/servers/models/server'
-import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
-import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
-import { ChannelType } from '#apps/channels/models/channel_type'
-import Message from '#apps/messages/models/message'
+import redis from '@adonisjs/redis/services/main'
+import transmit from '@adonisjs/transmit/services/main'
+import jwt from 'jsonwebtoken'
 
 export interface PayloadJWTSFUConnection {
   channelSn?: string
@@ -32,41 +30,22 @@ export interface PayloadJWTSFUConnection {
 export default class ChannelService {
   constructor(private userService: UserService) {}
 
-  async findAll(data: IndexChannelSchema): Promise<Channel[]> {
-    return Channel.query()
-      .if(data.messages, (query) => {
-        query.preload('messages')
-      })
-      .if(data.users, (query) => {
-        query.preload('users')
-      })
-  }
-
-  async findAllForUser(userId: string, data: IndexChannelSchema): Promise<Channel[]> {
-    return Channel.query()
-      .whereHas('users', (builder) => {
-        builder.where('user_id', userId)
-      })
-      .if(data.messages, (query) => {
-        query.preload('messages')
-      })
-      .if(data.users, (query) => {
-        query.preload('users')
-      })
-  }
-
-  async findById(data: ShowChannelSchema): Promise<Channel> {
-    return Channel.query()
-      .where('id', data.params.id)
-      .if(data.messages, (query) => {
-        query.preload('messages', (messageQuery) => {
-          messageQuery.preload('owner')
+  async findByIdOrFail(channelId: string): Promise<Channel> {
+    const cachedChannel = await redis.get(`channel:${channelId}`)
+    if (cachedChannel) {
+      return JSON.parse(cachedChannel) as Channel
+    }
+    const channel = await Channel.query()
+      .where('id', channelId)
+      .firstOrFail()
+      .catch(() => {
+        throw new ChannelNotFoundException('Channel not found', {
+          status: 404,
+          code: 'E_ROW_NOT_FOUND',
         })
       })
-      .if(data.users, (query) => {
-        query.preload('users')
-      })
-      .firstOrFail()
+    await redis.set(`channel:${channelId}`, JSON.stringify(channel), 'EX', 10 * 60 * 6)
+    return channel
   }
 
   async findAllByServer(serverId: string): Promise<Channel[]> {
@@ -185,7 +164,7 @@ export default class ChannelService {
       })
     })
     channel.merge(payload)
-
+    await redis.del(`channel:${id}`)
     return channel.save()
   }
 
