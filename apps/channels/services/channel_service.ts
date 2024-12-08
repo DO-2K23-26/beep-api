@@ -19,6 +19,9 @@ import logger from '@adonisjs/core/services/logger'
 import ChannelNotFoundException from '#apps/channels/exceptions/channel_not_found_exception'
 import Server from '#apps/servers/models/server'
 import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
+import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
+import { ChannelType } from '#apps/channels/models/channel_type'
+import Message from '#apps/messages/models/message'
 
 export interface PayloadJWTSFUConnection {
   channelSn?: string
@@ -68,10 +71,93 @@ export default class ChannelService {
 
   async findAllByServer(serverId: string): Promise<Channel[]> {
     const server = await Server.findOrFail(serverId).catch(() => {
-      throw new ServerNotFoundException('Server not found', { status: 404, code: 'E_ROWNOTFOUND' })
+      throw new ServerNotFoundException('Server not found', {
+        status: 404,
+        code: 'E_ROW_NOT_FOUND',
+      })
     })
     await server.load('channels')
     return server.channels
+  }
+
+  async findPrivateOrderedForUserOrFail(userId: string): Promise<Channel[]> {
+    await User.findOrFail(userId).catch(() => {
+      throw new UserNotFoundException('User not found', { status: 404, code: 'E_ROW_NOT_FOUND' })
+    })
+
+    const messageSubquery = Message.query()
+      .select('createdAt')
+      .whereColumn('messages.channel_id', 'channels.id')
+      .orderBy('createdAt', 'desc')
+      .limit(1)
+
+    const channels = await Channel.query()
+      .whereHas('users', (builder) => {
+        builder.where('user_id', userId)
+      })
+      .where('type', ChannelType.private_chat)
+      .orderBy(messageSubquery, 'desc')
+      .preload('messages', (builder) => {
+        builder.orderBy('createdAt', 'desc')
+      })
+      .preload('users', (builder) => {
+        builder.select('id', 'username', 'profilePicture').whereNot('id', userId)
+      })
+    return channels
+  }
+
+  async findPrivateByUser(userId: string): Promise<Channel[] | null> {
+    const user = await User.find(userId)
+    if (!user) return null
+    return Channel.query()
+      .whereHas('users', (builder) => {
+        builder.where('user_id', userId)
+      })
+      .where('type', ChannelType.private_chat)
+  }
+
+  async findPrivateByUserOrFail(userId: string): Promise<Channel[]> {
+    await User.findOrFail(userId).catch(() => {
+      throw new UserNotFoundException('User not found', { status: 404, code: 'E_ROW_NOT_FOUND' })
+    })
+
+    const channels = await this.findPrivateByUser(userId)
+    if (!channels) {
+      throw new ChannelNotFoundException('Channel not found', {
+        status: 404,
+        code: 'E_ROW_NOT_FOUND',
+      })
+    }
+    return channels
+  }
+
+  async findFromUsersOrFail(userIds: string[]): Promise<Channel> {
+    const users = await User.findMany(userIds)
+    if (users.length !== userIds.length) {
+      throw new UserNotFoundException('Users not found', {
+        status: 404,
+        code: 'E_ROW_NOT_FOUND',
+      })
+    }
+
+    const channel = await this.findFromUsers(userIds)
+    if (!channel) {
+      throw new ChannelNotFoundException('Channel not found', {
+        status: 404,
+        code: 'E_ROW_NOT_FOUND',
+      })
+    }
+
+    return channel
+  }
+
+  async findFromUsers(userIds: string[]): Promise<Channel | null> {
+    const channel = await Channel.query()
+      .whereHas('users', (builder) => {
+        builder.whereInPivot('user_id', userIds)
+      })
+      .first()
+    return channel
   }
 
   async create(
@@ -80,7 +166,7 @@ export default class ChannelService {
     userId: string
   ): Promise<Channel> {
     const sn = generateSnowflake()
-    const type = newChannel.type as 0 | 1 | 2
+    const type = newChannel.type as ChannelType
     const channel = await Channel.create({
       name: newChannel.name,
       type: type,

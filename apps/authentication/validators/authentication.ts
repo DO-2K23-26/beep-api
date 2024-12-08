@@ -1,6 +1,5 @@
 import vine from '@vinejs/vine'
 import { Infer } from '@vinejs/vine/types'
-import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
 
 export const signinAuthenticationValidator = vine.compile(
   vine.object({
@@ -45,7 +44,7 @@ export const createAuthenticationValidator = vine.compile(
     lastname: vine.string(),
     email: vine.string(),
     password: vine.string(),
-    profilePicture: new VineMultipartFile().nullable().optional(),
+    profilePicture: vine.file().nullable().optional(),
   })
 )
 

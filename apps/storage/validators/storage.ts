@@ -1,6 +1,5 @@
 import vine from '@vinejs/vine'
 import { Infer } from '@vinejs/vine/types'
-import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
 
 /**
  * Validator to validate the payload when creating
@@ -14,7 +13,7 @@ export const createStorageValidator = vine.compile(
       .exists((db, value) => {
         return db.from('messages').where('id', value).firstOrFail()
       }),
-    attachment: vine.multipartFile(),
+    attachment: vine.file(),
   })
 )
 
@@ -24,7 +23,7 @@ export const createStorageValidator = vine.compile(
  */
 export const updateStorageValidator = vine.compile(
   vine.object({
-    attachment: new VineMultipartFile(),
+    attachment: vine.file(),
     params: vine.object({
       id: vine
         .string()

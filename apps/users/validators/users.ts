@@ -1,4 +1,3 @@
-import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
 import vine from '@vinejs/vine'
 import { Infer } from '@vinejs/vine/types'
 
@@ -31,7 +30,7 @@ export const updateUserValidator = vine.compile(
     firstName: vine.string().optional(),
     lastName: vine.string().optional(),
     email: vine.string().email().optional(),
-    profilePicture: new VineMultipartFile().nullable().optional(),
+    profilePicture: vine.file().nullable().optional(),
   })
 )
 

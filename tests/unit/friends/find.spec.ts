@@ -3,11 +3,11 @@ import FriendService from '#apps/friends/services/friend_service'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
 import { FriendFactory } from '#database/factories/friend_factory'
 import { UserFactory } from '#database/factories/user_factory'
+import app from '@adonisjs/core/services/app'
 import { test } from '@japa/runner'
 
+const friendService = await app.container.make(FriendService)
 test.group('Friends find', () => {
-  const friendService = new FriendService()
-
   test('should return a frienship', async ({ assert }) => {
     const friendship = await FriendFactory.create()
     const foundFriendship = await friendService.findFriendship(

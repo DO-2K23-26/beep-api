@@ -1,4 +1,3 @@
-import { VineMultipartFile } from '#apps/shared/vineType/vine_multipart_file'
 import vine from '@vinejs/vine'
 import { Infer } from '@vinejs/vine/types'
 
@@ -42,7 +41,7 @@ export const indexServerValidator = vine.compile(
 
 export const updateBannerValidator = vine.compile(
   vine.object({
-    attachment: new VineMultipartFile(),
+    attachment: vine.file(),
     params: vine.object({
       serverId: vine.string().uuid({ version: [4] }),
     }),
@@ -53,7 +52,7 @@ export const updateBannerValidator = vine.compile(
 
 export const updatePictureValidator = vine.compile(
   vine.object({
-    attachment: new VineMultipartFile(),
+    attachment: vine.file(),
     params: vine.object({
       serverId: vine.string().uuid({ version: [4] }),
     }),

@@ -4,9 +4,13 @@ import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
 import AlreadyFriendsException from '#apps/friends/exceptions/already_friends_exception'
 import FriendshipNotFoundException from '#apps/friends/exceptions/friendship_not_found_exception'
+import Channel from '#apps/channels/models/channel'
+import { ChannelType } from '#apps/channels/models/channel_type'
+import ChannelService from '#apps/channels/services/channel_service'
 
 @inject()
 export default class FriendService {
+  constructor(readonly channelService: ChannelService) {}
   async deleteFriendship(userId: string, friendId: string): Promise<void> {
     const friendship = await this.findFriendshipOrFail(userId, friendId)
     await friendship.delete()
@@ -28,7 +32,19 @@ export default class FriendService {
         status: 400,
       })
     }
-    return Friend.create({ user_id: userId, friend_id: friendId })
+
+    const friends = await Friend.create({ user_id: userId, friend_id: friendId })
+
+    const channel = await this.channelService.findFromUsers([userId, friendId])
+    if (!channel) {
+      const channel = await Channel.create({
+        name: `${userId}, ${friendId}`,
+        type: ChannelType.private_chat,
+      })
+
+      await channel.related('users').attach([userId, friendId])
+    }
+    return friends
   }
 
   async findByUser(userId: string): Promise<User[]> {

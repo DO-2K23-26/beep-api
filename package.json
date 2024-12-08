@@ -70,7 +70,7 @@
     "@aws-sdk/s3-request-presigner": "^3.688.0",
     "@japa/expect": "^3.0.2",
     "@types/jsonwebtoken": "^9.0.5",
-    "@vinejs/vine": "^ 2.1.0 ",
+    "@vinejs/vine": "^3.0.0",
     "adonis-autoswagger": "^3.63.0",
     "flydrive": "^1.0.2",
     "jsonwebtoken": "^9.0.2",

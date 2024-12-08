@@ -8,10 +8,4 @@ export default class extends BaseSchema {
       table.string('server_id').nullable().alter()
     })
   }
-
-  async down() {
-    this.schema.alterTable(this.tableName, (table) => {
-      table.string('server_id').notNullable().alter()
-    })
-  }
 }

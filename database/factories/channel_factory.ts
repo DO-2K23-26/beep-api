@@ -13,6 +13,9 @@ export const ChannelFactory = factory
       serverId: server.id,
     })
   })
+  .state('private_channel', async (channel) => {
+    channel.type = ChannelType.private_chat
+  })
   .build()
 
 export const ChannelFactoryWithServer = (serverId: string) =>
