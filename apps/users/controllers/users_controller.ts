@@ -16,7 +16,6 @@ export default class UsersController {
   async update({ request, auth, response }: HttpContext) {
     const payload = auth.use('jwt').payload
     const data = await request.validateUsing(updateUserValidator)
-    if (data.email) return response.abort({ message: "You can't update the email with this route" })
     if (!payload?.sub) return response.abort({ message: "Can't update the user" })
     return this.userService.update(data, payload?.sub ?? '')
   }
