@@ -50,7 +50,7 @@ router
               })
               .prefix('/email')
             router.get('', [UsersControllerV0, 'findMe'])
-            router.put('', [UsersControllerV0, 'update'])
+            router.put('', [UsersController, 'update'])
           })
           .prefix('/@me')
         router.get('/:userId', [UsersControllerV0, 'show'])

@@ -30,7 +30,7 @@ export default class OtpController {
     const otpVerificationValidator = vine.compile(
       vine.object({
         email: vine.string().email(),
-        otp: vine.string().fixedLength(6), // Assuming OTP is a 6-digit code
+        otp: vine.string().fixedLength(6), // OTP is a 6-digit code
       })
     )
 
@@ -39,7 +39,7 @@ export default class OtpController {
 
     const isValid = await this.otpService.verifyOtp(email, otp)
     if (!isValid) {
-      return response.unauthorized({ message: 'Invalid or expired OTP' })
+      return response.badRequest({ error: 'Invalid or expired OTP' })
     }
 
     return response.ok({ message: 'OTP verified successfully' })
