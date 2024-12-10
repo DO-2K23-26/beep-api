@@ -31,12 +31,7 @@ export default class ServerRolesController {
    */
   async show({ params, bouncer }: HttpContext) {
     await bouncer.with(ServerRolePolicy).authorize('view' as never, params.serverId)
-    return this.roleService.findById({
-      name: undefined,
-      permissions: undefined,
-      color: undefined,
-      params: { id: params.roleId },
-    })
+    return this.roleService.findById(params.roleId)
   }
 
   /**
