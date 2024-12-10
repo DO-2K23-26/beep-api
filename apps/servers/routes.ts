@@ -70,6 +70,10 @@ router
                     router.put('/webhook/:webhookId', [ServerWebhooksController, 'updateWebhook'])
                     router.get('/webhooks', [ServerWebhooksController, 'findByChannelId'])
                     router.get('/webhook/:webhookId', [ServerWebhooksController, 'findByWebhookId'])
+                    router.delete('/webhook/:webhookId', [
+                      ServerWebhooksController,
+                      'deleteWebhook',
+                    ])
                   })
                   .prefix('/:channelId')
               })
