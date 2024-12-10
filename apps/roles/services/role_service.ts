@@ -1,14 +1,14 @@
 import RoleNotFoundException from '#apps/roles/exceptions/role_not_found_exception'
 import Role from '#apps/roles/models/role'
-import { CreateRoleSchema, ShowRoleSchema, UpdateRoleSchema } from '#apps/roles/validators/role'
+import { CreateRoleSchema, UpdateRoleSchema } from '#apps/roles/validators/role'
 import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
 import Server from '#apps/servers/models/server'
 import { inject } from '@adonisjs/core'
 
 @inject()
 export default class RoleService {
-  async findById(data: ShowRoleSchema): Promise<Role> {
-    return Role.query().where('id', data.params.id).firstOrFail()
+  async findById(roleId: string): Promise<Role> {
+    return Role.query().where('id', roleId).firstOrFail()
   }
 
   async findAllByServer(serverId: string): Promise<Role[]> {
