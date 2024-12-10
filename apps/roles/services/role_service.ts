@@ -8,7 +8,13 @@ import { inject } from '@adonisjs/core'
 @inject()
 export default class RoleService {
   async findById(roleId: string): Promise<Role> {
-    return Role.query().where('id', roleId).firstOrFail()
+    const role = await Role.query()
+      .where('id', roleId)
+      .firstOrFail()
+      .catch(() => {
+        throw new RoleNotFoundException('Server not found', { status: 404, code: 'E_ROWNOTFOUND' })
+      })
+    return role
   }
 
   async findAllByServer(serverId: string): Promise<Role[]> {
@@ -37,12 +43,16 @@ export default class RoleService {
       })
     })
     role.merge(payload)
-
     return role.save()
   }
 
   async deleteById(roleId: string): Promise<void> {
-    const role: Role = await Role.findOrFail(roleId)
+    const role: Role = await Role.findOrFail(roleId).catch(() => {
+      throw new RoleNotFoundException('Role not found', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
     await role.delete()
   }
 }
