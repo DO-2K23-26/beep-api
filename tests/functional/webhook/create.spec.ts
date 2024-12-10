@@ -11,11 +11,9 @@ test.group('Webhook create', () => {
 
     const payload = {
       name: 'string',
-      profilePicture: 'https://beep.baptistebronsin.be/logo.png',
       serverId: server.id,
       channelId: 'string',
       userId: 'string',
-      token: 'string',
     }
 
     const result = await client
@@ -25,7 +23,6 @@ test.group('Webhook create', () => {
     result.assertStatus(201)
     result.assertBodyContains({
       name: payload.name,
-      profilePicture: payload.profilePicture,
       channelId: payload.channelId,
       serverId: payload.serverId,
     })
@@ -43,10 +40,8 @@ test.group('Webhook create', () => {
 
     const payload = {
       name: webhook.name,
-      profilePicture: 'https://beep.baptistebronsin.be/logo.png',
       serverId: server.id,
       channelId: webhook.channelId,
-      token: 'string',
     }
 
     const result = await client
