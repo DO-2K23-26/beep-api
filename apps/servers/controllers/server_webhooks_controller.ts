@@ -53,4 +53,12 @@ export default class ServerWebhooksController {
     const webhook = await this.webhookService.findById(webhookId)
     return webhook
   }
+
+  // Deletes a webhook in a channel
+  async deleteWebhook({ params, bouncer }: HttpContext) {
+    await bouncer.with(ServerWebhookPolicy).authorize('delete' as never, params.serverId)
+
+    const webhookId = params.webhookId
+    await this.webhookService.delete(webhookId)
+  }
 }

@@ -7,6 +7,8 @@ import { randomUUID } from 'crypto'
 import Webhook from '#apps/webhooks/models/webhook'
 import WebhookAlreadyExistsException from '../exceptions/webhook_already_exists_exception.js'
 import WebhookNotFoundException from '../exceptions/webhook_not_found_exception.js'
+import Message from '#apps/messages/models/message'
+import { ActionSignalMessage, SignalMessage } from '#apps/messages/models/signaling'
 
 @inject()
 export default class WebhookService {
@@ -106,6 +108,28 @@ export default class WebhookService {
       })
     }
 
+    return webhook
+  }
+
+  // Supprime un webhook et tous les messages associés
+  async delete(webhookId: string) {
+    // Trouver le webhook
+    const webhook = await Webhook.findOrFail(webhookId)
+
+    // Supprimer les messages associés
+    // const messages = await Message.query().where('webhookId', webhookId)
+    const messages = await Message.findManyBy('webhookId', webhookId)
+    for (const message of messages) {
+      const signalMessage: SignalMessage = {
+        message: message,
+        action: ActionSignalMessage.delete,
+      }
+      transmit.broadcast(`channels/${message.channelId}/messages`, JSON.stringify(signalMessage))
+      await message.delete()
+    }
+
+    // Supprimer le webhook
+    await webhook.delete()
     return webhook
   }
 }
