@@ -40,7 +40,7 @@ export default class Webhook extends BaseModel {
 
   // Column for the secure token
   @column()
-  declare token: string
+  declare token: string | null
 
   // Define the parent relationship (a webhook belongs to a user)
   @belongsTo(() => User, {

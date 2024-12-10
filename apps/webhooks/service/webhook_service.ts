@@ -3,7 +3,7 @@ import { UpdateWebhookSchema, CreateWebhooksSchema } from '#apps/webhooks/valida
 import StorageService from '#apps/storage/services/storage_service'
 import { inject } from '@adonisjs/core'
 import transmit from '@adonisjs/transmit/services/main'
-import { randomUUID } from 'crypto'
+import crypto from 'node:crypto'
 import Webhook from '#apps/webhooks/models/webhook'
 import WebhookAlreadyExistsException from '../exceptions/webhook_already_exists_exception.js'
 import WebhookNotFoundException from '../exceptions/webhook_not_found_exception.js'
@@ -35,7 +35,7 @@ export default class WebhookService {
     const createdWebhook = await Webhook.create({
       name: webhook.name,
       profilePicture: webhook.profilePicture || 'https://beep.baptistebronsin.be/logo.png',
-      token: webhook.token || randomUUID(),
+      token: webhook.token || crypto.randomBytes(32).toString('hex'),
       userId: ownerId,
       channelId: channelId,
       serverId: webhook.serverId || null,
