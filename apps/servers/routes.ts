@@ -86,10 +86,10 @@ router
             router.get('/streaming/users', [ServerChannelsController, 'streamingUsers'])
             router.delete('/', [ServerController, 'destroy'])
             router.post('/mic', [ServerChannelsController, 'changeMutedStatus']).prefix('users')
+            router.get('/webhooks', [ServerWebhooksController, 'findByServerId'])
           })
           .prefix('/:serverId')
       })
       .prefix('servers')
   })
-
   .use(middleware.auth())
