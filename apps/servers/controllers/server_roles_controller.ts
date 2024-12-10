@@ -31,17 +31,21 @@ export default class ServerRolesController {
    */
   async show({ params, bouncer }: HttpContext) {
     await bouncer.with(ServerRolePolicy).authorize('view' as never, params.serverId)
-    // ####### big commentaire à hugo, .findById() prend ShowRoleSchema en paramètre
-    //return this.roleService.findById({ params: { id: params.roleId } })
+    return this.roleService.findById({
+      name: undefined,
+      permissions: undefined,
+      color: undefined,
+      params: { id: params.roleId },
+    })
   }
 
   /**
    * Handle the form submission to update a specific role by id
    */
   async update({ params, request, response, bouncer }: HttpContext) {
-    const receivedChannel = await request.validateUsing(updateRoleValidator)
+    const receivedRole = await request.validateUsing(updateRoleValidator)
     await bouncer.with(ServerRolePolicy).authorize('update' as never, params.serverId)
-    const role = await this.roleService.update(params.channelId, receivedChannel)
+    const role = await this.roleService.update(params.roleId, receivedRole)
     return response.send(role)
   }
 
@@ -49,8 +53,8 @@ export default class ServerRolesController {
    * Handle the form submission to delete a specific role by id.
    */
   async destroy({ params }: HttpContext) {
-    const channelId = params.channelId
-    await this.roleService.deleteById(channelId)
+    const roleId = params.roleId
+    await this.roleService.deleteById(roleId)
     return { message: 'Role deleted successfully' }
   }
 }
