@@ -7,8 +7,9 @@ const ServerChannelsController = () =>
   import('#apps/servers/controllers/server_channels_controller')
 const ServerInvitationsController = () =>
   import('#apps/servers/controllers/server_invitations_controller')
-
 const ServerMembersController = () => import('#apps/servers/controllers/server_members_controller')
+const ServerWebhooksController = () =>
+  import('#apps/servers/controllers/server_webhooks_controller')
 
 router
   .group(() => {
@@ -45,8 +46,15 @@ router
                 router.put('/:channelId', [ServerChannelsController, 'updateChannel'])
                 router.delete('/:channelId', [ServerChannelsController, 'deleteChannel'])
                 router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
+
                 router
-                  .post('/join', [ServerChannelsController, 'joinChannel'])
+                  .group(() => {
+                    router.post('/join', [ServerChannelsController, 'joinChannel'])
+                    router.post('/webhook', [ServerWebhooksController, 'createWebhook'])
+                    router.put('/webhook/:webhookId', [ServerWebhooksController, 'updateWebhook'])
+                    router.get('/webhooks', [ServerWebhooksController, 'findByChannelId'])
+                    router.get('/webhook/:webhookId', [ServerWebhooksController, 'findByWebhookId'])
+                  })
                   .prefix('/:channelId')
               })
               .prefix('channels')
@@ -69,10 +77,10 @@ router
             router.get('/streaming/users', [ServerChannelsController, 'streamingUsers'])
             router.delete('/', [ServerController, 'destroy'])
             router.post('/mic', [ServerChannelsController, 'changeMutedStatus']).prefix('users')
+            router.get('/webhooks', [ServerWebhooksController, 'findByServerId'])
           })
           .prefix('/:serverId')
       })
       .prefix('servers')
   })
-
   .use(middleware.auth())
