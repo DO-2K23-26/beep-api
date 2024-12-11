@@ -151,4 +151,20 @@ export default class MailService {
 
     await this.sendMail(email, subject, htmlMessage)
   }
+
+  /**
+   * Send email to confirm that a change (of the email) has been made
+   * @param email - Recipient's email
+   */
+  public async sendChangeConfirmationMail(email: string): Promise<void> {
+    const subject: string = 'Confirmation de changement'
+
+    const htmlMessage: string = `
+    <p>Bonjour,</p>
+    <p>Nous vous confirmons que votre changement a été effectué avec succès.</p>
+    <p>Si vous n'êtes pas à l'origine de cette modification, merci de nous contacter immédiatement.</p>
+  `
+
+    await this.sendMail(email, subject, htmlMessage)
+  }
 }

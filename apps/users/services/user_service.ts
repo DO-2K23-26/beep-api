@@ -58,6 +58,10 @@ export default class UserService {
       const key = await this.storageService.storeProfilePicture(updatedUser.profilePicture, user.id)
       user.merge({ profilePicture: key })
     }
+    if (updatedUser.email) {
+      this.mailService.sendChangeConfirmationMail(updatedUser.email)
+    }
+
     await user
       .merge(restOfObject)
       .save()
