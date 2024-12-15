@@ -3,7 +3,7 @@ import OtpService from '#apps/users/services/otp_service'
 import MailService from '#apps/authentication/services/mail_service'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import vine from '@vinejs/vine'
-import { otpEmailValidator } from '../validators/users.js'
+import { emailUpdateValidator } from '../validators/users.js'
 
 export default class OtpController {
   private otpService: OtpService
@@ -17,8 +17,8 @@ export default class OtpController {
   // Generate OTP
   public async generateOtp({ request, response }: HttpContext) {
     try {
-      const { email } = await request.validateUsing(otpEmailValidator)
-      await this.otpService.generateOtp(email)
+      const { email } = await request.validateUsing(emailUpdateValidator)
+      await this.otpService.generateOtp({ email })
       return response.ok({ message: 'OTP sent successfully' })
     } catch (error) {
       return response.badRequest({ errors: error.messages })
@@ -37,7 +37,7 @@ export default class OtpController {
     // Validate the incoming request using the otpVerificationValidator schema
     const { email, otp } = await request.validateUsing(otpVerificationValidator)
 
-    const isValid = await this.otpService.verifyOtp(email, otp)
+    const isValid = await this.otpService.verifyOtp({ email, otp })
     if (!isValid) {
       return response.badRequest({ error: 'Invalid or expired OTP' })
     }

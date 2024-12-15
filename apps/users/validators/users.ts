@@ -12,11 +12,12 @@ export const emailUpdateValidator = vine.compile(
 )
 
 /**
- * Validator for the OTP generation request
+ * Validator for the OTP validation request
  */
 export const otpEmailValidator = vine.compile(
   vine.object({
-    email: vine.string().email(), // Ensuring that emailValidator is a valid email address
+    email: vine.string().email(), // Valid email adress
+    otp: vine.string().maxLength(6), // 6 digit code
   })
 )
 
@@ -55,3 +56,4 @@ export type UpdateUserValidator = Infer<typeof updateUserValidator>
 export type GetMultipleUserValidator = Infer<typeof getMultipleUserValidator>
 export type GetUsersSchema = Infer<typeof getUsersValidator>
 export type OtpEmailValidator = Infer<typeof otpEmailValidator>
+export type EmailUpdateValidator = Infer<typeof emailUpdateValidator>
