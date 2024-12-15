@@ -3,16 +3,25 @@ import { UpdateWebhookSchema, CreateWebhooksSchema } from '#apps/webhooks/valida
 import StorageService from '#apps/storage/services/storage_service'
 import { inject } from '@adonisjs/core'
 import transmit from '@adonisjs/transmit/services/main'
-import crypto from 'node:crypto'
 import Webhook from '#apps/webhooks/models/webhook'
 import WebhookAlreadyExistsException from '../exceptions/webhook_already_exists_exception.js'
 import WebhookNotFoundException from '../exceptions/webhook_not_found_exception.js'
 import Message from '#apps/messages/models/message'
 import { ActionSignalMessage, SignalMessage } from '#apps/messages/models/signaling'
+import env from '#start/env'
+import jwt from 'jsonwebtoken'
+import WebhookJwtInvalidException from '../exceptions/webhook_jwt_invalid_exception.js'
+import AuthenticationService from '#apps/authentication/services/authentication_service'
+
+export interface PayloadJWTSFUConnection {
+  name?: string
+  userId: string
+}
 
 @inject()
 export default class WebhookService {
   constructor(protected storageService: StorageService) {}
+  authService = new AuthenticationService()
 
   async create(webhook: CreateWebhooksSchema, ownerId: string, channelId: string) {
     // Vérifiez si un webhook avec le même nom existe déjà dans le canal
@@ -35,7 +44,7 @@ export default class WebhookService {
     const createdWebhook = await Webhook.create({
       name: webhook.name,
       profilePicture: webhook.profilePicture || 'https://beep.baptistebronsin.be/logo.png',
-      token: webhook.token || crypto.randomBytes(32).toString('hex'),
+      token: this.generateToken({ name: webhook.name, userId: ownerId }),
       userId: ownerId,
       channelId: channelId,
       serverId: webhook.serverId || null,
@@ -131,5 +140,48 @@ export default class WebhookService {
     // Supprimer le webhook
     await webhook.delete()
     return webhook
+  }
+
+  async trigger(webhookId: string, messageContent: string) {
+    // Find the webhook by ID
+    const webhook = await Webhook.findOrFail(webhookId)
+
+    // Validate the webhook token with AuthenticationService.verifyToken
+    try {
+      this.authService.verifyToken(webhook.token ?? '')
+    } catch (err) {
+      throw new WebhookJwtInvalidException(err, {
+        status: 404,
+        code: 'E_WEBHOOK_INVALID_JWT',
+      })
+    }
+
+    // Create the message
+    const createdMessage = await Message.create({
+      content: messageContent,
+      webhookId: webhook.id,
+      channelId: webhook.channelId ?? '',
+      ownerId: webhook.userId ?? '',
+    })
+
+    // Construct the payload for the broadcast
+    const signalWebhook: SignalWebhook = {
+      webhook: webhook,
+      action: ActionSignalWebhook.trigger,
+      message: createdMessage.content,
+    }
+
+    // Broadcast the webhook event to the channel
+    transmit.broadcast(`channels/${webhook.channelId}/webhook`, JSON.stringify(signalWebhook))
+
+    return {
+      webhook,
+      message: createdMessage,
+      status: 'Webhook triggered and message created successfully',
+    }
+  }
+
+  generateToken(payload: PayloadJWTSFUConnection): string {
+    return jwt.sign(payload, env.get('APP_KEY'))
   }
 }

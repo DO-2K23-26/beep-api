@@ -13,6 +13,25 @@ const ServerMembersController = () => import('#apps/servers/controllers/server_m
 const ServerWebhooksController = () =>
   import('#apps/servers/controllers/server_webhooks_controller')
 
+/**
+ * Routes publiques (aucune authentification requise)
+ */
+router.group(() => {
+  router
+    .group(() => {
+      router
+        .group(() => {
+          router
+            .group(() => {
+              router.post('/trigger', [ServerWebhooksController, 'triggerWebhook'])
+            })
+            .prefix('/webhook/:webhookId')
+        })
+        .prefix('/channels/:channelId')
+    })
+    .prefix('/servers/:serverId')
+})
+
 router
   .group(() => {
     router

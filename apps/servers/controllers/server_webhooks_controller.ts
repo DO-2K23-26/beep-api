@@ -61,4 +61,14 @@ export default class ServerWebhooksController {
     const webhookId = params.webhookId
     await this.webhookService.delete(webhookId)
   }
+
+  //Trigger a webhook
+  async triggerWebhook({ params, bouncer, request, response }: HttpContext) {
+    const { webhookId } = params
+    await bouncer.with(ServerWebhookPolicy).authorize('trigger' as never, params.serverId)
+
+    const payload = request.only(['data'])
+    const result = await this.webhookService.trigger(webhookId, payload.data)
+    return response.ok(result)
+  }
 }
