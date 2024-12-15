@@ -48,4 +48,9 @@ export default class ServerWebhookPolicy extends BasePolicy {
   async delete(_payload: JwtPayload, _serverId: string) {
     return true
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async trigger(_payload: JwtPayload, _serverId: string) {
+    return true
+  }
 }
