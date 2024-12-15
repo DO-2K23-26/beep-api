@@ -1,6 +1,6 @@
 import redis from '@adonisjs/redis/services/main'
 import MailService from '#apps/authentication/services/mail_service'
-import cryptoRandomString from 'crypto-random-string'
+import crypto from 'node:crypto'
 
 export default class OtpService {
   private otpExpiry = 300 // OTP expires in 5 minutes
@@ -12,7 +12,7 @@ export default class OtpService {
    * @param email - Recipient's email
    */
   public async generateOtp(email: string): Promise<void> {
-    const otp = cryptoRandomString({ length: 6, type: 'numeric' }) // Generate 6-digit OTP
+    const otp = crypto.randomInt(100000, 999999).toString() // Generate 6-digit OTP
     const redisKey = this.getRedisKey(email)
 
     // Store OTP in Redis with expiration
