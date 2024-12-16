@@ -18,8 +18,9 @@ export default class ServerRolePolicy extends BasePolicy {
       await server.load('members')
       const member = server.members.find((m) => m.userId === payload.sub)
       if (!member) return false
+    } else {
+      return false
     }
-    return false
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
