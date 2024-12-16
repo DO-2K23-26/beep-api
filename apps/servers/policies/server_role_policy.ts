@@ -3,7 +3,6 @@ import { BasePolicy } from '@adonisjs/bouncer'
 import { inject } from '@adonisjs/core'
 import { JwtPayload } from 'jsonwebtoken'
 import Server from '#apps/servers/models/server'
-import ServerNotFoundException from '../exceptions/server_not_found_exception.js'
 
 @inject()
 export default class ServerRolePolicy extends BasePolicy {
@@ -13,21 +12,14 @@ export default class ServerRolePolicy extends BasePolicy {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async before(payload: JwtPayload, _action: string, ...params: any[]) {
-    const serverId = params[0] as string | null | undefined
+    const server = params[0] as Server | undefined | null
 
-    if (serverId && serverId !== undefined) {
-      const server = await Server.findOrFail(serverId).catch(() => {
-        throw new ServerNotFoundException('Server not found', {
-          status: 404,
-          code: 'E_ROWNOTFOUND',
-        })
-      })
-      if (!server) return false
+    if (server && server !== undefined) {
       await server.load('members')
       const member = server.members.find((m) => m.userId === payload.sub)
       if (!member) return false
-      return true
     }
+    return false
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,6 +34,11 @@ export default class ServerRolePolicy extends BasePolicy {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async update(_payload: JwtPayload, _serverId: string) {
+    return true
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async destroy(_payload: JwtPayload, _serverId: string) {
     return true
   }
 }

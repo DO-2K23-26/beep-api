@@ -2,6 +2,7 @@ import app from '@adonisjs/core/services/app'
 import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 import { errors as authErrors } from '@adonisjs/auth'
 import { errors as bouncerErrors } from '@adonisjs/bouncer'
+import { errors as lucidErrors } from '@adonisjs/lucid'
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -33,6 +34,14 @@ export default class HttpExceptionHandler extends ExceptionHandler {
 
     if (error instanceof bouncerErrors.E_AUTHORIZATION_FAILURE) {
       return ctx.response.status(error.status).send({
+        message: error.message,
+        status: error.status,
+        code: error.code,
+      })
+    }
+
+    if (error instanceof lucidErrors.E_ROW_NOT_FOUND) {
+      return ctx.response.status(404).send({
         message: error.message,
         status: error.status,
         code: error.code,
