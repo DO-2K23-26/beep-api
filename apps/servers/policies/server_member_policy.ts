@@ -11,9 +11,7 @@ export default class ServerMemberPolicy extends BasePolicy {
 
   async view(payload: JwtPayload, serverId: string) {
     const user = await this.userService.findById(payload.sub!)
-
     const ids = user.members.map((m) => m.serverId)
-
     if (ids.includes(serverId)) {
       return AuthorizationResponse.allow()
     }

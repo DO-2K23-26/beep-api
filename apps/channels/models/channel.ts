@@ -41,9 +41,7 @@ export default class Channel extends BaseModel {
   @hasMany(() => Message)
   declare messages: HasMany<typeof Message>
 
-  @belongsTo(() => Server, {
-    foreignKey: 'serverId',
-  })
+  @belongsTo(() => Server)
   declare server: BelongsTo<typeof Server>
 
   @column.dateTime({ autoCreate: true })

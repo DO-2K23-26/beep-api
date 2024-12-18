@@ -48,9 +48,6 @@ export default class MessageService {
       await this.create(
         {
           content: displayedMessage,
-          attachments: undefined,
-          parentMessageId: undefined,
-          transmitClientId: undefined,
         },
         userId,
         message.channelId
@@ -82,7 +79,15 @@ export default class MessageService {
       }
     }
     await createdMessage.load('attachments')
-
+    await createdMessage.load('owner', (query) => {
+      query.select('id', 'username', 'profilePicture')
+    })
+    if (message.parentMessageId)
+      await createdMessage.load('parentMessage', (query) => {
+        query.preload('owner', (query) => {
+          query.select('id', 'username', 'profilePicture')
+        })
+      })
     const signalMessage: SignalMessage = {
       message: createdMessage,
       action: ActionSignalMessage.create,
@@ -130,7 +135,7 @@ export default class MessageService {
       .where('channelId', channelId)
       .preload('parentMessage', (query) => {
         query.preload('owner', (query) => {
-          query.select('id', 'username')
+          query.select('id', 'username', 'profilePicture')
         })
       })
       .orderBy('created_at', 'desc')
@@ -142,10 +147,12 @@ export default class MessageService {
     const baseQuery = Message.query()
       .where('channelId', channelId)
       .preload('attachments')
-      .preload('parentMessage')
+      .preload('owner', (query) => {
+        query.select('id', 'username', 'profilePicture')
+      })
       .preload('parentMessage', (query) => {
         query.preload('owner', (query) => {
-          query.select('id', 'username')
+          query.select('id', 'username', 'profilePicture')
         })
       })
       .orderBy('created_at', 'desc')

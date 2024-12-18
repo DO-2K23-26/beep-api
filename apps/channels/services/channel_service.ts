@@ -31,10 +31,6 @@ export default class ChannelService {
   constructor(private userService: UserService) {}
 
   async findByIdOrFail(channelId: string): Promise<Channel> {
-    const cachedChannel = await redis.get(`channel:${channelId}`)
-    if (cachedChannel) {
-      return JSON.parse(cachedChannel) as Channel
-    }
     const channel = await Channel.query()
       .where('id', channelId)
       .firstOrFail()
@@ -44,7 +40,6 @@ export default class ChannelService {
           code: 'E_ROW_NOT_FOUND',
         })
       })
-    await redis.set(`channel:${channelId}`, JSON.stringify(channel), 'EX', 10 * 60 * 6)
     return channel
   }
 
@@ -74,11 +69,9 @@ export default class ChannelService {
       .whereHas('users', (builder) => {
         builder.where('user_id', userId)
       })
+      .orderByRaw(`(${messageSubquery.toQuery()}) DESC NULLS LAST`)
       .where('type', ChannelType.private_chat)
       .orderBy(messageSubquery, 'desc')
-      .preload('messages', (builder) => {
-        builder.orderBy('createdAt', 'desc')
-      })
       .preload('users', (builder) => {
         builder.select('id', 'username', 'profilePicture').whereNot('id', userId)
       })
@@ -130,10 +123,33 @@ export default class ChannelService {
     return channel
   }
 
+  /**
+   * Finds a channel that includes all and only the specified users.
+   *
+   * @param userIds - An array of user IDs to search for in the channel.
+   * @returns A promise that resolves to the channel if found, or null if no such channel exists.
+   *
+   * The method queries the database for a channel that:
+   * - Does not have the type 'text_server' or 'voice_server'.
+   * - Contains all the specified users.
+   * - Does not contain any users other than the specified ones.
+   */
   async findFromUsers(userIds: string[]): Promise<Channel | null> {
     const channel = await Channel.query()
+      .whereNot('type', ChannelType.text_server)
+      .whereNot('type', ChannelType.voice_server)
       .whereHas('users', (builder) => {
-        builder.whereInPivot('user_id', userIds)
+        builder.whereIn('user_id', userIds)
+      })
+      .whereIn('id', (subquery) => {
+        subquery
+          .from('channels_users')
+          .select('channel_id')
+          .groupBy('channel_id')
+          .havingRaw('COUNT(*) = ?', [userIds.length])
+      })
+      .whereDoesntHave('users', (builder) => {
+        builder.whereNotIn('user_id', userIds)
       })
       .first()
     return channel
