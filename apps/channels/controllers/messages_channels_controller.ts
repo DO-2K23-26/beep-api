@@ -52,7 +52,7 @@ export default class MessagesChannelsController {
    * Handle form submission for the create action
    */
   async store({ auth, request, params, response, bouncer }: HttpContext) {
-    const payload = auth.use('jwt').payload
+    const payload = auth.user as Payload
     const channelId = params.channelId
     await bouncer.with(MessageChannelPolicy).authorize('store' as never, channelId)
     const data = await request.validateUsing(createMessageValidator)

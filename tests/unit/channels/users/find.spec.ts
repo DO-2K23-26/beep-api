@@ -11,7 +11,9 @@ const channelService = await app.container.make(ChannelService)
 test.group('Channels users find', () => {
   test('must find a channel from user ids', async ({ assert }) => {
     const users = await UserFactory.createMany(2)
-    const channel = await ChannelFactory.merge({ name: `${users[0].id}, ${users[1].id}` }).create()
+    const channel = await ChannelFactory.merge({ name: `${users[0].id}, ${users[1].id}` })
+      .apply('private_channel')
+      .create()
     await channel.related('users').attach([users[0].id, users[1].id])
     const foundChannel = await channelService.findFromUsersOrFail([users[1].id, users[0].id])
     assert.equal(foundChannel?.id, channel.id)
@@ -40,6 +42,7 @@ test.group('Channels users find', () => {
       .catch((error: ChannelNotFoundException) => {
         errorThrown = error
       })
+    // console.log(errorThrown)
     assert.containsSubset(errorThrown, {
       code: 'E_ROW_NOT_FOUND',
       status: 404,
@@ -48,7 +51,9 @@ test.group('Channels users find', () => {
   })
   test('must return the channel if users exist and are in the channel', async ({ assert }) => {
     const users = await UserFactory.createMany(2)
-    const channel = await ChannelFactory.merge({ name: `${users[0].id}, ${users[1].id}` }).create()
+    const channel = await ChannelFactory.merge({ name: `${users[0].id}, ${users[1].id}` })
+      .apply('private_channel')
+      .create()
     await channel.related('users').attach([users[0].id, users[1].id])
     const foundChannel = await channelService.findFromUsers([users[0].id, users[1].id])
     assert.equal(foundChannel?.id, channel.id)

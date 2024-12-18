@@ -15,8 +15,8 @@ export const ChannelFactory = factory
   .state('private_channel', async (channel) => {
     channel.type = ChannelType.private_chat
   })
-  .relation('users', () => UserFactory)
   .relation('server', () => ServerFactory)
+  .relation('users', () => UserFactory)
   .build()
 
 export const ChannelFactoryWithServer = (serverId: string) =>

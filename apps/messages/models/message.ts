@@ -37,7 +37,7 @@ export default class Message extends BaseModel {
 
   // Column for reply to message ID, adjusted to allow null
   @column()
-  declare parentMessageId: string
+  declare parentMessageId: string | null
 
   // Define the parent relationship (a message belongs to a user)
   @belongsTo(() => User, {
