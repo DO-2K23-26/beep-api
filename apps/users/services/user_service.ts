@@ -8,7 +8,7 @@ import redis from '@adonisjs/redis/services/main'
 import jwt from 'jsonwebtoken'
 import { ChangeEmailToken } from '#apps/users/models/change_email_token'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
-import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_already_exists_exeption'
+import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_already_exists_exception'
 
 @inject()
 export default class UserService {

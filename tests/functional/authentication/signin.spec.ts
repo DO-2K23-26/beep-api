@@ -31,7 +31,7 @@ test.group('Authentication signin', () => {
     result.assertStatus(400)
   }).tags(['authentication:signin'])
 
-  test('Must return 401 when trying to signing without a right token and passKey', async ({
+  test('Must return 403 when trying to signing without a right token and passKey', async ({
     client,
   }) => {
     const payload = {
@@ -40,6 +40,6 @@ test.group('Authentication signin', () => {
     }
     const result = await client.post('/authentication/signin').json(payload)
 
-    result.assertStatus(401)
+    result.assertStatus(403)
   }).tags(['authentication:signin'])
 })
