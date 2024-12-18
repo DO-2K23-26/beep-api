@@ -1,8 +1,9 @@
 import { CreateAuthenticationSchema } from '#apps/authentication/validators/authentication'
+import { errors as authErrors } from '@adonisjs/auth'
 import { UpdatePasswordValidator } from '#apps/authentication/validators/verify'
-import EmailAlreadyExistsExeption from '#apps/users/exceptions/email_already_exists_exeption'
+import EmailAlreadyExistsExeption from '#apps/users/exceptions/email_already_exists_exception'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
-import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_already_exists_exeption'
+import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_already_exists_exception'
 import Token from '#apps/users/models/token'
 import User from '#apps/users/models/user'
 import env from '#start/env'
@@ -14,6 +15,9 @@ import crypto from 'node:crypto'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 import { Authenticators } from '@adonisjs/auth/types'
+import { authenticator } from 'otplib'
+import InvalidQRCodeException from '#apps/users/exceptions/invalid_qrcode_exception'
+import TotpMissingException from '#apps/users/exceptions/totp_missing_exception'
 
 export default class AuthenticationService {
   DEFAULT_PP_URL = 'default_profile_picture.png'
@@ -157,23 +161,28 @@ export default class AuthenticationService {
     return false
   }
 
-  async retrieveUserQRCode(token: string, passKey: string): Promise<User | null> {
+  async retrieveUserQRCode(token: string, passKey: string): Promise<User> {
     const isValid = await redis.get(`qr-code:${token}`)
     if (isValid !== 'validated') {
-      return null
+      throw new InvalidQRCodeException('QRCode is not valid', {
+        status: 403,
+        code: 'E_FORBIDDEN',
+      })
     }
     const passKeyStored = await redis.get(`qr-code:${token}:passkey`)
     if (passKeyStored !== passKey) {
-      return null
+      throw new InvalidQRCodeException('Wrong Passkey', {
+        status: 403,
+        code: 'E_FORBIDDEN',
+      })
     }
     const userId = await redis.get(`qr-code:${token}:user`)
     await redis.del(`qr-code:${token}:user`)
     await redis.del(`qr-code:${token}`)
     await redis.del(`qr-code:${token}:passkey`)
     const user = await User.findOrFail(userId).catch(() => {
-      throw new UserNotFoundException('User not found', {
-        status: 404,
-        code: 'E_ROWNOTFOUND',
+      throw new authErrors.E_UNAUTHORIZED_ACCESS('User not found', {
+        guardDriverName: 'jwt',
       })
     })
     return user
@@ -200,5 +209,64 @@ export default class AuthenticationService {
       user,
       tokens,
     }
+  }
+
+  async checkPassword(userId: string, password: string): Promise<boolean> {
+    const user = await User.findOrFail(userId)
+    return !!(await User.verifyCredentials(user.email, password))
+  }
+
+  async generateTOTPURI(userId: string) {
+    //edit user to add TOTP secret
+    const secret = authenticator.generateSecret()
+    logger.info(secret)
+    const user = await User.findOrFail(userId)
+    user.TOTPSecret = secret
+    await user.save()
+    const otpauth = authenticator.keyuri(user.email, 'Beep', secret)
+    logger.debug(otpauth)
+
+    return otpauth
+  }
+
+  async verifyTOTP(userId: string, totp: string): Promise<boolean> {
+    const user = await User.findOrFail(userId)
+    const secret = user.TOTPSecret
+
+    return authenticator.check(totp, secret)
+  }
+
+  async disable2FA(userId: string): Promise<void> {
+    const user = await User.findOrFail(userId)
+    user.TOTPAuthentication = false
+    await user.save()
+  }
+
+  async finalize2FA(userId: string): Promise<void> {
+    const user = await User.findOrFail(userId)
+    user.TOTPAuthentication = true
+    await user.save()
+  }
+
+  async authenticate(email: string, password: string): Promise<User> {
+    const user = await User.verifyCredentials(email, password)
+    if (user.TOTPAuthentication) {
+      throw new TotpMissingException('Missing totp token', {
+        status: 403,
+        code: 'E_MISSING_TOTP_TOKEN',
+      })
+    }
+    return user
+  }
+
+  async authenticateWithTotp(email: string, password: string, totpToken: string) {
+    const user = await User.verifyCredentials(email, password)
+    if (!authenticator.verify({ token: totpToken, secret: user.TOTPSecret })) {
+      throw new TotpMissingException('Wrong totp token', {
+        status: 403,
+        code: 'E_WRONG_TOTP_TOKEN',
+      })
+    }
+    return user
   }
 }

@@ -12,6 +12,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import redis from '@adonisjs/redis/services/main'
 import MailService from '../services/mail_service.js'
 import {
+  checkPasswordValidator,
+  checkTotpValidator,
   createAuthenticationValidator,
   resetPasswordValidator,
   signinAuthenticationValidator,
@@ -21,6 +23,7 @@ import { Authenticators } from '@adonisjs/auth/types'
 import { Payload } from '../contracts/payload.js'
 import { SignIn } from '../contracts/signin.js'
 import transmit from '@adonisjs/transmit/services/main'
+import logger from '@adonisjs/core/services/logger'
 
 @inject()
 export default class AuthenticationController {
@@ -32,19 +35,27 @@ export default class AuthenticationController {
 
   async signin({ request, response, auth }: HttpContext) {
     // (email & password) OR (token & passKey) are required and verified by the validator
-    const { email, password, token, passKey } = await request.validateUsing(
+    const { email, password, token, passKey, totpToken } = await request.validateUsing(
       signinAuthenticationValidator
     )
     let payload: SignIn
     if (token && passKey) {
       const user = await this.authenticationService.retrieveUserQRCode(token, passKey)
-      if (!user) return response.status(401).send({ message: 'Unauthorized' })
       payload = await this.authenticationService.handleSignIn(user, auth)
     } else if (email && password) {
-      const user = await User.verifyCredentials(email.toLocaleLowerCase(), password)
+      let user: User
+      if (!totpToken) {
+        user = await this.authenticationService.authenticate(email.toLowerCase(), password)
+      } else {
+        user = await this.authenticationService.authenticateWithTotp(
+          email.toLowerCase(),
+          password,
+          totpToken
+        )
+      }
       payload = await this.authenticationService.handleSignIn(user, auth)
     } else {
-      return response.status(401).send({ message: 'Unauthorized' })
+      return response.status(422).send({ message: 'Unprocessable entity' })
     }
 
     response.cookie('beep.access_token', payload.tokens.accessToken)
@@ -186,5 +197,60 @@ export default class AuthenticationController {
     const isValid = await this.authenticationService.validateQRCodeToken(token, payload.sub)
 
     return isValid ? response.status(204) : response.status(401).send({ message: 'Unauthorized' })
+  }
+
+  async checkPassword(payload: Payload, password: string): Promise<boolean> {
+    if (!payload?.sub) {
+      return false
+    }
+
+    const passwordCorrect = await this.authenticationService.checkPassword(payload.sub, password)
+
+    if (!passwordCorrect) return false
+    return true
+  }
+
+  async generateTOTPToken({ auth, request, response }: HttpContext) {
+    const payload = auth.user as Payload
+
+    const validator = await request.validateUsing(checkPasswordValidator)
+
+    if (!(await this.checkPassword(payload, validator.password))) {
+      return response.status(401).send({ message: 'Unauthorized' })
+    }
+
+    const totpURI = await this.authenticationService.generateTOTPURI(payload.sub)
+    return response.status(200).send({ uri: totpURI })
+  }
+
+  async finalize2FA({ auth, request, response }: HttpContext) {
+    const payload = auth.user as Payload
+    const validator = await request.validateUsing(checkTotpValidator)
+
+    if (!(await this.authenticationService.verifyTOTP(payload.sub, validator.totp))) {
+      return response.status(403).send({ message: 'Invalid TOTP' })
+    }
+
+    try {
+      await this.authenticationService.finalize2FA(payload.sub)
+    } catch (e) {
+      logger.error(e)
+      return response.status(500).send({ message: "couldn't save your preferences" })
+    }
+
+    return response.status(204)
+  }
+
+  async disable2FA({ auth, response }: HttpContext) {
+    const payload = auth.user as Payload
+    try {
+      await this.authenticationService.generateTOTPURI(payload.sub) // generate new totp secret to reroll it in case user just want to roll his totp secret
+      await this.authenticationService.disable2FA(payload.sub)
+    } catch (e) {
+      logger.error(e)
+      return response.status(500).send({ message: "couldn't save your preferences" })
+    }
+
+    return response.status(204)
   }
 }

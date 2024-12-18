@@ -82,6 +82,16 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   static accessTokens = DbAccessTokensProvider.forModel(User)
 
+  @column({
+    columnName: 'TOTPAuthentication',
+  })
+  declare TOTPAuthentication: boolean
+
+  @column({
+    columnName: 'TOTPSecret',
+  })
+  declare TOTPSecret: string
+
   @hasMany(() => Token)
   declare tokens: HasMany<typeof Token>
 

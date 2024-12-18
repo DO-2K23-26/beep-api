@@ -3,6 +3,7 @@ import { Infer } from '@vinejs/vine/types'
 
 export const signinAuthenticationValidator = vine.compile(
   vine.object({
+    // Email
     email: vine
       .string()
       .email()
@@ -14,6 +15,9 @@ export const signinAuthenticationValidator = vine.compile(
       .optional()
       .requiredIfAnyMissing(['token', 'passKey'])
       .requiredIfExists('email'),
+    // TOTP token when login with email/password
+    totpToken: vine.string().optional(),
+    // QR code token
     token: vine
       .string()
       .optional()
@@ -24,6 +28,18 @@ export const signinAuthenticationValidator = vine.compile(
       .optional()
       .requiredIfAnyMissing(['email', 'password'])
       .requiredIfExists('token'),
+  })
+)
+
+export const checkPasswordValidator = vine.compile(
+  vine.object({
+    password: vine.string(),
+  })
+)
+
+export const checkTotpValidator = vine.compile(
+  vine.object({
+    totp: vine.string(),
   })
 )
 

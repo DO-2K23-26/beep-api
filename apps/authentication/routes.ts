@@ -13,13 +13,15 @@ router
     router.post('/reset-password', [AuthenticationController, 'sendResetPasswordEmail'])
     router.post('/verify-reset-password', [AuthenticationController, 'verifyResetPassword'])
     router.get('/qr-code', [AuthenticationController, 'generateQRCodeToken'])
-
     router
       .group(() => {
         router.post('/qr-code/:token', [AuthenticationController, 'validateQRCodeToken'])
+        router.post('/totp', [AuthenticationController, 'generateTOTPToken'])
         router.patch('/password', [AuthenticationController, 'updatePassword'])
         router.post('/send-email', [AuthenticationController, 'sendEmail'])
         router.post('/logout', [AuthenticationController, 'logout'])
+        router.post('/totp/complete', [AuthenticationController, 'finalize2FA'])
+        router.post('/totp/disable', [AuthenticationController, 'disable2FA'])
       })
       .use(middleware.auth())
   })
