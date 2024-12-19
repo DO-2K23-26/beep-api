@@ -8,6 +8,8 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import { InvitationStatus } from '#apps/invitations/models/status'
 import InvitationPolicy from '#apps/invitations/policies/invitation_policy'
+import emitter from '@adonisjs/core/services/emitter'
+import { EVENTS, FriendRequest } from '#start/events'
 
 @inject()
 export default class InvitationsController {
@@ -17,6 +19,16 @@ export default class InvitationsController {
     const userPayload = auth.user as Payload
     const req = await request.validateUsing(createFriendInvitationValidator)
     const invitation = await this.invitationService.createFriend(userPayload.sub, req)
+
+    const event: FriendRequest = {
+      receiverId: invitation.targetId as string,
+      type: EVENTS.friend_request,
+      senderName: userPayload.username,
+    }
+
+    // emit the event
+    await emitter.emit('friend:request', event)
+
     return response.created(invitation)
   }
 

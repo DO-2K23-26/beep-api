@@ -123,6 +123,7 @@ export default class InvitationService {
       type: InvitationType.FRIEND,
       status: InvitationStatus.Pending,
     })
+
     return invitation
   }
 

@@ -9,9 +9,15 @@ import {
 } from '#apps/messages/validators/message'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import { JwtPayload } from 'jsonwebtoken'
+import MentionService from '#apps/notification/services/mention_service'
+
 @inject()
 export default class MessagesChannelsController {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly mentionService: MentionService
+  ) {}
   /**
    * Display a list of resource
    */
@@ -52,13 +58,18 @@ export default class MessagesChannelsController {
    * Handle form submission for the create action
    */
   async store({ auth, request, params, response, bouncer }: HttpContext) {
-    const payload = auth.user as Payload
-    const channelId = params.channelId
+    const payload = auth.use('jwt').payload as JwtPayload
+    const channelId: string = params.channelId
     await bouncer.with(MessageChannelPolicy).authorize('store' as never, channelId)
     const data = await request.validateUsing(createMessageValidator)
-    if (!data.attachments && !data.content)
-      return response.badRequest({ message: 'Content or attachments are required' })
+
     const newMessage = await this.messageService.create(data, payload!.sub as string, channelId)
+    await this.mentionService.notifyMentionedUsers(
+      newMessage.content,
+      payload!.sub as string,
+      channelId
+    )
+
     return response.created(newMessage)
   }
 
