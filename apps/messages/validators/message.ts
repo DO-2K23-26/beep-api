@@ -8,7 +8,7 @@ import { Infer } from '@vinejs/vine/types'
 export const createMessageValidator = vine.compile(
   vine.object({
     content: vine.string().optional(),
-    attachments: vine.array(vine.file()).optional(),
+    attachments: vine.array(vine.file()).optional().requiredIfMissing('content'),
     parentMessageId: vine.string().optional(),
     transmitClientId: vine.string().optional(),
   })

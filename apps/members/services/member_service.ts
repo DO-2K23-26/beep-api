@@ -38,6 +38,10 @@ export default class MemberService implements MemberServiceContract {
     })
   }
 
+  async findFrom(memberIds: string[]) {
+    return Member.query().whereIn('id', memberIds)
+  }
+
   async createFromInvitation(invitationId: string, userId: string): Promise<Member> {
     const invitation = await Invitation.findByOrFail('id', invitationId).catch(() => {
       throw new WrongInvitationFormatException('Invitation not found', {

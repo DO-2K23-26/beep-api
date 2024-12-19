@@ -26,6 +26,15 @@ export default class ServerService {
     return pageServers.all()
   }
 
+  async findByChannelId(channelId: string): Promise<Server> {
+    const server = await Server.query()
+      .whereHas('channels', (builder) => {
+        builder.where('id', channelId)
+      })
+      .firstOrFail()
+    return server
+  }
+
   async findById(serverId: string): Promise<Server> {
     return Server.query().where('id', serverId).firstOrFail()
   }

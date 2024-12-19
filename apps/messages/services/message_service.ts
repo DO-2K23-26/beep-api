@@ -20,6 +20,11 @@ import transmit from '@adonisjs/transmit/services/main'
 export default class MessageService {
   constructor(protected storageService: StorageService) {}
 
+  extractMentionsFromMessage(message: string): string[] {
+    const mentions = message.match(/@(\S+)/g)
+    return mentions ? mentions : []
+  }
+
   async findAll() {
     return Message.query()
   }
