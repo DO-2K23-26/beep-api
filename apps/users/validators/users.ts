@@ -52,8 +52,18 @@ export const getMultipleUserValidator = vine.compile(
   })
 )
 
+export const getEmailUpdateValidator = vine.compile(
+  vine.object({
+    oldEmail: vine.string().email(),
+    newEmail: vine.string().email(),
+    password: vine.string(),
+  })
+)
+
 export type UpdateUserValidator = Infer<typeof updateUserValidator>
 export type GetMultipleUserValidator = Infer<typeof getMultipleUserValidator>
 export type GetUsersSchema = Infer<typeof getUsersValidator>
 export type OtpEmailValidator = Infer<typeof otpEmailValidator>
 export type EmailUpdateValidator = Infer<typeof emailUpdateValidator>
+export type ConfirmEmailUpdateValidator = Infer<typeof confirmEmailUpdateValidator>
+export type GetEmailUpdateValidator = Infer<typeof getEmailUpdateValidator>
