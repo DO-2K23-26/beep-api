@@ -35,7 +35,7 @@ export default class UserService {
   }
 
   async findById(userId: string): Promise<User> {
-    return User.query().where('id', userId).preload('members').firstOrFail()
+    return User.findOrFail(userId)
   }
 
   async create(data: {

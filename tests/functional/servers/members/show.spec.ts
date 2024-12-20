@@ -9,11 +9,11 @@ import { test } from '@japa/runner'
 
 test.group('Servers members show', () => {
   test('must return 200 if the user is on the same server', async ({ client, expect }) => {
-    const user = await UserFactory.make()
-    const server = await ServerFactory.make()
+    const user = await UserFactory.create()
+    const server = await ServerFactory.create()
 
-    await MemberFromFactory(server.id, user.id).make()
-    const member = await MemberFactoryWithServer(server.id).make()
+    await MemberFromFactory(server.id, user.id).create()
+    const member = await MemberFactoryWithServer(server.id).create()
 
     const response = await client
       .get(`/v1/servers/${server.id}/members/${member.userId}`)
@@ -25,12 +25,9 @@ test.group('Servers members show', () => {
   }).tags(['servers:members'])
 
   test('must return 404 if the server does not exist', async ({ client }) => {
-    const user = await UserFactory.make()
-    const server = await ServerFactory.make()
+    const user = await UserFactory.create()
 
-    await MemberFromFactory(server.id, user.id).make()
-
-    const response = await client.get(`/v1/servers/${server.id}/members/1`).loginAs(user)
+    const response = await client.get(`/v1/servers/non-existant-id/members/1`).loginAs(user)
 
     response.assertStatus(404)
   }).tags(['servers:members'])
