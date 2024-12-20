@@ -1,5 +1,6 @@
+import Member from '#apps/members/models/member'
 import UserService from '#apps/users/services/user_service'
-import { AuthorizationResponse, BasePolicy } from '@adonisjs/bouncer'
+import { BasePolicy } from '@adonisjs/bouncer'
 import { inject } from '@adonisjs/core'
 import { JwtPayload } from 'jsonwebtoken'
 
@@ -8,14 +9,20 @@ export default class ServerMemberPolicy extends BasePolicy {
   constructor(protected userService: UserService) {
     super()
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async before(payload: JwtPayload, _action: string, ...params: any[]) {
+    const members = params[0] as Member[] | null | undefined
 
-  async view(payload: JwtPayload, serverId: string) {
-    const user = await this.userService.findById(payload.sub!)
-    const ids = user.members.map((m) => m.serverId)
-    if (ids.includes(serverId)) {
-      return AuthorizationResponse.allow()
+    if (members && members !== undefined) {
+      const member = members.find((m) => m.userId === payload.sub)
+      if (!member) return false
+    } else {
+      return false
     }
+  }
 
-    return AuthorizationResponse.deny()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async view(_payload: JwtPayload, _members: Member[]) {
+    return true
   }
 }

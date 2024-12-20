@@ -53,6 +53,9 @@ export default class MessageService {
       await this.create(
         {
           content: displayedMessage,
+          attachments: undefined,
+          parentMessageId: undefined,
+          transmitClientId: undefined,
         },
         userId,
         message.channelId

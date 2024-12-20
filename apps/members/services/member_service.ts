@@ -91,16 +91,20 @@ export default class MemberService implements MemberServiceContract {
     return this.create(server.id, userId)
   }
 
-  getMemberByUserIdAndServerId(userId: string, serverId: string): Promise<Member> {
-    return Member.query().where('user_id', userId).where('server_id', serverId).firstOrFail()
+  async getMemberByUserIdAndServerId(userId: string, serverId: string): Promise<Member> {
+    const members = await Member.query().where('user_id', userId).where('server_id', serverId)
+    return members[0]
   }
 
   addMemberRole(): Promise<void> {
     throw new Error('Method not implemented.')
   }
 
-  findAllByServerId(serverId: string): Promise<Member[]> {
-    return Member.query().where('server_id', serverId).paginate(1, 1000)
+  async findAllByServerId(serverId: string): Promise<Member[]> {
+    const server = await Server.findOrFail(serverId)
+    const members = await server.related('members').query().paginate(1, 1000)
+
+    return members
   }
 
   removeMemberRole(): Promise<void> {
