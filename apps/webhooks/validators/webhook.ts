@@ -30,6 +30,14 @@ export const updateWebhookValidator = vine.compile(
   })
 )
 
+export const triggerWebhookValidator = vine.compile(
+  vine.object({
+    data: vine.object({
+      // Add the required properties here
+    }),
+  })
+)
+
 // export const pinMessageValidator = vine.compile(
 //   vine.object({
 //     action: vine.string().in(['pin', 'unpin']),
@@ -45,4 +53,5 @@ export const updateWebhookValidator = vine.compile(
 // export type GetMessagesValidator = Infer<typeof getMessagesValidator>
 export type CreateWebhooksSchema = Infer<typeof createWebhookValidator>
 export type UpdateWebhookSchema = Infer<typeof updateWebhookValidator>
+export type TriggerWebhookSchema = Infer<typeof triggerWebhookValidator>
 // export type PinMessagesSchema = Infer<typeof pinMessageValidator>

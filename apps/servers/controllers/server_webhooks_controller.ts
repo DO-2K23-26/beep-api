@@ -2,7 +2,7 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import WebhookService from '#apps/webhooks/service/webhook_service'
 import ServerWebhookPolicy from '../policies/server_webhook_policy.js'
-import { createWebhookValidator } from '#apps/webhooks/validators/webhook'
+import { createWebhookValidator, triggerWebhookValidator } from '#apps/webhooks/validators/webhook'
 @inject()
 export default class ServerWebhooksController {
   constructor(private webhookService: WebhookService) {}
@@ -63,12 +63,13 @@ export default class ServerWebhooksController {
   }
 
   //Trigger a webhook
-  async triggerWebhook({ params, bouncer, request, response }: HttpContext) {
-    const { webhookId } = params
-    await bouncer.with(ServerWebhookPolicy).authorize('trigger' as never, params.serverId)
+  async triggerWebhook({ params, request, response }: HttpContext) {
+    const receivedWebhook = await request.validateUsing(triggerWebhookValidator)
 
-    const payload = request.only(['data'])
-    const result = await this.webhookService.trigger(webhookId, payload.data)
+    const { webhookId } = params
+
+    const payload = { data: receivedWebhook.data }
+    const result = await this.webhookService.trigger(webhookId, JSON.stringify(payload.data))
     return response.ok(result)
   }
 }
