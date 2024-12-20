@@ -1,24 +1,20 @@
-import UserService from '#apps/users/services/user_service'
 import { BasePolicy } from '@adonisjs/bouncer'
 import { inject } from '@adonisjs/core'
 import { JwtPayload } from 'jsonwebtoken'
-import Server from '#apps/servers/models/server'
+import ServerService from '#apps/servers/services/server_service'
 
 @inject()
 export default class ServerRolePolicy extends BasePolicy {
-  constructor(protected userService: UserService) {
+  constructor(protected serverService: ServerService) {
     super()
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async before(payload: JwtPayload, _action: string, ...params: any[]) {
-    const server = params[0] as Server | undefined | null
+  async before(payload: JwtPayload, _action: string, ...params: never[]) {
+    const serverId: string | undefined = params[0]
 
-    if (server && server !== undefined) {
-      await server.load('members')
-      const member = server.members.find((m) => m.userId === payload.sub)
-      if (!member) return false
-    } else {
+    const isPresent = await this.serverService.userPartOfServer(payload.sub!, serverId!)
+
+    if (!isPresent) {
       return false
     }
   }
