@@ -36,7 +36,8 @@ export default class ServerService {
   }
 
   async findById(serverId: string): Promise<Server> {
-    return Server.query().where('id', serverId).firstOrFail()
+    const server = await Server.findOrFail(serverId)
+    return server
   }
 
   async create(

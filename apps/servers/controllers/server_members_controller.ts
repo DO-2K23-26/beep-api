@@ -14,14 +14,15 @@ export default class ServerMembersController {
 
   async index({ params, bouncer }: HttpContext) {
     const { serverId } = params
-    const server = await this.serverService.findById(serverId)
-    await bouncer.with(ServerMemberPolicy).authorize('view' as never, server.id)
-    return this.memberService.findAllByServerId(server.id)
+    const members = await this.memberService.findAllByServerId(serverId)
+    await bouncer.with(ServerMemberPolicy).authorize('view' as never, members)
+    return members
   }
 
   async show({ params, bouncer }: HttpContext) {
     const { serverId, userId } = params
-    await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
+    const members = await this.memberService.findAllByServerId(serverId)
+    await bouncer.with(ServerMemberPolicy).authorize('view' as never, members)
     return this.memberService.getMemberByUserIdAndServerId(userId, serverId)
   }
 
