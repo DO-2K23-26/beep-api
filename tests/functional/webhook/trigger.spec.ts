@@ -10,11 +10,19 @@ test.group('Webhook trigger', () => {
     await MemberFromFactory(server.id, user.id).make()
 
     const webhook = await WebhookFactory.make()
+    console.log(webhook)
+
+    const payload = {
+      data: {
+        message: 'Hello world',
+      },
+    }
 
     const result = await client
       .post(`/servers/${server.id}/channels/${webhook.channelId}/webhook/${webhook.id}/trigger`)
+      .json(payload)
       .loginAs(user)
-    console.log(result)
+    console.log(result.body())
     result.assertStatus(201)
   }).tags(['webhook:trigger'])
 })

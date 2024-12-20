@@ -15,7 +15,6 @@ import AuthenticationService from '#apps/authentication/services/authentication_
 
 export interface PayloadJWTSFUConnection {
   name?: string
-  userId: string
 }
 
 @inject()
@@ -44,7 +43,7 @@ export default class WebhookService {
     const createdWebhook = await Webhook.create({
       name: webhook.name,
       profilePicture: webhook.profilePicture || 'https://beep.baptistebronsin.be/logo.png',
-      token: this.generateToken({ name: webhook.name, userId: ownerId }),
+      token: this.generateToken({ name: webhook.name }),
       userId: ownerId,
       channelId: channelId,
       serverId: webhook.serverId || null,
@@ -148,7 +147,13 @@ export default class WebhookService {
 
     // Validate the webhook token with AuthenticationService.verifyToken
     try {
-      this.authService.verifyToken(webhook.token ?? '')
+      if (webhook.token) {
+        console.log(webhook.token)
+        jwt.verify(webhook.token, env.get('APP_KEY'))
+      } else {
+        console.log('Webhook token is empty')
+      }
+      // this.authService.verifyToken(webhook.token ?? '')
     } catch (err) {
       throw new WebhookJwtInvalidException(err, {
         status: 404,
