@@ -2,7 +2,11 @@ import MailService from '#apps/authentication/services/mail_service'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import StorageService from '#apps/storage/services/storage_service'
 import User from '#apps/users/models/user'
-import { GetUsersSchema, UpdateUserValidator } from '#apps/users/validators/users'
+import {
+  GetUsersSchema,
+  UpdateUserValidator,
+  GetEmailUpdateValidator,
+} from '#apps/users/validators/users'
 import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
 import jwt from 'jsonwebtoken'
@@ -112,16 +116,23 @@ export default class UserService {
     return { new_email: data.new_email, user_id: data.user_id }
   }
 
-  updateEmail(userId: string, email: string) {
+  async updateEmail(updateEmail: GetEmailUpdateValidator) {
+    // if the current password is not right
+
+    const user = await User.verifyCredentials(
+      updateEmail.oldEmail.toLocaleLowerCase(),
+      updateEmail.password
+    ).catch(() => {
+      throw new UserNotFoundException('Password not right', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
+
     const changeEmailValidator: UpdateUserValidator = {
-      username: undefined,
-      firstName: undefined,
-      lastName: undefined,
-      email: email,
-      profilePicture: undefined,
-      description: undefined,
-      status: undefined,
+      email: updateEmail.newEmail,
     }
-    return this.update(changeEmailValidator, userId)
+
+    return this.update(changeEmailValidator, user.id)
   }
 }

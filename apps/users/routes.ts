@@ -46,7 +46,8 @@ router
             router
               .group(() => {
                 router.post('', [UsersControllerV0, 'createEmailToken'])
-                router.put('', [UsersControllerV0, 'confirmEmailUpdate'])
+                // router.put('', [UsersControllerV0, 'confirmEmailUpdate'])
+                router.post('/update', [UsersController, 'updateEmail'])
               })
               .prefix('/email')
             router.get('', [UsersControllerV0, 'findMe'])
