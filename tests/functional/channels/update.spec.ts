@@ -31,6 +31,19 @@ test.group('Channels update', () => {
     assert.equal(response.body().name, channel.name)
     assert.equal(response.body().description, data.description)
   }).tags(['channels:update'])
+  test('must return 200 when update position successfully', async ({ assert, client }) => {
+    const channel = await ChannelFactory.with('server').create()
+    const user = await UserFactory.create()
+    await MemberFromFactory(channel.serverId, user.id).create()
+    const data = { position: 1 }
+    const response = await client
+      .put(`/servers/${channel.serverId}/channels/${channel.id}`)
+      .json(data)
+      .loginAs(user)
+    assert.equal(response.status(), 200)
+    assert.equal(response.body().position, data.position)
+    assert.equal(response.body().name, channel.name)
+  }).tags(['channels:update'])
   test('must return 200 when update name successfully', async ({ assert, client }) => {
     const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()

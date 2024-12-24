@@ -33,6 +33,9 @@ export default class Channel extends BaseModel {
   @column()
   declare type: number
 
+  @column()
+  declare position: number
+
   @manyToMany(() => User, {
     pivotTable: 'channels_users',
   })
