@@ -55,9 +55,3 @@ emitter.on('friend:request', (friendRequest) => {
     event: JSON.stringify(notification),
   })
 })
-
-emitter.on('user:messaged', (message) => {
-  transmit.broadcast(`notifications/users/${message.receiverId}`, {
-    event: JSON.stringify(message),
-  })
-})
