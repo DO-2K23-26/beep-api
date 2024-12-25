@@ -9,7 +9,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { InvitationStatus } from '#apps/invitations/models/status'
 import InvitationPolicy from '#apps/invitations/policies/invitation_policy'
 import emitter from '@adonisjs/core/services/emitter'
-import { Notification } from '#start/events'
 
 @inject()
 export default class InvitationsController {

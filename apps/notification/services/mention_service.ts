@@ -3,7 +3,6 @@ import ChannelService from '#apps/channels/services/channel_service'
 import { inject } from '@adonisjs/core'
 import MessageService from '#apps/messages/services/message_service'
 import User from '#apps/users/models/user'
-import { EVENTS, MentionPayload } from '#start/events'
 import emitter from '@adonisjs/core/services/emitter'
 
 @inject()
@@ -27,9 +26,8 @@ export default class MentionService {
 
     await Promise.all(
       users.map(async (user) => {
-        const msg: MentionPayload = {
+        const msg = {
           receiverId: user.id,
-          type: EVENTS.mentioned,
           senderName: senderName.username,
           channelName: channel.name,
           serverName: channel.server.name,
