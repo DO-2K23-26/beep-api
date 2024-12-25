@@ -16,8 +16,8 @@ transmit.authorize<{ token: string }>('qr-code/:token', async (_ctx: HttpContext
   }
 })
 
-transmit.authorize<{ id: string }>('notifications/users/:id', async (ctx: HttpContext, { id }) => {
+/*transmit.authorize<{ id: string }>('notifications/users/:id', async (ctx: HttpContext, { id }) => {
   const user = (await ctx.auth.authenticate()) as JwtPayload
 
   return user.sub === id
-})
+})*/
