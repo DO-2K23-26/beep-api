@@ -48,7 +48,7 @@ emitter.on('user:mentioned', (mention) => {
 
 emitter.on('friend:request', (friendRequest) => {
   const notification: Notification = {
-    type: NOTIFICATION_TYPE.USER_MENTIONED_IN_MESSAGE,
+    type: NOTIFICATION_TYPE.FRIEND_REQUEST,
     payload: friendRequest
   }
   transmit.broadcast(`notifications/users/${friendRequest.receiverId}`, {
