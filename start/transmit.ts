@@ -1,7 +1,7 @@
 import transmit from '@adonisjs/transmit/services/main'
 import type { HttpContext } from '@adonisjs/core/http'
 import redis from '@adonisjs/redis/services/main'
-import { JwtPayload } from 'jsonwebtoken'
+// import { JwtPayload } from 'jsonwebtoken'
 
 transmit.authorize<{ token: string }>('qr-code/:token', async (_ctx: HttpContext, { token }) => {
   try {
