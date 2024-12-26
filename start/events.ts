@@ -10,7 +10,7 @@ declare module '@adonisjs/core/types' {
 
 export enum NOTIFICATION_TYPE {
   USER_MENTIONED_IN_MESSAGE,
-  FRIEND_REQUEST // add message_type
+  FRIEND_REQUEST, // add message_type
 }
 
 export interface NotificationMeta {
@@ -21,7 +21,8 @@ export interface FriendRequestNotification {
   senderName: string
 }
 
-export interface UserMessagedNotification { // a suivre ...
+export interface UserMessagedNotification {
+  // a suivre ...
   senderName: string
 }
 
@@ -32,14 +33,14 @@ export interface UserMentionedInMessageNotification {
 }
 
 export interface Notification {
-  type: NOTIFICATION_TYPE,
+  type: NOTIFICATION_TYPE
   payload: FriendRequestNotification | UserMentionedInMessageNotification
 }
 
 emitter.on('user:mentioned', (mention) => {
   const notification: Notification = {
     type: NOTIFICATION_TYPE.USER_MENTIONED_IN_MESSAGE,
-    payload: mention
+    payload: mention,
   }
   transmit.broadcast(`notifications/users/${mention.receiverId}`, {
     event: JSON.stringify(notification),
@@ -49,7 +50,7 @@ emitter.on('user:mentioned', (mention) => {
 emitter.on('friend:request', (friendRequest) => {
   const notification: Notification = {
     type: NOTIFICATION_TYPE.FRIEND_REQUEST,
-    payload: friendRequest
+    payload: friendRequest,
   }
   transmit.broadcast(`notifications/users/${friendRequest.receiverId}`, {
     event: JSON.stringify(notification),
