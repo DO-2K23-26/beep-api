@@ -135,4 +135,11 @@ export default class ServerService {
       .paginate(page, limit)
     return pageServers.all()
   }
+
+  async userPartOfServer(userId: string, serverId: string): Promise<boolean> {
+    const server = await this.findById(serverId)
+    await server.load('members')
+
+    return server.members.some((m) => m.userId === userId)
+  }
 }

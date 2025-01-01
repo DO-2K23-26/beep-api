@@ -1,10 +1,10 @@
+import Role from '#apps/roles/models/role'
+import Server from '#apps/servers/models/server'
+import User from '#apps/users/models/user'
 import { BaseModel, beforeCreate, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
-import User from '#apps/users/models/user'
-import Server from '#apps/servers/models/server'
-import Role from '#apps/role/models/role'
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 
 export default class Member extends BaseModel {
   @column({ isPrimary: true })
