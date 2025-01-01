@@ -1,3 +1,9 @@
+import Channel from '#apps/channels/models/channel'
+import Invitation from '#apps/invitations/models/invitation'
+import Member from '#apps/members/models/member'
+import Role from '#apps/roles/models/role'
+import { generateSnowflake } from '#apps/shared/services/snowflake'
+import User from '#apps/users/models/user'
 import {
   BaseModel,
   beforeCreate,
@@ -6,15 +12,9 @@ import {
   hasMany,
   manyToMany,
 } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
-import User from '#apps/users/models/user'
-import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
-import Channel from '#apps/channels/models/channel'
-import Member from '#apps/members/models/member'
-import Invitation from '#apps/invitations/models/invitation'
-import { generateSnowflake } from '#apps/shared/services/snowflake'
-import Role from '#apps/role/models/role'
 
 export default class Server extends BaseModel {
   @column({ isPrimary: true })
