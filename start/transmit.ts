@@ -1,7 +1,7 @@
 import transmit from '@adonisjs/transmit/services/main'
 import type { HttpContext } from '@adonisjs/core/http'
 import redis from '@adonisjs/redis/services/main'
-import { JwtPayload } from 'jsonwebtoken'
+// import { JwtPayload } from 'jsonwebtoken'
 
 transmit.authorize<{ token: string }>('qr-code/:token', async (_ctx: HttpContext, { token }) => {
   try {
@@ -16,8 +16,8 @@ transmit.authorize<{ token: string }>('qr-code/:token', async (_ctx: HttpContext
   }
 })
 
-transmit.authorize<{ id: string }>('notifications/users/:id', async (ctx: HttpContext, { id }) => {
+/*transmit.authorize<{ id: string }>('notifications/users/:id', async (ctx: HttpContext, { id }) => {
   const user = (await ctx.auth.authenticate()) as JwtPayload
 
   return user.sub === id
-})
+})*/
