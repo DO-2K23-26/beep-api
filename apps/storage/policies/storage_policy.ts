@@ -2,7 +2,6 @@ import Message from '#apps/messages/models/message'
 import { allowGuest, BasePolicy } from '@adonisjs/bouncer'
 import { AuthorizerResponse } from '@adonisjs/bouncer/types'
 import { JwtPayload } from 'jsonwebtoken'
-import PermissionResolver from '#apps/shared/services/permissions/permission_resolver'
 import { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import { createStorageValidator, updateStorageValidator } from '#apps/storage/validators/storage'
@@ -11,10 +10,7 @@ import { createStorageValidator, updateStorageValidator } from '#apps/storage/va
 export default class StoragePolicy extends BasePolicy {
   protected payload: JwtPayload
 
-  constructor(
-    protected permissionResolver: PermissionResolver,
-    protected ctx: HttpContext
-  ) {
+  constructor(protected ctx: HttpContext) {
     super()
     this.payload = ctx.auth.use('jwt').payload! as JwtPayload
   }
