@@ -177,6 +177,11 @@ export default class MessageService {
   setSignalingChannel(userId: string, transmitId: string) {
     redis.setex(`signalingChannel:${userId}`, transmitId, 3600)
   }
+
+  async isUserAuthor(messageId: string, userId: string) {
+    const message = await Message.find(messageId)
+    return message?.ownerId === userId
+  }
   /*
   async updateFilesOfMessage(
     updatedMessage: Message,

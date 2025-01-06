@@ -3,8 +3,8 @@ import { ChannelType } from '#apps/channels/models/channel_type'
 import ChannelService from '#apps/channels/services/channel_service'
 import MessageNotFoundException from '#apps/messages/exceptions/message_not_found_exception'
 import Message from '#apps/messages/models/message'
-import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
-import Server from '#apps/servers/models/server'
+import MessageService from '#apps/messages/services/message_service'
+import ServerService from '#apps/servers/services/server_service'
 import { BasePolicy } from '@adonisjs/bouncer'
 import { inject } from '@adonisjs/core'
 import { HttpContext } from '@adonisjs/core/http'
@@ -15,13 +15,15 @@ export default class MessageChannelPolicy extends BasePolicy {
 
   constructor(
     protected channelService: ChannelService,
+    protected serverService: ServerService,
+    protected messageService: MessageService,
     protected ctx: HttpContext
   ) {
     super()
     this.payload = ctx.auth.use('jwt').payload! as JwtPayload
   }
 
-  async before(payload: JwtPayload, _action: string, ...params: unknown[]) {
+  async before(payload: JwtPayload, action: string, ...params: unknown[]) {
     const channelId = params[0] as string | null | undefined
     let channel: Channel
     if (channelId && channelId !== undefined)
@@ -29,20 +31,18 @@ export default class MessageChannelPolicy extends BasePolicy {
     else return false
 
     if (channel.type === ChannelType.private_chat) {
+      // If the user is in the channel and the channel is a private
+      // therefore we can bypass show, index and store
       await channel.load('users')
-      const channelUser = channel.users.find((user) => user.id === payload.sub)
-      if (!channelUser) return false
+      const userIsInChannel = channel.users.some((user) => user.id === payload.sub)
+      if ((action === 'destroy' || action === 'update') && !userIsInChannel) return false
+      else return userIsInChannel
     } else if (channel.type === ChannelType.text_server && channel.serverId) {
+      // If the channel is part of a server, we need to check if the user is part of the server
+      // then we will perform other authorization checks
       const serverId = channel.serverId
-      const server = await Server.findOrFail(serverId).catch(() => {
-        throw new ServerNotFoundException('Server not found', {
-          status: 404,
-          code: 'E_SERVER_NOT_FOUND',
-        })
-      })
-      await server.load('members')
-      const member = server.members.find((m) => m.userId === payload.sub)
-      if (!member) return false
+      const isPresent = await this.serverService.userPartOfServer(payload.sub!, serverId!)
+      if (!isPresent) return false
     } else {
       return false
     }
@@ -63,23 +63,11 @@ export default class MessageChannelPolicy extends BasePolicy {
     return true
   }
 
-  async update(payload: JwtPayload, _channelId: string, messageId: string) {
-    const message = await Message.find(messageId)
-    if (!message)
-      throw new MessageNotFoundException('Message not found', {
-        status: 404,
-        code: 'E_ROW_NOT_FOUND',
-      })
-    return message.ownerId === payload.sub
+  update(payload: JwtPayload, _channelId: string, messageId: string) {
+    return this.messageService.isUserAuthor(messageId, payload.sub ?? '')
   }
 
-  async destroy(payload: JwtPayload, _channelId: string, messageId: string) {
-    const message = await Message.find(messageId)
-    if (!message)
-      throw new MessageNotFoundException('Message not found', {
-        status: 404,
-        code: 'E_ROW_NOT_FOUND',
-      })
-    return message.ownerId === payload.sub
+  destroy(payload: JwtPayload, _channelId: string, messageId: string) {
+    return this.messageService.isUserAuthor(messageId, payload.sub ?? '')
   }
 }
