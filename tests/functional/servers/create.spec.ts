@@ -1,3 +1,6 @@
+import Server from '#apps/servers/models/server'
+import { DEFAULT_ROLE_SERVER_PERMISSION } from '#apps/shared/constants/default_role_permission'
+import { DEFAULT_ROLE_SERVER } from '#apps/shared/constants/default_role_server'
 import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
@@ -18,7 +21,7 @@ test.group('Servers create', () => {
       })
     )
   }).tags(['servers:create'])
-  test('must add the use creating the server as member', async ({ client, expect }) => {
+  test('must add the user creating the server as member', async ({ client, expect }) => {
     const payload = {
       name: 'My Server 2',
       visibility: 'public',
@@ -38,6 +41,25 @@ test.group('Servers create', () => {
         userId: user.id,
       })
     )
+  }).tags(['servers:create'])
+
+  test('must return 201 and create the BasicRole', async ({ client, expect }) => {
+    const payload = {
+      name: 'My Server 12345',
+      visibility: 'public',
+      description: 'This is a test server',
+    }
+    const user = await UserFactory.create()
+    const resultServerCreation = await client.post('/servers').json(payload).loginAs(user)
+    console.log(resultServerCreation.body())
+    const server = await Server.findOrFail(resultServerCreation.body().id)
+    await server.load('roles')
+    console.log(server.roles[0])
+    expect(server.roles.length).toBe(1)
+    expect(server.roles[0].name).toEqual(DEFAULT_ROLE_SERVER)
+    expect(server.roles[0].permissions).toEqual(DEFAULT_ROLE_SERVER_PERMISSION)
+
+    resultServerCreation.assertStatus(201)
   }).tags(['servers:create'])
   test('must return a 201 when creating a server without description', async ({ client }) => {
     const user = await UserFactory.make()

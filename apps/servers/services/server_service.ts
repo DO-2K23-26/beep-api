@@ -7,6 +7,10 @@ import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
 import ServerAlreadyExistsException from '../exceptions/server_already_exists_exception.js'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
+import Role from '#apps/roles/models/role'
+import { DEFAULT_ROLE_SERVER } from '#apps/shared/constants/default_role_server'
+import { DEFAULT_ROLE_SERVER_PERMISSION } from '#apps/shared/constants/default_role_permission'
+import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export default class ServerService {
@@ -59,20 +63,47 @@ export default class ServerService {
       })
     })
     const sn = generateSnowflake()
-    const server = await Server.create({
-      banner: '',
-      icon: '',
-      name: name,
-      description: description ?? '',
-      visibility: visibility as 'public' | 'private',
-      ownerId: ownerId,
-      serialNumber: sn,
-    })
-    Member.create({
-      userId: ownerId,
-      serverId: server.id,
-      avatar: user.profilePicture,
-      nickname: user.username,
+    let server = new Server()
+    let member = new Member()
+    let role = new Role()
+
+    await db.transaction(async (trx) => {
+      server.useTransaction(trx)
+      member.useTransaction(trx)
+      role.useTransaction(trx)
+
+      server = await Server.create(
+        {
+          banner: '',
+          icon: '',
+          name: name,
+          description: description ?? '',
+          visibility: visibility as 'public' | 'private',
+          ownerId: ownerId,
+          serialNumber: sn,
+        },
+        { client: trx }
+      )
+
+      member = await Member.create(
+        {
+          avatar: user.profilePicture,
+          nickname: user.username,
+          serverId: server.id,
+          userId: ownerId,
+        },
+        { client: trx }
+      )
+
+      role = await Role.create(
+        {
+          id: server.id,
+          name: DEFAULT_ROLE_SERVER,
+          permissions: DEFAULT_ROLE_SERVER_PERMISSION,
+          serverId: server.id,
+        },
+        { client: trx }
+      )
     })
 
     let path: string | null = null
