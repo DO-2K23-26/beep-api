@@ -42,7 +42,6 @@ test.group('Channels users find', () => {
       .catch((error: ChannelNotFoundException) => {
         errorThrown = error
       })
-    // console.log(errorThrown)
     assert.containsSubset(errorThrown, {
       code: 'E_ROW_NOT_FOUND',
       status: 404,
