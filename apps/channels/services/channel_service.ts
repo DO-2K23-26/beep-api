@@ -305,4 +305,11 @@ export default class ChannelService {
   generateToken(payload: PayloadJWTSFUConnection): string {
     return jwt.sign(payload, env.get('APP_KEY'), { expiresIn: '5m' })
   }
+
+  async isUserInChannel(channelId: string, userId: string): Promise<boolean> {
+    const channel = await Channel.find(channelId)
+    if (channel?.type != ChannelType.private_chat) return false
+    await channel.load('users')
+    return channel.users.some((user) => user.id === userId)
+  }
 }

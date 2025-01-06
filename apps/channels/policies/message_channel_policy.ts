@@ -1,8 +1,6 @@
 import Channel from '#apps/channels/models/channel'
 import { ChannelType } from '#apps/channels/models/channel_type'
 import ChannelService from '#apps/channels/services/channel_service'
-import MessageNotFoundException from '#apps/messages/exceptions/message_not_found_exception'
-import Message from '#apps/messages/models/message'
 import MessageService from '#apps/messages/services/message_service'
 import ServerService from '#apps/servers/services/server_service'
 import { BasePolicy } from '@adonisjs/bouncer'
@@ -33,8 +31,7 @@ export default class MessageChannelPolicy extends BasePolicy {
     if (channel.type === ChannelType.private_chat) {
       // If the user is in the channel and the channel is a private
       // therefore we can bypass show, index and store
-      await channel.load('users')
-      const userIsInChannel = channel.users.some((user) => user.id === payload.sub)
+      const userIsInChannel = await this.channelService.isUserInChannel(channelId, payload.sub!)
       if ((action === 'destroy' || action === 'update') && !userIsInChannel) return false
       else return userIsInChannel
     } else if (channel.type === ChannelType.text_server && channel.serverId) {
