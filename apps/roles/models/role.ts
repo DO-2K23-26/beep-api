@@ -34,6 +34,6 @@ export default class Role extends BaseModel {
   // Snowflake IDs can be sorted by creation date.
   @beforeCreate()
   public static async generateUuid(model: Role) {
-    model.id = randomUUID()
+    if (!model.id) model.id = randomUUID()
   }
 }
