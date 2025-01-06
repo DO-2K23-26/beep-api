@@ -7,6 +7,8 @@ import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
 import ServerAlreadyExistsException from '../exceptions/server_already_exists_exception.js'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
+import Role from '#apps/roles/models/role'
+import { Permissions } from '#apps/shared/enums/permissions'
 
 @inject()
 export default class ServerService {
@@ -68,11 +70,19 @@ export default class ServerService {
       ownerId: ownerId,
       serialNumber: sn,
     })
-    Member.create({
+
+    await Member.create({
       userId: ownerId,
       serverId: server.id,
       avatar: user.profilePicture,
       nickname: user.username,
+    })
+
+    await Role.create({
+      id: server.id,
+      name: 'BasicMember',
+      permissions: Permissions.VIEW_CHANNELS | Permissions.SEND_MESSAGES | Permissions.ATTACH_FILES,
+      serverId: server.id,
     })
 
     let path: string | null = null
