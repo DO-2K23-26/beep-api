@@ -1,5 +1,6 @@
 import Server from '#apps/servers/models/server'
-import { Permissions } from '#apps/shared/enums/permissions'
+import { DEFAULT_ROLE_SERVER_PERMISSION } from '#apps/shared/constants/default_role_permission'
+import { DEFAULT_ROLE_SERVER } from '#apps/shared/constants/default_role_server'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 
 export default class extends BaseSeeder {
@@ -11,9 +12,8 @@ export default class extends BaseSeeder {
           { id: server.id },
           {
             id: server.id,
-            name: 'BasicMember',
-            permissions:
-              Permissions.VIEW_CHANNELS | Permissions.SEND_MESSAGES | Permissions.ATTACH_FILES,
+            name: DEFAULT_ROLE_SERVER,
+            permissions: DEFAULT_ROLE_SERVER_PERMISSION,
           }
         )
       })
