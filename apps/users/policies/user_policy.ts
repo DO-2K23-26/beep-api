@@ -1,36 +1,24 @@
-import PermissionResolver from '#apps/shared/services/permissions/permission_resolver'
 import User from '#apps/users/models/user'
 import { allowGuest, BasePolicy } from '@adonisjs/bouncer'
 import { AuthorizerResponse } from '@adonisjs/bouncer/types'
 import { inject } from '@adonisjs/core'
-import { JwtPayload } from 'jsonwebtoken'
 
 @inject()
 export default class UserPolicy extends BasePolicy {
-  constructor(protected permissionResolver: PermissionResolver) {
+  constructor() {
     super()
   }
 
-  async before(payload: JwtPayload) {
-    const isAdmin = await this.permissionResolver
-      .createResolve(payload.resource_access)
-      .verifyAccess('admin')
-
-    if (isAdmin) return true
+  async view(): Promise<AuthorizerResponse> {
+    return false
   }
 
-  async view(payload: JwtPayload): Promise<AuthorizerResponse> {
-    return this.permissionResolver.createResolve(payload.resource_access).verifyAccess('view-users')
+  async store(): Promise<AuthorizerResponse> {
+    return false
   }
 
-  async store(payload: JwtPayload): Promise<AuthorizerResponse> {
-    return this.permissionResolver
-      .createResolve(payload.resource_access)
-      .verifyAccess('create-users')
-  }
-
-  async delete(payload: JwtPayload): Promise<AuthorizerResponse> {
-    return this.permissionResolver.createResolve(payload.resource_access).verifyAccess('view-users')
+  async delete(): Promise<AuthorizerResponse> {
+    return false
   }
 
   @allowGuest()

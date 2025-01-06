@@ -5,18 +5,16 @@ import MessageNotFoundException from '#apps/messages/exceptions/message_not_foun
 import Message from '#apps/messages/models/message'
 import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
 import Server from '#apps/servers/models/server'
-import PermissionResolver from '#apps/shared/services/permissions/permission_resolver'
 import { BasePolicy } from '@adonisjs/bouncer'
 import { inject } from '@adonisjs/core'
 import { HttpContext } from '@adonisjs/core/http'
 import { JwtPayload } from 'jsonwebtoken'
 @inject()
-export default class ChannelPolicy extends BasePolicy {
+export default class MessageChannelPolicy extends BasePolicy {
   protected payload: JwtPayload
 
   constructor(
     protected channelService: ChannelService,
-    protected permissionResolver: PermissionResolver,
     protected ctx: HttpContext
   ) {
     super()
