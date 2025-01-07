@@ -6,6 +6,7 @@ import UserNotFoundException from '#apps/users/exceptions/user_not_found_excepti
 import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
 import ServerAlreadyExistsException from '../exceptions/server_already_exists_exception.js'
+import ServerCountLimitReachedException from '../exceptions/server_count_limit_reached_exception.js'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
 import Role from '#apps/roles/models/role'
 import { DEFAULT_ROLE_SERVER } from '#apps/shared/constants/default_role_server'
@@ -62,6 +63,16 @@ export default class ServerService {
         code: 'E_ROWNOTFOUND',
       })
     })
+
+    // check if user already has 100 servers or more as the owner (owner_id in servers table)
+    const userServers = await this.findByUserId(ownerId)
+    if (userServers.length >= 50) {
+      throw new ServerCountLimitReachedException('User has reached the limit of servers', {
+        status: 400,
+        code: 'E_SERVER_COUNT_LIMIT_REACHED',
+      })
+    }
+
     const sn = generateSnowflake()
     let server = new Server()
     let member = new Member()
