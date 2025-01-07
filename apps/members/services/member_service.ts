@@ -1,24 +1,33 @@
+import WrongChannelTypeException from '#apps/channels/exceptions/wrong_channel_type'
+import { ChannelType } from '#apps/channels/models/channel_type'
+import ChannelService from '#apps/channels/services/channel_service'
 import ExpiredInvitationException from '#apps/invitations/exceptions/expired_invitation_exception'
 import PrivateServerException from '#apps/invitations/exceptions/private_server_exception'
 import UnusableInvitationException from '#apps/invitations/exceptions/unusable_invitation_exception'
 import WrongInvitationFormatException from '#apps/invitations/exceptions/wrong_invitation_format_exception'
-import Invitation from '#apps/invitations/models/invitation'
 import { InvitationStatus } from '#apps/invitations/models/status'
 import { InvitationType } from '#apps/invitations/models/type'
-import { MemberServiceContract } from '#apps/members/contracts/member_service'
+import InvitationService from '#apps/invitations/services/invitation_service'
 import UserAlreadyMember from '#apps/members/exceptions/user_already_member_exception'
 import Member from '#apps/members/models/member'
-import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
-import Server from '#apps/servers/models/server'
-import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
-import User from '#apps/users/models/user'
+import RoleService from '#apps/roles/services/role_service'
+import ServerService from '#apps/servers/services/server_service'
+import UserService from '#apps/users/services/user_service'
+import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
-export default class MemberService implements MemberServiceContract {
-  async create(serverId: string, userId: string): Promise<Member> {
-    const user = await User.findOrFail(userId).catch(() => {
-      throw new UserNotFoundException('User not found', { status: 404, code: 'E_USER_NOT_FOUND' })
-    })
 
+@inject()
+export default class MemberService {
+  constructor(
+    protected userService: UserService,
+    protected serverService: ServerService,
+    protected invitationService: InvitationService,
+    protected channelService: ChannelService,
+    protected roleService: RoleService
+  ) {}
+
+  async create(serverId: string, userId: string): Promise<Member> {
+    const user = await this.userService.findById(userId)
     const member = await Member.create({
       nickname: user.username,
       serverId,
@@ -32,23 +41,12 @@ export default class MemberService implements MemberServiceContract {
     return member
   }
 
-  async getServersByUserId(userId: string): Promise<Server[]> {
-    return Server.query().whereHas('members', (builder) => {
-      builder.where('user_id', userId)
-    })
-  }
-
   async findFrom(memberIds: string[]) {
     return Member.query().whereIn('id', memberIds)
   }
 
   async createFromInvitation(invitationId: string, userId: string): Promise<Member> {
-    const invitation = await Invitation.findByOrFail('id', invitationId).catch(() => {
-      throw new WrongInvitationFormatException('Invitation not found', {
-        status: 404,
-        code: 'E_INVITATION_NOT_FOUND',
-      })
-    })
+    const invitation = await this.invitationService.findById(invitationId)
     if (invitation.status !== InvitationStatus.Pending && invitation.status !== null) {
       throw new UnusableInvitationException('Invitation is not usable', {
         status: 400,
@@ -76,12 +74,7 @@ export default class MemberService implements MemberServiceContract {
   }
 
   async createForServer(userId: string, serverId: string): Promise<Member> {
-    const server = await Server.findOrFail(serverId).catch(() => {
-      throw new ServerNotFoundException('Server not found', {
-        status: 404,
-        code: 'E_ROW_NOT_FOUND',
-      })
-    })
+    const server = await this.serverService.findById(serverId)
     if (server.visibility === 'private') {
       throw new PrivateServerException('Server is private', {
         status: 403,
@@ -96,15 +89,42 @@ export default class MemberService implements MemberServiceContract {
     return members[0]
   }
 
-  addMemberRole(): Promise<void> {
-    throw new Error('Method not implemented.')
-  }
-
   async findAllByServerId(serverId: string): Promise<Member[]> {
-    const server = await Server.findOrFail(serverId)
+    const server = await this.serverService.findById(serverId)
     const members = await server.related('members').query().paginate(1, 1000)
 
     return members
+  }
+
+  async getPermissionsFromChannel(userId: string, channelId: string): Promise<number> {
+    const channel = await this.channelService.findByIdOrFail(channelId)
+
+    if (channel.serverId === null || channel.type !== ChannelType.TEXT_SERVER)
+      throw new WrongChannelTypeException('Wrong channel type', {
+        status: 400,
+        code: 'E_WRONG_CHANNEL_TYPE',
+      })
+    return this.getPermissions(userId, channel.serverId)
+  }
+
+  async getPermissions(userId: string, serverId: string) {
+    const member = await Member.query()
+      .where('user_id', userId)
+      .where('server_id', serverId)
+      .preload('roles')
+      .firstOrFail()
+    const role = await this.roleService.findById(serverId)
+    let permissions = role.permissions
+
+    member.roles.forEach((r) => {
+      permissions |= r.permissions
+    })
+
+    return permissions
+  }
+
+  addMemberRole(): Promise<void> {
+    throw new Error('Method not implemented.')
   }
 
   removeMemberRole(): Promise<void> {

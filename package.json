@@ -79,6 +79,7 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@vinejs/vine": "^3.0.0",
     "adonis-autoswagger": "^3.63.0",
+    "api": "link:",
     "flydrive": "^1.0.2",
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.4.4",

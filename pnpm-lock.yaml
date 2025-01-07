@@ -71,6 +71,9 @@ importers:
       adonis-autoswagger:
         specifier: ^3.63.0
         version: 3.63.0
+      api:
+        specifier: 'link:'
+        version: 'link:'
       flydrive:
         specifier: ^1.0.2
         version: 1.1.0(@aws-sdk/client-s3@3.688.0)(@aws-sdk/s3-request-presigner@3.688.0)

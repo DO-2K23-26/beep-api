@@ -9,11 +9,11 @@ export const ChannelFactory = factory
     return Channel.create({
       name: faker.internet.username(),
       description: faker.lorem.sentence(),
-      type: ChannelType.text_server,
+      type: ChannelType.TEXT_SERVER,
     })
   })
   .state('private_channel', async (channel) => {
-    channel.type = ChannelType.private_chat
+    channel.type = ChannelType.PRIVATE_CHAT
   })
   .relation('server', () => ServerFactory)
   .relation('users', () => UserFactory)
@@ -25,7 +25,7 @@ export const ChannelFactoryWithServer = (serverId: string) =>
       return Channel.create({
         name: faker.internet.username(),
         description: faker.lorem.sentence(),
-        type: ChannelType.text_server,
+        type: ChannelType.TEXT_SERVER,
         serverId: serverId,
       })
     })

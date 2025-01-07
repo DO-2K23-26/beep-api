@@ -190,7 +190,6 @@ export default class MessageService {
     const messageWithAttachements = await this.show(updatedMessage.id)
     const attachments: Attachment[] = messageWithAttachements.attachments
     let updatedAttachement: Attachment[] = []
-    console.log(!providedMessage.attachments && attachments !== undefined)
     // If no attachements provided delete all old attchements and stop the function
     if (!providedMessage.attachments && attachments !== undefined) {
       for (const attachment of attachments) {

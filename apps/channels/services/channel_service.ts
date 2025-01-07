@@ -70,7 +70,7 @@ export default class ChannelService {
         builder.where('user_id', userId)
       })
       .orderByRaw(`(${messageSubquery.toQuery()}) DESC NULLS LAST`)
-      .where('type', ChannelType.private_chat)
+      .where('type', ChannelType.PRIVATE_CHAT)
       .orderBy(messageSubquery, 'desc')
       .preload('users', (builder) => {
         builder.select('id', 'username', 'profilePicture').whereNot('id', userId)
@@ -85,7 +85,7 @@ export default class ChannelService {
       .whereHas('users', (builder) => {
         builder.where('user_id', userId)
       })
-      .where('type', ChannelType.private_chat)
+      .where('type', ChannelType.PRIVATE_CHAT)
   }
 
   async findPrivateByUserOrFail(userId: string): Promise<Channel[]> {
@@ -136,8 +136,8 @@ export default class ChannelService {
    */
   async findFromUsers(userIds: string[]): Promise<Channel | null> {
     const channel = await Channel.query()
-      .whereNot('type', ChannelType.text_server)
-      .whereNot('type', ChannelType.voice_server)
+      .whereNot('type', ChannelType.TEXT_SERVER)
+      .whereNot('type', ChannelType.VOICE_SERVER)
       .whereHas('users', (builder) => {
         builder.whereIn('user_id', userIds)
       })
@@ -308,7 +308,7 @@ export default class ChannelService {
 
   async isUserInChannel(channelId: string, userId: string): Promise<boolean> {
     const channel = await Channel.find(channelId)
-    if (channel?.type != ChannelType.private_chat) return false
+    if (channel?.type != ChannelType.PRIVATE_CHAT) return false
     await channel.load('users')
     return channel.users.some((user) => user.id === userId)
   }

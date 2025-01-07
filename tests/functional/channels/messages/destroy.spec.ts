@@ -65,7 +65,7 @@ test.group('Channels messages destroy', () => {
     const response = await client
       .delete(`/channels/${channel.id}/messages/nonexistantMessageId`)
       .loginAs(member.user)
-    response.assertStatus(404)
+    response.assertStatus(403)
   }).tags(['channels:messages:destroy'])
 
   test('must return 404 if the channel does not exist', async ({ client }) => {

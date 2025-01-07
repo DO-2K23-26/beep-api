@@ -181,4 +181,8 @@ export default class InvitationService {
       )
     return invitations
   }
+
+  async findById(id: string): Promise<Invitation> {
+    return Invitation.findOrFail(id)
+  }
 }

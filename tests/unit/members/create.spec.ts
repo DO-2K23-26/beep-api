@@ -14,9 +14,11 @@ import UserAlreadyMember from '#apps/members/exceptions/user_already_member_exce
 import { ServerFactory } from '#database/factories/server_factory'
 import PrivateServerException from '#apps/invitations/exceptions/private_server_exception'
 import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
+import app from '@adonisjs/core/services/app'
+
+const memberService = await app.container.make(MemberService)
 
 test.group('Members create', () => {
-  const memberService = new MemberService()
   test('must add a new member to a server from invitation', async ({ assert }) => {
     const invitation = await InvitationFactory.with('server').apply('expiration').create()
     const user = await UserFactory.create()
@@ -80,16 +82,14 @@ test.group('Members create', () => {
 
   test('must fail if the invitation does not exist', async ({ assert }) => {
     const user = await UserFactory.create()
-    let errorThrown = new WrongInvitationFormatException()
-    await memberService
-      .createFromInvitation('non-existant-id', user.id)
-      .catch((error: WrongInvitationFormatException) => {
-        errorThrown = error
-      })
+    let errorThrown
+    await memberService.createFromInvitation('non-existant-id', user.id).catch((error) => {
+      errorThrown = error
+    })
     assert.containsSubset(errorThrown, {
       status: 404,
-      code: 'E_INVITATION_NOT_FOUND',
-      message: 'Invitation not found',
+      code: 'E_ROW_NOT_FOUND',
+      message: 'Row not found',
     })
   })
   test('must fail if this is a friend invitation', async ({ assert }) => {
@@ -147,9 +147,9 @@ test.group('Members create', () => {
         errorThrown = error
       })
     assert.containsSubset(errorThrown, {
-      message: 'User not found',
+      message: 'Row not found',
       status: 404,
-      code: 'E_USER_NOT_FOUND',
+      code: 'E_ROW_NOT_FOUND',
     })
   })
   test('must fail if the server is private', async ({ assert }) => {
@@ -177,7 +177,7 @@ test.group('Members create', () => {
         errorThrown = error
       })
     assert.containsSubset(errorThrown, {
-      message: 'Server not found',
+      message: 'Row not found',
       status: 404,
       code: 'E_ROW_NOT_FOUND',
     })

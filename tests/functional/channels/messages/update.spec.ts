@@ -72,7 +72,7 @@ test.group('Channels messages update', () => {
     response.assertStatus(403)
   }).tags(['channels:messages:update'])
 
-  test('must return 404 if the message does not exist', async ({ client }) => {
+  test('must return 403 if the message does not exist', async ({ client }) => {
     const member = await MemberFactory.create()
     await member.load('user')
     const channel = await ChannelFactory.merge({ serverId: member.serverId }).create()
@@ -80,7 +80,7 @@ test.group('Channels messages update', () => {
       .patch(`/channels/${channel.id}/messages/nonexistantMessageId`)
       .loginAs(member.user)
       .json({ content: 'Forbidden message' })
-    response.assertStatus(404)
+    response.assertStatus(403)
   }).tags(['channels:messages:update'])
 
   test('must return 404 if the channel does not exist', async ({ client }) => {

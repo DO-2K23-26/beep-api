@@ -41,8 +41,7 @@ export default class ServerService {
   }
 
   async findById(serverId: string): Promise<Server> {
-    const server = await Server.findOrFail(serverId)
-    return server
+    return Server.findOrFail(serverId)
   }
 
   async create(
@@ -183,5 +182,11 @@ export default class ServerService {
     await server.load('members')
 
     return server.members.some((m) => m.userId === userId)
+  }
+
+  async getByUserId(userId: string): Promise<Server[]> {
+    return Server.query().whereHas('members', (builder) => {
+      builder.where('user_id', userId)
+    })
   }
 }
