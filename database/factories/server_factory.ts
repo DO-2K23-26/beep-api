@@ -15,7 +15,6 @@ export const ServerFactory = factory
     await RoleWithServerFactory(server.id).apply('default_role').create()
     return server
   })
-
   .relation('members', () => MemberFactory)
   .build()
 
@@ -29,3 +28,17 @@ export const ServerFactoryWithOwner = (ownerId: string) =>
       })
     })
     .build()
+
+export const PermissionLessServerFactory = factory
+  .define(Server, async ({ faker }) => {
+    const user = await UserFactory.create()
+    const server = await Server.create({
+      name: faker.internet.displayName(),
+      description: faker.lorem.sentence(),
+      ownerId: user.id,
+    })
+    await RoleWithServerFactory(server.id).create()
+    return server
+  })
+  .relation('members', () => MemberFactory)
+  .build()

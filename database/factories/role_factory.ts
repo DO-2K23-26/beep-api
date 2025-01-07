@@ -26,7 +26,7 @@ export const RoleWithServerFactory = (serverId: string) =>
       return Role.create({
         id: serverId,
         name: faker.internet.username(),
-        permissions: faker.number.int({ max: 0xfff }),
+        permissions: 0,
         serverId: serverId,
       })
     })
