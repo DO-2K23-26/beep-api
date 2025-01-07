@@ -33,6 +33,8 @@ spec:
             {{- if .Values.app.observability.enabled }}
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: {{ .Values.app.observability.OTEL_EXPORTER_OTLP_ENDPOINT }}
+            - name: LOKI_HOST
+              value: {{ .Values.app.observability.Loki.host }}
             {{- end }}
             - name: DB_PASSWORD
               valueFrom:

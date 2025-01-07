@@ -43,3 +43,5 @@ app:
   observability:
     enabled: false
     OTEL_EXPORTER_OTLP_ENDPOINT: ""
+    Loki:
+      host: ""
