@@ -40,3 +40,6 @@ configService: beep-services-config
 app:
   existingSecret: app-secret
   configMap: backend-config
+  observability:
+    enabled: false
+    OTEL_EXPORTER_OTLP_ENDPOINT: ""

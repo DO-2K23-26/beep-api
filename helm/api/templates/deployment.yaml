@@ -30,6 +30,10 @@ spec:
           - configMapRef:
               name: {{ .Values.configService }}
           env:
+            {{- if .Values.app.observability.enabled }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.app.observability.OTEL_EXPORTER_OTLP_ENDPOINT }}
+            {{- end }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
