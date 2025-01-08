@@ -11,4 +11,3 @@ data:
   SESSION_DRIVER: 'cookie'
   NODE_ENV: 'production'
   FRONTEND_URL: '{{ .Values.frontendUrl }}'
-  APP_VERSION: '{{ .Chart.AppVersion }}'
