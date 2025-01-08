@@ -44,12 +44,24 @@ export default class MessageChannelPolicy extends BasePolicy {
     }
   }
 
-  async show() {
-    return true
+  async show(payload: JwtPayload, channelId: string) {
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.VIEW_CHANNELS,
+    ])
   }
 
-  async index() {
-    return true
+  async index(payload: JwtPayload, channelId: string) {
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.VIEW_CHANNELS,
+    ])
   }
   async store(payload: JwtPayload, channelId: string) {
     const userPermissions = await this.memberService.getPermissionsFromChannel(
@@ -66,8 +78,25 @@ export default class MessageChannelPolicy extends BasePolicy {
     return true
   }
 
-  update(payload: JwtPayload, _channelId: string, messageId: string) {
-    return this.messageService.isUserAuthor(messageId, payload.sub!)
+  async update(payload: JwtPayload, channelId: string, messageId: string) {
+    // SEND_MESSAGES & VIEW_CHANNEL & MANAGE_MESSAGES
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    const isUserOwner = await this.messageService.isUserAuthor(messageId, payload.sub!)
+    if (isUserOwner) return true
+
+    return (
+      this.permissionsService.validate_permissions(userPermissions, [
+        Permissions.SEND_MESSAGES,
+        Permissions.VIEW_CHANNELS,
+      ]) ||
+      this.permissionsService.validate_permissions(userPermissions, [
+        Permissions.MANAGE_MESSAGES,
+        Permissions.VIEW_CHANNELS,
+      ])
+    )
   }
 
   destroy(payload: JwtPayload, _channelId: string, messageId: string) {
