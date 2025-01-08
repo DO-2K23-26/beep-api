@@ -12,6 +12,7 @@ import env from '#start/env'
 import jwt from 'jsonwebtoken'
 import WebhookJwtInvalidException from '../exceptions/webhook_jwt_invalid_exception.js'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
+import User from '#apps/users/models/user'
 
 export interface PayloadJWTSFUConnection {
   name?: string
@@ -161,13 +162,29 @@ export default class WebhookService {
       })
     }
 
+    if (!webhook.userId) {
+      throw new Error('Webhook userId is missing or invalid')
+    }
+
+    // Optionally: Ensure the user exists in the database
+    const userExists = await User.find(webhook.userId)
+    if (!userExists) {
+      throw new Error(`User with ID ${webhook.userId} does not exist`)
+    }
+
+    console.log('AVANT CREATION MESSAGE')
+
     // Create the message
     const createdMessage = await Message.create({
       content: messageContent,
       webhookId: webhook.id,
-      channelId: webhook.channelId ?? '',
-      ownerId: webhook.userId ?? '',
+      channelId: webhook.channelId,
+      ownerId: webhook.userId,
     })
+
+    console.log('APRES CREATION MESSAGE')
+
+    console.log('Created message:', createdMessage)
 
     // Construct the payload for the broadcast
     const signalWebhook: SignalWebhook = {

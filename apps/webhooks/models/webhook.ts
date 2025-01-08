@@ -24,7 +24,7 @@ export default class Webhook extends BaseModel {
 
   // Column for channel ID (nullable)
   @column({ columnName: 'channel_id' })
-  declare channelId: string | null
+  declare channelId: string
 
   // Column for user ID (nullable)
   @column({ columnName: 'user_id' })

@@ -5,18 +5,14 @@ import env from '#start/env'
 
 export const WebhookFactory = factory
   .define(Webhook, async ({ faker }) => {
+    const name = faker.lorem.words(2)
     return Webhook.create({
-      name: faker.lorem.words(2),
+      name,
       profilePicture: faker.image.avatar(),
       userId: faker.lorem.word(),
-      token: '',
+      token: jwt.sign({ name }, env.get('APP_KEY')),
       channelId: faker.lorem.word(),
       serverId: faker.lorem.word(),
     })
   })
-  .state(
-    'token',
-    (webhook) => (webhook.token = jwt.sign({ name: webhook.name }, env.get('APP_KEY')))
-  )
-
   .build()
