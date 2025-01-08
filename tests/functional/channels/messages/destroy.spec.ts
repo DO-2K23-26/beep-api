@@ -97,7 +97,7 @@ test.group('Channels messages destroy', () => {
       .loginAs(members[1].user)
       .json(data)
     response.assertStatus(200)
-  }).tags(['channels:messages:update'])
+  }).tags(['channels:messages:destroy'])
 
   test('must return 401 if not logged in', async ({ client }) => {
     const channel = await ChannelFactory.create()
@@ -126,7 +126,7 @@ test.group('Channels messages destroy', () => {
       .loginAs(members[1].user)
       .json(data)
     response.assertStatus(403)
-  }).tags(['channels:messages:update'])
+  }).tags(['channels:messages:destroy'])
 
   test('must return 403 if the user is not in the server of the channel', async ({ client }) => {
     const user = await UserFactory.create()

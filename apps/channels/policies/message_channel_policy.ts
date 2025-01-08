@@ -75,20 +75,17 @@ export default class MessageChannelPolicy extends BasePolicy {
   }
 
   async pin(payload: JwtPayload, channelId: string) {
+    const channel = await this.channelService.findByIdOrFail(channelId)
+    if (channel.type == ChannelType.PRIVATE_CHAT) return true
+
     const userPermissions = await this.memberService.getPermissionsFromChannel(
       payload.sub!,
       channelId
     )
-    return (
-      this.permissionsService.validate_permissions(userPermissions, [
-        Permissions.SEND_MESSAGES,
-        Permissions.VIEW_CHANNELS,
-      ]) ||
-      this.permissionsService.validate_permissions(userPermissions, [
-        Permissions.MANAGE_MESSAGES,
-        Permissions.VIEW_CHANNELS,
-      ])
-    )
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.SEND_MESSAGES,
+      Permissions.VIEW_CHANNELS,
+    ])
   }
 
   async update(payload: JwtPayload, channelId: string, messageId: string) {
