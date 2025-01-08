@@ -5,7 +5,7 @@ import { MessageFactory } from '#database/factories/message_factory'
 import { PermissionLessServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
-// MANAGE_MESSAGES VIEW_CHANNELS SEND_MESSAGES
+
 test.group('Channels messages update', () => {
   test('must return 200 when updating message of a channel in a server', async ({ client }) => {
     const member = await MemberFactory.create()
@@ -19,32 +19,6 @@ test.group('Channels messages update', () => {
     const response = await client
       .patch(`/channels/${channel.id}/messages/${message.id}`)
       .loginAs(member.user)
-      .json(data)
-    response.assertStatus(200)
-    response.assertBodyContains(data)
-  }).tags(['channels:messages:update'])
-
-  test('must return 200 when updating message of a channel in a server with only MANAGE_MESSAGES & VIEW_CHANNEL permission', async ({
-    client,
-  }) => {
-    const server = await PermissionLessServerFactory.create()
-    await server.load('roles')
-    const role = server.roles[0]
-    role.permissions = Permissions.MANAGE_MESSAGES | Permissions.VIEW_CHANNELS
-    await role.save()
-    const members = await MemberFactoryWithServer(server.id).createMany(2)
-    await Promise.all(members.map(async (m) => await m.load('user')))
-    const channel = await ChannelFactory.merge({ serverId: members[1].serverId }).create()
-    const message = await MessageFactory.merge({
-      channelId: channel.id,
-      ownerId: members[0].userId,
-    }).create()
-
-    const data = { content: 'new content' }
-
-    const response = await client
-      .patch(`/channels/${channel.id}/messages/${message.id}`)
-      .loginAs(members[1].user)
       .json(data)
     response.assertStatus(200)
     response.assertBodyContains(data)

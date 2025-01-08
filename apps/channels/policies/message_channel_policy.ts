@@ -74,19 +74,11 @@ export default class MessageChannelPolicy extends BasePolicy {
     ])
   }
 
-  async pin() {
-    return true
-  }
-
-  async update(payload: JwtPayload, channelId: string, messageId: string) {
-    // SEND_MESSAGES & VIEW_CHANNEL & MANAGE_MESSAGES
+  async pin(payload: JwtPayload, channelId: string) {
     const userPermissions = await this.memberService.getPermissionsFromChannel(
       payload.sub!,
       channelId
     )
-    const isUserOwner = await this.messageService.isUserAuthor(messageId, payload.sub!)
-    if (isUserOwner) return true
-
     return (
       this.permissionsService.validate_permissions(userPermissions, [
         Permissions.SEND_MESSAGES,
@@ -99,7 +91,35 @@ export default class MessageChannelPolicy extends BasePolicy {
     )
   }
 
-  destroy(payload: JwtPayload, _channelId: string, messageId: string) {
-    return this.messageService.isUserAuthor(messageId, payload.sub!)
+  async update(payload: JwtPayload, channelId: string, messageId: string) {
+    const isUserOwner = await this.messageService.isUserAuthor(messageId, payload.sub!)
+    if (isUserOwner) return true
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.SEND_MESSAGES,
+      Permissions.VIEW_CHANNELS,
+    ])
+  }
+
+  async destroy(payload: JwtPayload, channelId: string, messageId: string) {
+    const isUserOwner = await this.messageService.isUserAuthor(messageId, payload.sub!)
+    if (isUserOwner) return true
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return (
+      this.permissionsService.validate_permissions(userPermissions, [
+        Permissions.SEND_MESSAGES,
+        Permissions.VIEW_CHANNELS,
+      ]) ||
+      this.permissionsService.validate_permissions(userPermissions, [
+        Permissions.MANAGE_MESSAGES,
+        Permissions.VIEW_CHANNELS,
+      ])
+    )
   }
 }
