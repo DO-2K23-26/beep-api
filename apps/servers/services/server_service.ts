@@ -65,7 +65,7 @@ export default class ServerService {
     })
 
     // check if user already has 100 servers or more as the owner (owner_id in servers table)
-    const userServers = await this.findByUserId(ownerId)
+    const userServers = await this.findByUserId(ownerId, 1, 51)
     if (userServers.length >= 50) {
       throw new ServerCountLimitReachedException('User has reached the limit of servers', {
         status: 400,
