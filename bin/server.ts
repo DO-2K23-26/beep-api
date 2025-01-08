@@ -9,6 +9,9 @@
 |
 */
 
+// Start the instrumentation
+import '../instrumentation.ts'
+
 import 'reflect-metadata'
 import { Ignitor, prettyPrintError } from '@adonisjs/core'
 
