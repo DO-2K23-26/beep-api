@@ -38,7 +38,6 @@ router.use([
   () => import('@adonisjs/session/session_middleware'),
   () => import('@adonisjs/auth/initialize_auth_middleware'),
   () => import('#apps/shared/middleware/initialize_bouncer_middleware'),
-  () => import('#apps/shared/middleware/auth_exception_middleware'), // Ajout du middleware personnalisé
 ])
 
 /**
