@@ -172,8 +172,6 @@ export default class WebhookService {
       throw new Error(`User with ID ${webhook.userId} does not exist`)
     }
 
-    console.log('AVANT CREATION MESSAGE')
-
     // Create the message
     const createdMessage = await Message.create({
       content: messageContent,
@@ -181,10 +179,6 @@ export default class WebhookService {
       channelId: webhook.channelId,
       ownerId: webhook.userId,
     })
-
-    console.log('APRES CREATION MESSAGE')
-
-    console.log('Created message:', createdMessage)
 
     // Construct the payload for the broadcast
     const signalWebhook: SignalWebhook = {
