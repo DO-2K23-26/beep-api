@@ -2,13 +2,18 @@ import MailService from '#apps/authentication/services/mail_service'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import StorageService from '#apps/storage/services/storage_service'
 import User from '#apps/users/models/user'
-import { GetUsersSchema, UpdateUserValidator } from '#apps/users/validators/users'
+import {
+  GetUsersSchema,
+  UpdateUserValidator,
+  OldEmailUpdateValidator,
+} from '#apps/users/validators/users'
 import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
 import jwt from 'jsonwebtoken'
 import { ChangeEmailToken } from '#apps/users/models/change_email_token'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
 import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_already_exists_exception'
+import EmailAlreadyExistsExeption from '#apps/users/exceptions/email_already_exists_exception'
 
 @inject()
 export default class UserService {
@@ -58,14 +63,26 @@ export default class UserService {
       const key = await this.storageService.storeProfilePicture(updatedUser.profilePicture, user.id)
       user.merge({ profilePicture: key })
     }
+    if (updatedUser.email) {
+      this.mailService.sendChangeConfirmationMail(updatedUser.email)
+    }
+
     await user
       .merge(restOfObject)
       .save()
       .catch(() => {
-        throw new UsernameAlreadyExistsExeption('Username already exists', {
-          status: 400,
-          code: 'E_USERNAMEALREADYEXISTS',
-        })
+        if (updatedUser.username) {
+          throw new UsernameAlreadyExistsExeption('Username already exists', {
+            status: 400,
+            code: 'E_USERNAMEALREADYEXISTS',
+          })
+        }
+        if (updatedUser.email) {
+          throw new EmailAlreadyExistsExeption('Email already exists', {
+            status: 400,
+            code: 'E_EMAILALREADYEXISTS',
+          })
+        }
       })
     return user
   }
@@ -99,14 +116,23 @@ export default class UserService {
     return { new_email: data.new_email, user_id: data.user_id }
   }
 
-  updateEmail(userId: string, email: string) {
+  async updateEmail(updateEmail: OldEmailUpdateValidator) {
+    // if the current password is not right
+
+    const user = await User.verifyCredentials(
+      updateEmail.oldEmail.toLocaleLowerCase(),
+      updateEmail.password
+    ).catch(() => {
+      throw new UserNotFoundException('Password not right', {
+        status: 404,
+        code: 'E_ROWNOTFOUND',
+      })
+    })
+
     const changeEmailValidator: UpdateUserValidator = {
-      username: undefined,
-      firstName: undefined,
-      lastName: undefined,
-      email: email,
-      profilePicture: undefined,
+      email: updateEmail.newEmail,
     }
-    return this.update(changeEmailValidator, userId)
+
+    return this.update(changeEmailValidator, user.id)
   }
 }

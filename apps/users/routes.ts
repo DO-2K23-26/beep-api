@@ -8,6 +8,7 @@ const UsersInvitationsController = () =>
 const UsersControllerV0 = () => import('#apps/users/controllers/users_v0_controller')
 const UsersController = () => import('#apps/users/controllers/users_controller')
 const UserServersController = () => import('#apps/users/controllers/user_servers_controller')
+const OtpController = () => import('#apps/users/controllers/otp_controller')
 
 router
   .group(() => {
@@ -33,16 +34,24 @@ router
         router.post('/disconnect', [UsersControllerV0, 'disconnectUser'])
         router.get('/onlines', [UsersControllerV0, 'onlines'])
         router.get('/display', [UsersControllerV0, 'all'])
+        // route should look like /users/otp/[name of route]
+        router
+          .group(() => {
+            router.post('/generate', [OtpController, 'generateOtp']) // Corrected OTP controller method
+            router.post('/verify', [OtpController, 'verifyOtp']) // Corrected OTP controller method
+          })
+          .prefix('/otp')
         router
           .group(() => {
             router
               .group(() => {
                 router.post('', [UsersControllerV0, 'createEmailToken'])
-                router.put('', [UsersControllerV0, 'confirmEmailUpdate'])
+                // router.put('', [UsersControllerV0, 'confirmEmailUpdate'])
+                router.post('/update', [UsersController, 'updateEmail'])
               })
               .prefix('/email')
             router.get('', [UsersControllerV0, 'findMe'])
-            router.put('', [UsersControllerV0, 'update'])
+            router.put('', [UsersController, 'update'])
           })
           .prefix('/@me')
         router.get('/:userId', [UsersControllerV0, 'show'])
