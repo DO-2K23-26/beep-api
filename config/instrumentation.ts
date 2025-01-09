@@ -24,8 +24,9 @@ if (process.env.OTLP_ENDPOINT) {
   // Create an OpenTelemetry SDK
   const sdk = new NodeSDK({
     resource: new Resource({
-      [ATTR_SERVICE_NAME]: 'beep-api-' + process.env.ENVIRONMENT,
+      [ATTR_SERVICE_NAME]: 'beep-api',
       [ATTR_SERVICE_VERSION]: process.env.APP_VERSION,
+      environment: process.env.ENVIRONMENT,
     }),
     traceExporter: traceExporter,
     instrumentations: [getNodeAutoInstrumentations()],
