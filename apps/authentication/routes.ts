@@ -1,5 +1,6 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
+import { throttleSignUp } from '#start/limiter'
 
 const AuthenticationController = () =>
   import('#apps/authentication/controllers/authentication_controller')
@@ -7,7 +8,7 @@ const AuthenticationController = () =>
 router
   .group(() => {
     router.post('/signin', [AuthenticationController, 'signin'])
-    router.post('/signup', [AuthenticationController, 'signup'])
+    router.post('/signup', [AuthenticationController, 'signup']).use(throttleSignUp)
     router.post('/verify', [AuthenticationController, 'verifyEmail'])
     router.post('/refresh', [AuthenticationController, 'refresh'])
     router.post('/reset-password', [AuthenticationController, 'sendResetPasswordEmail'])

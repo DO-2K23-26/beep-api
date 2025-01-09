@@ -1,5 +1,6 @@
 const StoragesController = () => import('#apps/storage/controllers/storages_controller')
 import { middleware } from '#start/kernel'
+import { throttleCreation } from '#start/limiter'
 import router from '@adonisjs/core/services/router'
 
 const ServerController = () => import('#apps/servers/controllers/server_controller')
@@ -36,7 +37,7 @@ router
       .group(() => {
         router.get('/', [ServerController, 'index'])
         router.get('/discover', [ServerController, 'discover'])
-        router.post('/', [ServerController, 'store'])
+        router.post('/', [ServerController, 'store']).use(throttleCreation)
         router.post('/leave', [ServerChannelsController, 'leaveChannel']).prefix('channels')
         router
           .group(() => {
@@ -52,7 +53,7 @@ router
             router
               .group(() => {
                 router.get('/', [ServerChannelsController, 'findByServerId'])
-                router.post('/', [ServerChannelsController, 'createChannel'])
+                router.post('/', [ServerChannelsController, 'createChannel']).use(throttleCreation)
                 router.put('/:channelId', [ServerChannelsController, 'updateChannel'])
                 router.delete('/:channelId', [ServerChannelsController, 'deleteChannel'])
                 router.get('/:channelId', [ServerChannelsController, 'findByChannelId'])
