@@ -89,6 +89,9 @@ importers:
       pg:
         specifier: ^8.13.1
         version: 8.13.1
+      pino-loki:
+        specifier: ^2.4.0
+        version: 2.4.0
       pino-pretty:
         specifier: 12.1.0
         version: 12.1.0
@@ -2269,6 +2272,10 @@ packages:
     resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
     engines: {node: '>=14'}
 
+  commander@12.1.0:
+    resolution: {integrity: sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA==}
+    engines: {node: '>=18'}
+
   commander@9.5.0:
     resolution: {integrity: sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==}
     engines: {node: ^12.20.0 || >=14}
@@ -2325,10 +2332,6 @@ packages:
 
   crypt@0.0.2:
     resolution: {integrity: sha512-mCxBlsHFYh9C+HVpiEacem8FEBnMXgU9gy4zmNC+SXAZNB/1idgp/aulFJ4FgCi7GPEVbfyng092GqL2k2rmow==}
-
-  crypto-random-string@5.0.0:
-    resolution: {integrity: sha512-KWjTXWwxFd6a94m5CdRGW/t82Tr8DoBc9dNnPCAbFI1EBweN6v1tv8y4Y1m7ndkp/nkIBRxUxAzpaBnR2k3bcQ==}
-    engines: {node: '>=14.16'}
 
   css@3.0.0:
     resolution: {integrity: sha512-DG9pFfwOrzc+hawpmqX/dHYHJG+Bsdb0klhyi1sDneOgGOXy9wQIC8hzyVp1e4NRYDBdxcylvywPkkXCHAzTyQ==}
@@ -3814,6 +3817,10 @@ packages:
 
   pino-abstract-transport@2.0.0:
     resolution: {integrity: sha512-F63x5tizV6WCh4R6RHyi2Ml+M70DNRXt/+HANowMflpgGFMAym/VKm6G7ZOQRjqN7XbGxK1Lg9t6ZrtzOaivMw==}
+
+  pino-loki@2.4.0:
+    resolution: {integrity: sha512-PN0BQ5TSGRuFI3jSiBIOJ3G8A5wSKGOPgKCseNuKdwnChV+rATAmfZqDo7lq0pDtvifSsBmXhw1gjv69J9bg9g==}
+    hasBin: true
 
   pino-pretty@12.1.0:
     resolution: {integrity: sha512-Z7JdCPqggoRyo0saJyCe1BN8At5qE+ZBElNbyx+znCaCVN+ohOqlWb+/WSYnamzfi2e6P6pXq/3H66KwFQHXWg==}
@@ -7636,6 +7643,8 @@ snapshots:
 
   commander@10.0.1: {}
 
+  commander@12.1.0: {}
+
   commander@9.5.0:
     optional: true
 
@@ -7688,10 +7697,6 @@ snapshots:
       which: 2.0.2
 
   crypt@0.0.2: {}
-
-  crypto-random-string@5.0.0:
-    dependencies:
-      type-fest: 2.19.0
 
   css@3.0.0:
     dependencies:
@@ -9161,6 +9166,12 @@ snapshots:
   pino-abstract-transport@2.0.0:
     dependencies:
       split2: 4.2.0
+
+  pino-loki@2.4.0:
+    dependencies:
+      commander: 12.1.0
+      pino-abstract-transport: 2.0.0
+      pump: 3.0.2
 
   pino-pretty@12.1.0:
     dependencies:

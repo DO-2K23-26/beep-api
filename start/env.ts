@@ -68,4 +68,12 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   LIMITER_STORE: Env.schema.enum(['redis', 'memory'] as const),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the loki logger
+  |----------------------------------------------------------
+  */
+  LOKI_HOST: Env.schema.string.optional(),
+  LOKI_LOG_LEVEL: Env.schema.string.optional(),
 })
