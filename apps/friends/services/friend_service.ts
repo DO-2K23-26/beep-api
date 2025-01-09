@@ -39,7 +39,7 @@ export default class FriendService {
     if (!channel) {
       const channel = await Channel.create({
         name: `${userId}, ${friendId}`,
-        type: ChannelType.private_chat,
+        type: ChannelType.PRIVATE_CHAT,
       })
 
       await channel.related('users').attach([userId, friendId])

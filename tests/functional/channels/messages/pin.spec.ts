@@ -1,6 +1,7 @@
 import { ChannelFactory } from '#database/factories/channel_factory'
-import { MemberFactory } from '#database/factories/member_factory'
+import { MemberFactory, MemberFactoryWithServer } from '#database/factories/member_factory'
 import { MessageFactory } from '#database/factories/message_factory'
+import { PermissionLessServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
@@ -50,6 +51,25 @@ test.group('Channels messages pin', () => {
       .json({ action: 'pin' })
     response.assertStatus(401)
   })
+
+  test('must return 403 if the user has not permission SEND_MESSAGES & VIEW_CHANNELS, in server', async ({
+    client,
+  }) => {
+    const server = await PermissionLessServerFactory.create()
+    const member = await MemberFactoryWithServer(server.id).createMany(2)
+    await Promise.all(member.map(async (m) => await m.load('user')))
+    const channel = await ChannelFactory.merge({ serverId: member[0].serverId }).create()
+    const message = await MessageFactory.merge({
+      channelId: channel.id,
+      ownerId: member[1].userId,
+    }).create()
+    // Simulate the user not having the required permissions
+    const response = await client
+      .patch(`/channels/${channel.id}/messages/${message.id}/pinning`)
+      .loginAs(member[0].user)
+      .json({ action: 'pin' })
+    response.assertStatus(403)
+  }).tags(['channels:messages:update'])
 
   test('must return 403 if the user is not in the server of the channel', async ({ client }) => {
     const user = await UserFactory.create()

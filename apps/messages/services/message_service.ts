@@ -177,6 +177,11 @@ export default class MessageService {
   setSignalingChannel(userId: string, transmitId: string) {
     redis.setex(`signalingChannel:${userId}`, transmitId, 3600)
   }
+
+  async isUserAuthor(messageId: string, userId: string) {
+    const message = await Message.find(messageId)
+    return message?.ownerId === userId
+  }
   /*
   async updateFilesOfMessage(
     updatedMessage: Message,
@@ -185,7 +190,6 @@ export default class MessageService {
     const messageWithAttachements = await this.show(updatedMessage.id)
     const attachments: Attachment[] = messageWithAttachements.attachments
     let updatedAttachement: Attachment[] = []
-    console.log(!providedMessage.attachments && attachments !== undefined)
     // If no attachements provided delete all old attchements and stop the function
     if (!providedMessage.attachments && attachments !== undefined) {
       for (const attachment of attachments) {

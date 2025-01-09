@@ -5,8 +5,8 @@ import { UserFactory } from '#database/factories/user_factory'
 
 export const MemberFactory = factory
   .define(Member, async ({ faker }) => {
-    const server = await ServerFactory.make()
-    const user = await UserFactory.make()
+    const server = await ServerFactory.create()
+    const user = await UserFactory.create()
 
     return Member.create({
       nickname: faker.internet.username(),
@@ -18,7 +18,6 @@ export const MemberFactory = factory
       userId: user.id,
     })
   })
-
   .build()
 
 export const MemberFactoryWithServer = (serverId: string) =>

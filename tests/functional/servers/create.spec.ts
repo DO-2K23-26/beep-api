@@ -51,10 +51,8 @@ test.group('Servers create', () => {
     }
     const user = await UserFactory.create()
     const resultServerCreation = await client.post('/servers').json(payload).loginAs(user)
-    console.log(resultServerCreation.body())
     const server = await Server.findOrFail(resultServerCreation.body().id)
     await server.load('roles')
-    console.log(server.roles[0])
     expect(server.roles.length).toBe(1)
     expect(server.roles[0].name).toEqual(DEFAULT_ROLE_SERVER)
     expect(server.roles[0].permissions).toEqual(DEFAULT_ROLE_SERVER_PERMISSION)

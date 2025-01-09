@@ -1,8 +1,8 @@
 import Role from '#apps/roles/models/role'
 import Server from '#apps/servers/models/server'
 import User from '#apps/users/models/user'
-import { BaseModel, beforeCreate, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, beforeCreate, belongsTo, column, manyToMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 
@@ -53,8 +53,8 @@ export default class Member extends BaseModel {
   })
   declare server: BelongsTo<typeof Server>
 
-  @hasMany(() => Role)
-  declare roles: HasMany<typeof Role>
+  @manyToMany(() => Role)
+  declare roles: ManyToMany<typeof Role>
 
   @beforeCreate()
   static async generateUuid(model: Member) {

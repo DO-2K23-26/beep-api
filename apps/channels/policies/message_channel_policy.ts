@@ -1,85 +1,122 @@
 import Channel from '#apps/channels/models/channel'
 import { ChannelType } from '#apps/channels/models/channel_type'
 import ChannelService from '#apps/channels/services/channel_service'
-import MessageNotFoundException from '#apps/messages/exceptions/message_not_found_exception'
-import Message from '#apps/messages/models/message'
-import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
-import Server from '#apps/servers/models/server'
+import MemberService from '#apps/members/services/member_service'
+import MessageService from '#apps/messages/services/message_service'
+import ServerService from '#apps/servers/services/server_service'
+import { Permissions } from '#apps/shared/enums/permissions'
+import PermissionsService from '#apps/shared/services/permissions/permissions_service'
 import { BasePolicy } from '@adonisjs/bouncer'
 import { inject } from '@adonisjs/core'
-import { HttpContext } from '@adonisjs/core/http'
 import { JwtPayload } from 'jsonwebtoken'
 @inject()
 export default class MessageChannelPolicy extends BasePolicy {
-  protected payload: JwtPayload
-
   constructor(
     protected channelService: ChannelService,
-    protected ctx: HttpContext
+    protected serverService: ServerService,
+    protected messageService: MessageService,
+    protected memberService: MemberService,
+    protected permissionsService: PermissionsService
   ) {
     super()
-    this.payload = ctx.auth.use('jwt').payload! as JwtPayload
   }
 
-  async before(payload: JwtPayload, _action: string, ...params: unknown[]) {
+  async before(payload: JwtPayload, action: string, ...params: unknown[]) {
     const channelId = params[0] as string | null | undefined
     let channel: Channel
     if (channelId && channelId !== undefined)
       channel = await this.channelService.findByIdOrFail(channelId)
     else return false
 
-    if (channel.type === ChannelType.private_chat) {
-      await channel.load('users')
-      const channelUser = channel.users.find((user) => user.id === payload.sub)
-      if (!channelUser) return false
-    } else if (channel.type === ChannelType.text_server && channel.serverId) {
-      const serverId = channel.serverId
-      const server = await Server.findOrFail(serverId).catch(() => {
-        throw new ServerNotFoundException('Server not found', {
-          status: 404,
-          code: 'E_SERVER_NOT_FOUND',
-        })
-      })
-      await server.load('members')
-      const member = server.members.find((m) => m.userId === payload.sub)
-      if (!member) return false
+    if (channel.type === ChannelType.PRIVATE_CHAT) {
+      // If the user is in the channel and the channel is a private
+      // therefore we can bypass show, index and store
+      const userIsInChannel = await this.channelService.isUserInChannel(channelId, payload.sub!)
+      if ((action === 'destroy' || action === 'update') && !userIsInChannel) return false
+      else return userIsInChannel
+    } else if (channel.type === ChannelType.TEXT_SERVER && channel.serverId) {
+      // If the channel is part of a server, we need to check if the user is part of the server
+      // then we will perform other authorization checks
+      const isPresent = await this.serverService.userPartOfServer(payload.sub!, channel.serverId!)
+      if (!isPresent) return false
     } else {
       return false
     }
   }
 
-  async show() {
-    return true
+  async show(payload: JwtPayload, channelId: string) {
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.VIEW_CHANNELS,
+    ])
   }
 
-  async index() {
-    return true
+  async index(payload: JwtPayload, channelId: string) {
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.VIEW_CHANNELS,
+    ])
   }
-  async store() {
-    return true
+  async store(payload: JwtPayload, channelId: string) {
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.SEND_MESSAGES,
+      Permissions.VIEW_CHANNELS,
+    ])
   }
 
-  async pin() {
-    return true
+  async pin(payload: JwtPayload, channelId: string) {
+    const channel = await this.channelService.findByIdOrFail(channelId)
+    if (channel.type == ChannelType.PRIVATE_CHAT) return true
+
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.SEND_MESSAGES,
+      Permissions.VIEW_CHANNELS,
+    ])
   }
 
-  async update(payload: JwtPayload, _channelId: string, messageId: string) {
-    const message = await Message.find(messageId)
-    if (!message)
-      throw new MessageNotFoundException('Message not found', {
-        status: 404,
-        code: 'E_ROW_NOT_FOUND',
-      })
-    return message.ownerId === payload.sub
+  async update(payload: JwtPayload, channelId: string, messageId: string) {
+    const isUserOwner = await this.messageService.isUserAuthor(messageId, payload.sub!)
+    if (isUserOwner) return true
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.SEND_MESSAGES,
+      Permissions.VIEW_CHANNELS,
+    ])
   }
 
-  async destroy(payload: JwtPayload, _channelId: string, messageId: string) {
-    const message = await Message.find(messageId)
-    if (!message)
-      throw new MessageNotFoundException('Message not found', {
-        status: 404,
-        code: 'E_ROW_NOT_FOUND',
-      })
-    return message.ownerId === payload.sub
+  async destroy(payload: JwtPayload, channelId: string, messageId: string) {
+    const isUserOwner = await this.messageService.isUserAuthor(messageId, payload.sub!)
+    if (isUserOwner) return true
+    const userPermissions = await this.memberService.getPermissionsFromChannel(
+      payload.sub!,
+      channelId
+    )
+    return (
+      this.permissionsService.validate_permissions(userPermissions, [
+        Permissions.SEND_MESSAGES,
+        Permissions.VIEW_CHANNELS,
+      ]) ||
+      this.permissionsService.validate_permissions(userPermissions, [
+        Permissions.MANAGE_MESSAGES,
+        Permissions.VIEW_CHANNELS,
+      ])
+    )
   }
 }

@@ -1,26 +1,19 @@
 import RoleNotFoundException from '#apps/roles/exceptions/role_not_found_exception'
 import Role from '#apps/roles/models/role'
 import { CreateRoleSchema, UpdateRoleSchema } from '#apps/roles/validators/role'
-import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
 import Server from '#apps/servers/models/server'
 import { inject } from '@adonisjs/core'
 
 @inject()
 export default class RoleService {
   async findById(roleId: string): Promise<Role> {
-    const role = await Role.query()
-      .where('id', roleId)
-      .firstOrFail()
-      .catch(() => {
-        throw new RoleNotFoundException('Server not found', { status: 404, code: 'E_ROWNOTFOUND' })
-      })
-    return role
+    return Role.findOrFail(roleId).catch((error) => {
+      throw error
+    })
   }
 
   async findAllByServer(serverId: string): Promise<Role[]> {
-    const server = await Server.findOrFail(serverId).catch(() => {
-      throw new ServerNotFoundException('Server not found', { status: 404, code: 'E_ROWNOTFOUND' })
-    })
+    const server = await Server.findOrFail(serverId)
     await server.load('roles')
     return server.roles
   }

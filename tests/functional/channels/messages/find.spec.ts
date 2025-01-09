@@ -1,6 +1,7 @@
 import { ChannelFactory } from '#database/factories/channel_factory'
-import { MemberFactory } from '#database/factories/member_factory'
+import { MemberFactory, MemberFactoryWithServer } from '#database/factories/member_factory'
 import { MessageFactory } from '#database/factories/message_factory'
+import { PermissionLessServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
@@ -75,6 +76,17 @@ test.group('Channels messages find', () => {
     const channel = await ChannelFactory.create()
     const response = await client.get(`/channels/${channel.id}/messages`)
     response.assertStatus(401)
+  }).tags(['channels:messages:find'])
+
+  test('must return 403 if the user does not have the VIEW_CHANNEL permission', async ({
+    client,
+  }) => {
+    const server = await PermissionLessServerFactory.create()
+    const member = await MemberFactoryWithServer(server.id).create()
+    await member.load('user')
+    const channel = await ChannelFactory.merge({ serverId: member.serverId }).create()
+    const response = await client.get(`/channels/${channel.id}/messages`).loginAs(member.user)
+    response.assertStatus(403)
   }).tags(['channels:messages:find'])
 
   test('must return a 403 if the user is not a member of the server of the channel', async ({

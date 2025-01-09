@@ -11,7 +11,7 @@ test.group('Channels create', () => {
     await MemberFromFactory(server.id, user.id).create()
     const payload = {
       name: 'My Channel',
-      type: ChannelType.text_server,
+      type: ChannelType.TEXT_SERVER,
     }
     const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
     result.assertStatus(201)
@@ -28,7 +28,7 @@ test.group('Channels create', () => {
     const server = await ServerFactory.make()
     const payload = {
       name: 'My Channel',
-      type: ChannelType.text_server,
+      type: ChannelType.TEXT_SERVER,
     }
     const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
     result.assertStatus(403)
@@ -37,7 +37,7 @@ test.group('Channels create', () => {
     const user = await UserFactory.make()
     const server = await ServerFactory.make()
     const payload = {
-      type: ChannelType.text_server,
+      type: ChannelType.TEXT_SERVER,
     }
     const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
     result.assertStatus(422)
