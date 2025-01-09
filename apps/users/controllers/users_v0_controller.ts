@@ -2,7 +2,6 @@ import AuthenticationService from '#apps/authentication/services/authentication_
 import User from '#apps/users/models/user'
 import UserService from '#apps/users/services/user_service'
 import {
-  // confirmEmailUpdateValidator,
   emailUpdateValidator,
   getMultipleUserValidator,
   updateUserValidator,
@@ -133,14 +132,4 @@ export default class UsersController {
     )
     return response.send({ token: token })
   }
-
-  // async confirmEmailUpdate({ auth, bouncer, request }: HttpContext) {
-  //   const payload = auth.use('jwt').payload
-  //   const data = await request.validateUsing(confirmEmailUpdateValidator)
-  //   const emailChangeToken = await this.userService.getEmailChangeToken(data.token)
-  //   await bouncer
-  //     .with(UserPolicy)
-  //     .authorize('updateEmail' as never, payload?.sub, emailChangeToken.user_id)
-  //   return this.userService.updateEmail(emailChangeToken.user_id, emailChangeToken.new_email)
-  // }
 }

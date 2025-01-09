@@ -2,7 +2,7 @@ import { inject } from '@adonisjs/core'
 import { HttpContext } from '@adonisjs/core/http'
 import UserService from '#apps/users/services/user_service'
 import UserPolicy from '#apps/users/policies/user_policy'
-import { getEmailUpdateValidator, updateUserValidator } from '../validators/users.js'
+import { oldEmailUpdateValidator, updateUserValidator } from '#apps/users/validators/users'
 
 @inject()
 export default class UsersController {
@@ -24,7 +24,7 @@ export default class UsersController {
   async updateEmail({ request }: HttpContext) {
     // ,auth, response
     // const payload = auth.use('jwt').payload
-    const data = await request.validateUsing(getEmailUpdateValidator)
+    const data = await request.validateUsing(oldEmailUpdateValidator)
     // if (!payload?.sub) return response.abort({ message: "Can't update the user" })
 
     return this.userService.updateEmail(data)

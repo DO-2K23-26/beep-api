@@ -1,18 +1,16 @@
 import { HttpContext } from '@adonisjs/core/http'
 import OtpService from '#apps/users/services/otp_service'
 import MailService from '#apps/authentication/services/mail_service'
-import AuthenticationService from '#apps/authentication/services/authentication_service'
 import vine from '@vinejs/vine'
 import { emailUpdateValidator } from '../validators/users.js'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class OtpController {
-  private otpService: OtpService
-
-  constructor() {
-    const authenticationService = new AuthenticationService()
-    const mailService = new MailService(authenticationService)
-    this.otpService = new OtpService(mailService)
-  }
+  constructor(
+    protected mailService: MailService,
+    protected otpService: OtpService
+  ) {}
 
   // Generate OTP
   public async generateOtp({ request, response }: HttpContext) {

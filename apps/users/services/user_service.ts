@@ -5,7 +5,7 @@ import User from '#apps/users/models/user'
 import {
   GetUsersSchema,
   UpdateUserValidator,
-  GetEmailUpdateValidator,
+  OldEmailUpdateValidator,
 } from '#apps/users/validators/users'
 import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
@@ -116,7 +116,7 @@ export default class UserService {
     return { new_email: data.new_email, user_id: data.user_id }
   }
 
-  async updateEmail(updateEmail: GetEmailUpdateValidator) {
+  async updateEmail(updateEmail: OldEmailUpdateValidator) {
     // if the current password is not right
 
     const user = await User.verifyCredentials(
