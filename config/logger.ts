@@ -1,4 +1,5 @@
 import env from '#start/env'
+import type { LokiOptions } from 'pino-loki'
 import app from '@adonisjs/core/services/app'
 import { defineConfig, targets } from '@adonisjs/core/logger'
 
@@ -18,6 +19,17 @@ const loggerConfig = defineConfig({
         targets: targets()
           .pushIf(!app.inProduction, targets.pretty())
           .pushIf(app.inProduction, targets.file({ destination: 1 }))
+          .pushIf(!(env.get('LOKI_HOST') === undefined), {
+            target: 'pino-loki',
+            level: env.get('LOKI_LOG_LEVEL') || env.get('LOG_LEVEL'),
+            options: {
+              labels: {
+                application: 'beep-api',
+                environment: env.get('ENVIRONMENT') || 'undefined',
+              },
+              host: env.get('LOKI_HOST') || '',
+            } satisfies LokiOptions,
+          })
           .toArray(),
       },
     },
