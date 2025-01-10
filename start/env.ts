@@ -76,4 +76,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   LOKI_HOST: Env.schema.string.optional(),
   LOKI_LOG_LEVEL: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the drive package
+  |----------------------------------------------------------
+  */
+  DRIVE_DISK: Env.schema.enum(['s3'] as const),
+  AWS_ACCESS_KEY_ID: Env.schema.string(),
+  AWS_SECRET_ACCESS_KEY: Env.schema.string(),
 })

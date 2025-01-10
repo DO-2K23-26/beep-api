@@ -4,7 +4,6 @@ import {
   resetPasswordVerifyValidator,
   updatePasswordValidator,
 } from '#apps/authentication/validators/verify'
-import StorageService from '#apps/storage/services/storage_service'
 import User from '#apps/users/models/user'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
@@ -14,7 +13,6 @@ import MailService from '../services/mail_service.js'
 import {
   checkPasswordValidator,
   checkTotpValidator,
-  createAuthenticationValidator,
   resetPasswordValidator,
   signinAuthenticationValidator,
 } from '../validators/authentication.js'
@@ -24,6 +22,7 @@ import { Payload } from '../contracts/payload.js'
 import { SignIn } from '../contracts/signin.js'
 import transmit from '@adonisjs/transmit/services/main'
 import logger from '@adonisjs/core/services/logger'
+import { createUserValidator } from '#apps/users/validators/users'
 
 @inject()
 export default class AuthenticationController {
@@ -65,18 +64,9 @@ export default class AuthenticationController {
   }
 
   async signup({ request, response }: HttpContext) {
-    const schemaUser = await request.validateUsing(createAuthenticationValidator)
-    const user: User = await this.authenticationService.registerUser(schemaUser)
+    const schemaUser = await request.validateUsing(createUserValidator)
+    const user: User = await this.userService.create(schemaUser)
     await this.mailService.sendSignUpMail(user)
-
-    if (schemaUser.profilePicture) {
-      user.profilePicture = await new StorageService().storeProfilePicture(
-        schemaUser.profilePicture,
-        user.id
-      )
-      await user.save()
-    }
-
     return response.created(user)
   }
 

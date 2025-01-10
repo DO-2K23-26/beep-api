@@ -46,6 +46,17 @@ export const updateUserValidator = vine.compile(
   })
 )
 
+export const createUserValidator = vine.compile(
+  vine.object({
+    username: vine.string(),
+    firstname: vine.string(),
+    lastname: vine.string(),
+    email: vine.string().email(),
+    password: vine.string(),
+    profilePicture: vine.file().nullable().optional(),
+  })
+)
+
 export const getMultipleUserValidator = vine.compile(
   vine.object({
     ids: vine.array(vine.string()).optional(),
@@ -60,6 +71,7 @@ export const oldEmailUpdateValidator = vine.compile(
   })
 )
 
+export type CreateUserValidator = Infer<typeof createUserValidator>
 export type UpdateUserValidator = Infer<typeof updateUserValidator>
 export type GetMultipleUserValidator = Infer<typeof getMultipleUserValidator>
 export type GetUsersSchema = Infer<typeof getUsersValidator>

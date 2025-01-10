@@ -1,4 +1,3 @@
-import { CreateAuthenticationSchema } from '#apps/authentication/validators/authentication'
 import { errors as authErrors } from '@adonisjs/auth'
 import { UpdatePasswordValidator } from '#apps/authentication/validators/verify'
 import EmailAlreadyExistsExeption from '#apps/users/exceptions/email_already_exists_exception'
@@ -18,10 +17,10 @@ import { Authenticators } from '@adonisjs/auth/types'
 import { authenticator } from 'otplib'
 import InvalidQRCodeException from '#apps/users/exceptions/invalid_qrcode_exception'
 import TotpMissingException from '#apps/users/exceptions/totp_missing_exception'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class AuthenticationService {
-  DEFAULT_PP_URL = 'default_profile_picture.png'
-
   async verifyToken(token: string) {
     try {
       const decodedToken = jwt.decode(token, { complete: true })
@@ -34,35 +33,6 @@ export default class AuthenticationService {
         guardDriverName: 'jwt',
       })
     }
-  }
-
-  async registerUser(schemaUser: CreateAuthenticationSchema): Promise<User> {
-    const usernameExists = await User.findBy('username', schemaUser.username)
-    if (usernameExists) {
-      throw new UsernameAlreadyExistsExeption('Username already exists', {
-        code: 'E_USERNAME_ALREADY_EXISTS',
-        status: 400,
-      })
-    }
-
-    const emailExists = await User.findBy('email', schemaUser.email.toLowerCase())
-    if (emailExists) {
-      throw new EmailAlreadyExistsExeption('User already exists', {
-        code: 'E_MAIL_ALREADY_EXISTS',
-        status: 400,
-      })
-    }
-
-    const user = await User.create({
-      username: schemaUser.username,
-      firstName: schemaUser.firstname,
-      lastName: schemaUser.lastname,
-      email: schemaUser.email.toLowerCase(),
-      password: schemaUser.password,
-      profilePicture: this.DEFAULT_PP_URL,
-    })
-
-    return user
   }
 
   async getUserByEmail(email: string): Promise<User | null> {

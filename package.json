@@ -62,6 +62,7 @@
     "@adonisjs/bouncer": "^3.1.4",
     "@adonisjs/core": "^6.14.1",
     "@adonisjs/cors": "^2.2.1",
+    "@adonisjs/drive": "^3.2.0",
     "@adonisjs/limiter": "^2.3.3",
     "@adonisjs/lucid": "^21.3.0",
     "@adonisjs/mail": "^9.2.2",

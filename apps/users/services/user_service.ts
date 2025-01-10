@@ -6,6 +6,7 @@ import {
   GetUsersSchema,
   UpdateUserValidator,
   OldEmailUpdateValidator,
+  CreateUserValidator,
 } from '#apps/users/validators/users'
 import { inject } from '@adonisjs/core'
 import redis from '@adonisjs/redis/services/main'
@@ -14,9 +15,12 @@ import { ChangeEmailToken } from '#apps/users/models/change_email_token'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
 import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_already_exists_exception'
 import EmailAlreadyExistsExeption from '#apps/users/exceptions/email_already_exists_exception'
+import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export default class UserService {
+  DEFAULT_PP_URL = 'default_profile_picture.png'
+
   constructor(
     protected mailService: MailService,
     protected storageService: StorageService
@@ -38,15 +42,48 @@ export default class UserService {
     return User.findOrFail(userId)
   }
 
-  async create(data: {
-    username: string
-    firstName: string
-    lastName: string
-    email: string
-    password: string
-  }) {
+  async create(user: CreateUserValidator) {
+    const usernameExists = await User.findBy('username', user.username)
+    if (usernameExists) {
+      throw new UsernameAlreadyExistsExeption('Username already exists', {
+        code: 'E_USERNAME_ALREADY_EXISTS',
+        status: 400,
+      })
+    }
+    const emailExists = await User.findBy('email', user.email.toLowerCase())
+    if (emailExists) {
+      throw new EmailAlreadyExistsExeption('User already exists', {
+        code: 'E_MAIL_ALREADY_EXISTS',
+        status: 400,
+      })
+    }
     const sn = generateSnowflake()
-    return User.create({ ...data, serialNumber: sn })
+    const userCreationTransaction = await db.transaction()
+    let createdUser = new User()
+    createdUser.useTransaction(userCreationTransaction)
+    try {
+      createdUser = await User.create({
+        username: user.username,
+        firstName: user.firstname,
+        lastName: user.lastname,
+        email: user.email,
+        password: user.password,
+        profilePicture: this.DEFAULT_PP_URL,
+        serialNumber: sn,
+      })
+      if (user.profilePicture) {
+        const path = 'profilePictures/' + createdUser.id + '/' + user.profilePicture.clientName
+        user.profilePicture.moveToDisk(path)
+        createdUser.profilePicture = path
+        await createdUser.save()
+      }
+      await userCreationTransaction.commit()
+    } catch (error) {
+      await userCreationTransaction.rollback()
+      throw error
+    }
+
+    return createdUser
   }
 
   async update(updatedUser: UpdateUserValidator, userId: string) {
@@ -125,7 +162,7 @@ export default class UserService {
     ).catch(() => {
       throw new UserNotFoundException('Password not right', {
         status: 404,
-        code: 'E_ROWNOTFOUND',
+        code: 'E_ROW_NOTFOUND',
       })
     })
 
