@@ -43,7 +43,7 @@ export const throttleCreation = limiter.define('creation', (ctx) => {
     .every('1 minute')
     .usingKey(`user_${(ctx.auth.user as Payload).sub}`)
     .limitExceeded(() => {
-      logger.warn(`User ${(ctx.auth.user as Payload).username} (${ctx.request.ip}) is spamming`)
+      logger.warn(`User ${(ctx.auth.user as Payload).username} (${ctx.request.ip()}) is spamming`)
     }) as LimiterType
 })
 
@@ -61,7 +61,7 @@ export const throttleMessage = limiter.define('message', (ctx) => {
     .usingKey(`user_${(ctx.auth.user as Payload).sub}`)
     .limitExceeded(() => {
       logger.warn(
-        `User ${(ctx.auth.user as Payload).username} (${ctx.request.ip}) is spamming messages`
+        `User ${(ctx.auth.user as Payload).username} (${ctx.request.ip()}) is spamming messages`
       )
     }) as LimiterType
 })
