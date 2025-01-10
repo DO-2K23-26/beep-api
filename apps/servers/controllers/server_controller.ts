@@ -9,8 +9,7 @@ import {
 } from '#apps/servers/validators/server'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import logger from '@adonisjs/core/services/logger'
-import ServerPolicy from '../policies/server_policy.js'
+import ServerPolicy from '#apps/servers/policies/server_policy'
 
 @inject()
 export default class ServersController {
@@ -52,7 +51,6 @@ export default class ServersController {
    */
   async store({ auth, request, response }: HttpContext) {
     const payload = await request.validateUsing(createServerValidator)
-    logger.debug('before jwt')
     const userPayload = auth.use('jwt').payload as Payload
     const server = await this.serverService.create(payload, userPayload.sub)
     return response.created(server)
