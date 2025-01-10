@@ -1,14 +1,25 @@
+import { Permissions } from '#apps/shared/enums/permissions'
 import { ChannelFactory } from '#database/factories/channel_factory'
 import { MemberFromFactory } from '#database/factories/member_factory'
+import { RoleFactory } from '#database/factories/role_factory'
 import { ServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
 test.group('Channels update', () => {
-  test('must return 200 when update successfully', async ({ assert, client }) => {
+  test('must return 200 when update with role MANAGE_CHANNEL in server successfully', async ({
+    assert,
+    client,
+  }) => {
     const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()
-    await MemberFromFactory(channel.serverId, user.id).create()
+    const member = await MemberFromFactory(channel.serverId, user.id).create()
+    const role = await RoleFactory.merge({
+      permissions: Permissions.MANAGE_CHANNELS,
+      serverId: channel.serverId,
+    }).create()
+    await role.related('members').attach([member.id])
+
     const data = { name: 'new name', description: 'new description' }
     const response = await client
       .put(`/servers/${channel.serverId}/channels/${channel.id}`)
@@ -76,7 +87,7 @@ test.group('Channels update', () => {
     assert.equal(response.status(), 403)
   })
 
-  test('must return 404 if the channel does not exist', async ({ assert, client }) => {
+  test('must return 403 if the channel does not exist', async ({ client }) => {
     const server = await ServerFactory.create()
     const user = await UserFactory.create()
     await MemberFromFactory(server.id, user.id).create()
@@ -85,6 +96,6 @@ test.group('Channels update', () => {
       .put(`/servers/${server.id}/channels/nonexistantId`)
       .json(data)
       .loginAs(user)
-    assert.equal(response.status(), 404)
+    response.assertStatus(403)
   }).tags(['channels:update'])
 })

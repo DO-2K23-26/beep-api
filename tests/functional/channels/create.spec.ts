@@ -1,14 +1,24 @@
 import { ChannelType } from '#apps/channels/models/channel_type'
+import { Permissions } from '#apps/shared/enums/permissions'
 import { MemberFromFactory } from '#database/factories/member_factory'
+import { RoleFactory } from '#database/factories/role_factory'
 import { ServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
 test.group('Channels create', () => {
-  test('must return a 201 when creating a text channel', async ({ client, expect }) => {
+  test('must return a 201 when creating a text channel with role MANAGE_CHANNEL in server', async ({
+    client,
+    expect,
+  }) => {
     const user = await UserFactory.make()
     const server = await ServerFactory.make()
-    await MemberFromFactory(server.id, user.id).create()
+    const member = await MemberFromFactory(server.id, user.id).create()
+    const role = await RoleFactory.merge({
+      permissions: Permissions.MANAGE_CHANNELS,
+      serverId: server.id,
+    }).create()
+    role.related('members').attach([member.id])
     const payload = {
       name: 'My Channel',
       type: ChannelType.TEXT_SERVER,

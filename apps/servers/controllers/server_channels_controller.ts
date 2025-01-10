@@ -40,9 +40,10 @@ export default class ServerChannelsController {
   }
 
   // Deletes a channel from a server
-  async deleteChannel({ params }: HttpContext) {
+  async deleteChannel({ params, bouncer }: HttpContext) {
     const channelId = params.channelId
     await this.channelService.deleteById(channelId)
+    await bouncer.with(ServerChannelPolicy).authorize('delete' as never, params.serverId)
     return { message: 'Channel deleted successfully' }
   }
 
