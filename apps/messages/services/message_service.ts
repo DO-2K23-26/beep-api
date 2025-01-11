@@ -11,8 +11,8 @@ import {
   UpdateMessagesSchema,
 } from '#apps/messages/validators/message'
 import StorageService from '#apps/storage/services/storage_service'
-import { CreateStorageSchema } from '#apps/storage/validators/storage'
 import { inject } from '@adonisjs/core'
+import db from '@adonisjs/lucid/services/db'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 
@@ -71,31 +71,56 @@ export default class MessageService {
   }
 
   async create(message: CreateMessagesSchema, ownerId: string, channelId: string) {
-    const createdMessage = await Message.create({
-      content: message.content,
-      parentMessageId: message.parentMessageId,
-      ownerId: ownerId,
-      channelId: channelId,
-    })
-    if (message.attachments) {
-      for (const attachment of message.attachments) {
-        const dataAttachments: CreateStorageSchema = {
-          messageId: createdMessage.id,
-          attachment: attachment,
-        }
-        await this.storageService.store(dataAttachments, createdMessage)
+    console.log('message creation')
+    const messageCreationTransaction = await db.transaction()
+    let createdMessage = new Message()
+
+    try {
+      createdMessage = await Message.create(
+        {
+          content: message.content,
+          parentMessageId: message.parentMessageId,
+          ownerId: ownerId,
+          channelId: channelId,
+        },
+        { client: messageCreationTransaction }
+      )
+
+      if (message.attachments) {
+        await Promise.all(
+          message.attachments.map(async (attachment) => {
+            const key =
+              createdMessage.channelId + '/' + createdMessage.id + '/' + attachment.clientName
+            console.log('key before', key)
+            await attachment.moveToDisk(key)
+            console.log('key after', key)
+            return await createdMessage.related('attachments').create({
+              name: key,
+              contentType: attachment.headers['content-type'],
+              messageId: createdMessage.id,
+            })
+          })
+        )
       }
+      await messageCreationTransaction.commit()
+    } catch (error) {
+      await messageCreationTransaction.rollback()
+      throw error
     }
+
     await createdMessage.load('attachments')
+
     await createdMessage.load('owner', (query) => {
       query.select('id', 'username', 'profilePicture')
     })
+
     if (message.parentMessageId)
       await createdMessage.load('parentMessage', (query) => {
         query.preload('owner', (query) => {
           query.select('id', 'username', 'profilePicture')
         })
       })
+
     const signalMessage: SignalMessage = {
       message: createdMessage,
       action: ActionSignalMessage.create,
@@ -182,64 +207,4 @@ export default class MessageService {
     const message = await Message.find(messageId)
     return message?.ownerId === userId
   }
-  /*
-  async updateFilesOfMessage(
-    updatedMessage: Message,
-    providedMessage: UpdateMessagesSchema
-  ): Promise<Attachment[] | null> {
-    const messageWithAttachements = await this.show(updatedMessage.id)
-    const attachments: Attachment[] = messageWithAttachements.attachments
-    let updatedAttachement: Attachment[] = []
-    // If no attachements provided delete all old attchements and stop the function
-    if (!providedMessage.attachments && attachments !== undefined) {
-      for (const attachment of attachments) {
-        await this.storageService.destroy(attachment.id)
-      }
-      return null
-    }
-
-    //This part allow us to update if the attachements already exists
-    //If not it will be created
-    if (providedMessage.attachments) {
-      for (const attachment of providedMessage.attachments) {
-        const attachmentToUpdate = attachments.find(
-          (a: Attachment) =>
-            updatedMessage.channelId + '/' + updatedMessage.id + '/' + attachment.clientName ===
-            a.name
-        )
-        if (attachmentToUpdate) {
-          const dataAttachments: UpdateStorageSchema = {
-            params: {
-              id: attachmentToUpdate.id,
-            },
-            attachment: attachment,
-          }
-          updatedAttachement.push(await this.storageService.update(dataAttachments))
-        } else {
-          const dataAttachments: CreateStorageSchema = {
-            messageId: updatedMessage.id,
-            attachment: attachment,
-          }
-          updatedAttachement.push(await this.storageService.store(dataAttachments, updatedMessage))
-        }
-      }
-
-      //Delete old attachements that aren't linked to the message anymore
-      if (attachments !== undefined) {
-        for (const attachment of attachments) {
-          if (
-            !providedMessage.attachments.find(
-              (a: MultipartFile) =>
-                updatedMessage.channelId + '/' + updatedMessage.id + '/' + a.clientName ===
-                attachment.name
-            )
-          ) {
-            await this.storageService.destroy(attachment.id)
-          }
-        }
-      }
-    }
-    return updatedAttachement
-  }
-  */
 }

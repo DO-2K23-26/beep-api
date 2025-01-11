@@ -1,8 +1,6 @@
 import { errors as authErrors } from '@adonisjs/auth'
 import { UpdatePasswordValidator } from '#apps/authentication/validators/verify'
-import EmailAlreadyExistsExeption from '#apps/users/exceptions/email_already_exists_exception'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
-import UsernameAlreadyExistsExeption from '#apps/users/exceptions/username_already_exists_exception'
 import Token from '#apps/users/models/token'
 import User from '#apps/users/models/user'
 import env from '#start/env'

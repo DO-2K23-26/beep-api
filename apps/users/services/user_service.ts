@@ -60,23 +60,25 @@ export default class UserService {
     const sn = generateSnowflake()
     const userCreationTransaction = await db.transaction()
     let createdUser = new User()
-    createdUser.useTransaction(userCreationTransaction)
     try {
-      createdUser = await User.create({
-        username: user.username,
-        firstName: user.firstname,
-        lastName: user.lastname,
-        email: user.email,
-        password: user.password,
-        profilePicture: this.DEFAULT_PP_URL,
-        serialNumber: sn,
-      })
+      createdUser = await User.create(
+        {
+          username: user.username,
+          firstName: user.firstname,
+          lastName: user.lastname,
+          email: user.email,
+          password: user.password,
+          profilePicture: this.DEFAULT_PP_URL,
+          serialNumber: sn,
+        },
+        { client: userCreationTransaction }
+      )
       if (user.profilePicture) {
         const path = 'profilePictures/' + createdUser.id + '/' + user.profilePicture.clientName
         user.profilePicture.moveToDisk(path)
         createdUser.profilePicture = path
-        await createdUser.save()
       }
+      await createdUser.save()
       await userCreationTransaction.commit()
     } catch (error) {
       await userCreationTransaction.rollback()

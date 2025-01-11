@@ -62,7 +62,7 @@ export default class MessagesChannelsController {
     const channelId: string = params.channelId
     await bouncer.with(MessageChannelPolicy).authorize('store' as never, channelId)
     const data = await request.validateUsing(createMessageValidator)
-
+    console.log('azerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr')
     const newMessage = await this.messageService.create(data, payload!.sub as string, channelId)
     await this.mentionService.notifyMentionedUsers(
       newMessage.content,
