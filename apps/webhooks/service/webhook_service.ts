@@ -13,6 +13,11 @@ import jwt from 'jsonwebtoken'
 import WebhookJwtInvalidException from '../exceptions/webhook_jwt_invalid_exception.js'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import User from '#apps/users/models/user'
+import WebhookUserIdMissing from '../exceptions/webhook_userId_missing.js'
+import WebhookTokenEmpty from '../exceptions/webhook_token_empty.js'
+import WebhookAppKeyMissing from '../exceptions/webhook_app_key_missing.js'
+import WebhookProcessingException from '../exceptions/webhook_processing.js'
+import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
 
 export interface PayloadJWTSFUConnection {
   name?: string
@@ -146,30 +151,61 @@ export default class WebhookService {
     // Find the webhook by ID
     const webhook = await Webhook.findOrFail(webhookId)
 
-    // Validate the webhook token with AuthenticationService.verifyToken
+    // Validate the webhook token
     try {
       if (webhook.token) {
-        console.log(webhook.token)
-        jwt.verify(webhook.token, env.get('APP_KEY'))
+        const appKey = env.get('APP_KEY')
+        if (!appKey) {
+          throw new WebhookAppKeyMissing('Application key is not configured in the environment', {
+            status: 500,
+            code: 'E_APP_KEY_MISSING',
+          })
+        }
+
+        try {
+          jwt.verify(webhook.token, appKey)
+        } catch (jwtError) {
+          throw new WebhookJwtInvalidException('Invalid JWT token provided', {
+            status: 401,
+            code: 'E_INVALID_JWT',
+            cause: jwtError,
+          })
+        }
       } else {
-        console.log('Webhook token is empty')
+        throw new WebhookTokenEmpty('Webhook token is required but was not provided', {
+          status: 400,
+          code: 'E_TOKEN_MISSING',
+        })
       }
-      // this.authService.verifyToken(webhook.token ?? '')
     } catch (err) {
-      throw new WebhookJwtInvalidException(err, {
-        status: 404,
-        code: 'E_WEBHOOK_INVALID_JWT',
+      if (!(err instanceof WebhookJwtInvalidException)) {
+        throw new WebhookProcessingException(
+          'An error occurred while processing the webhook token',
+          {
+            status: 500,
+            code: 'E_WEBHOOK_PROCESSING',
+            cause: err,
+          }
+        )
+      }
+      throw err // Re-throw specific JWT exception
+    }
+
+    // Validate the userId field
+    if (!webhook.userId) {
+      throw new WebhookUserIdMissing('Webhook userId is required but was not provided', {
+        status: 400,
+        code: 'E_USERID_MISSING',
       })
     }
 
-    if (!webhook.userId) {
-      throw new Error('Webhook userId is missing or invalid')
-    }
-
-    // Optionally: Ensure the user exists in the database
+    // Ensure the user exists in the database
     const userExists = await User.find(webhook.userId)
     if (!userExists) {
-      throw new Error(`User with ID ${webhook.userId} does not exist`)
+      throw new UserNotFoundException(`User with ID ${webhook.userId} does not exist`, {
+        status: 404,
+        code: 'E_USER_NOT_FOUND',
+      })
     }
 
     // Create the message
@@ -190,6 +226,7 @@ export default class WebhookService {
     // Broadcast the webhook event to the channel
     transmit.broadcast(`channels/${webhook.channelId}/webhook`, JSON.stringify(signalWebhook))
 
+    // Return the result
     return {
       webhook,
       message: createdMessage,
