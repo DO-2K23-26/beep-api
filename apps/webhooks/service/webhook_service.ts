@@ -18,6 +18,7 @@ import WebhookTokenEmpty from '../exceptions/webhook_token_empty.js'
 import WebhookAppKeyMissing from '../exceptions/webhook_app_key_missing.js'
 import WebhookProcessingException from '../exceptions/webhook_processing.js'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
+import TokenService from './token_service.js'
 
 export interface PayloadJWTSFUConnection {
   name?: string
@@ -25,7 +26,10 @@ export interface PayloadJWTSFUConnection {
 
 @inject()
 export default class WebhookService {
-  constructor(protected storageService: StorageService) {}
+  constructor(
+    protected storageService: StorageService,
+    private readonly tokenService: TokenService
+  ) {}
   authService = new AuthenticationService()
 
   async create(webhook: CreateWebhooksSchema, ownerId: string, channelId: string) {
@@ -49,7 +53,7 @@ export default class WebhookService {
     const createdWebhook = await Webhook.create({
       name: webhook.name,
       profilePicture: webhook.profilePicture || 'https://beep.baptistebronsin.be/logo.png',
-      token: this.generateToken({ name: webhook.name }),
+      token: this.tokenService.generateToken({ name: webhook.name }),
       userId: ownerId,
       channelId: channelId,
       serverId: webhook.serverId || null,
@@ -232,9 +236,5 @@ export default class WebhookService {
       message: createdMessage,
       status: 'Webhook triggered and message created successfully',
     }
-  }
-
-  generateToken(payload: PayloadJWTSFUConnection): string {
-    return jwt.sign(payload, env.get('APP_KEY'))
   }
 }
