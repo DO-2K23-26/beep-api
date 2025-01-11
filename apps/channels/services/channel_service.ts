@@ -162,16 +162,19 @@ export default class ChannelService {
   ): Promise<Channel> {
     const sn = generateSnowflake()
     const type = newChannel.type as ChannelType
-    const firstChannel = await Channel.query().where('serverId', serverId).orderBy('position').first()
+    const firstChannel = await Channel.query()
+      .where('serverId', serverId)
+      .orderBy('position')
+      .first()
     console.log(`Creating channel ${newChannel.name}`)
     console.log(firstChannel)
-    const position = firstChannel != null ? firstChannel.position -1 : 0;
+    const position = firstChannel != null ? firstChannel.position - 1 : 0
     const channel = await Channel.create({
       name: newChannel.name,
       type: type,
       serverId: serverId,
       serialNumber: sn,
-      position
+      position,
     })
     await channel.related('users').attach([userId])
     return channel
