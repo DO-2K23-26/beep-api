@@ -56,8 +56,6 @@ test.group('Channels create', () => {
     }
 
     results.sort((a, b) => a.position - b.position)
-    console.log(results)
-    console.log(payloads)
     for (let i = 0; i < payloads.length; i++) {
       expect(payloads[i].name).toEqual(results[results.length - 1 - i].name) // result should be the reverted list of insertion
     }
