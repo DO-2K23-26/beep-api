@@ -1,7 +1,7 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import WebhookService from '#apps/webhooks/service/webhook_service'
-import ServerWebhookPolicy from '../policies/server_webhook_policy.js'
+import WebhookService from '#apps/webhooks/services/webhook_service'
+import ServerWebhookPolicy from '#apps/servers/policies/server_webhook_policy'
 import { createWebhookValidator, triggerWebhookValidator } from '#apps/webhooks/validators/webhook'
 @inject()
 export default class ServerWebhooksController {
