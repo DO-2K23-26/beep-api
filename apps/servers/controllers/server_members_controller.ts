@@ -4,6 +4,7 @@ import { HttpContext } from '@adonisjs/core/http'
 import ServerMemberPolicy from '#apps/servers/policies/server_member_policy'
 import ServerService from '#apps/servers/services/server_service'
 import { Payload } from '#apps/authentication/contracts/payload'
+import { updateMemberValidator } from '#apps/members/validators/member'
 
 @inject()
 export default class ServerMembersController {
@@ -14,15 +15,14 @@ export default class ServerMembersController {
 
   async index({ params, bouncer }: HttpContext) {
     const { serverId } = params
+    await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
     const members = await this.memberService.findAllByServerId(serverId)
-    await bouncer.with(ServerMemberPolicy).authorize('view' as never, members)
     return members
   }
 
   async show({ params, bouncer }: HttpContext) {
     const { serverId, userId } = params
-    const members = await this.memberService.findAllByServerId(serverId)
-    await bouncer.with(ServerMemberPolicy).authorize('view' as never, members)
+    await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
     return this.memberService.getMemberByUserIdAndServerId(userId, serverId)
   }
 
@@ -37,5 +37,11 @@ export default class ServerMembersController {
     const invitationId = params.invitationId
     const member = await this.memberService.createFromInvitation(invitationId, userPayload.sub)
     return response.created(member)
+  }
+  async udpate({ request, bouncer, params }: HttpContext) {
+    const { serverId, memberId } = params
+    await bouncer.with(ServerMemberPolicy).authorize('update' as never, serverId, memberId)
+    const data = await request.validateUsing(updateMemberValidator)
+    return this.memberService.update(memberId, data)
   }
 }

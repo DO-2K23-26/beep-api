@@ -21,8 +21,13 @@ router
           .group(() => {
             router.post('join', [ServerMembersController, 'joinPublic'])
             router.get('members', [ServerMembersController, 'index'])
-            router.get('members/:userId', [ServerMembersController, 'show'])
             router.post('invitation', [ServerInvitationsController, 'createInvitation'])
+            router
+              .group(() => {
+                router.put(':memberId', [ServerMembersController, 'udpate'])
+                router.get(':userId', [ServerMembersController, 'show'])
+              })
+              .prefix('members')
           })
           .prefix(':serverId')
         router.post('join/:invitationId', [ServerMembersController, 'joinPrivate'])
