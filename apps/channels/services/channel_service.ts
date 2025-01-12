@@ -166,7 +166,7 @@ export default class ChannelService {
       .where('serverId', serverId)
       .orderBy('position')
       .first()
-    logger.info(`Creating server ${newChannel.name}`)
+    logger.info(`Creating channel ${newChannel.name}`)
     const position = firstChannel != null ? firstChannel.position - 1 : 0
     const channel = await Channel.create({
       name: newChannel.name,
