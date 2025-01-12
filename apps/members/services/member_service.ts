@@ -15,6 +15,7 @@ import ServerService from '#apps/servers/services/server_service'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
+import { UpdateMembersSchema } from '#apps/members/validators/member'
 
 @inject()
 export default class MemberService {
@@ -107,6 +108,12 @@ export default class MemberService {
     return this.getPermissions(userId, channel.serverId)
   }
 
+  async update(id: string, member: UpdateMembersSchema): Promise<Member> {
+    const updatedMember = await Member.findOrFail(id)
+    await updatedMember.merge(member).save()
+    return updatedMember
+  }
+
   async getPermissions(userId: string, serverId: string) {
     const member = await Member.query()
       .where('user_id', userId)
@@ -121,17 +128,5 @@ export default class MemberService {
     })
 
     return permissions
-  }
-
-  addMemberRole(): Promise<void> {
-    throw new Error('Method not implemented.')
-  }
-
-  removeMemberRole(): Promise<void> {
-    throw new Error('Method not implemented.')
-  }
-
-  removeServerMember(): Promise<void> {
-    throw new Error('Method not implemented.')
   }
 }

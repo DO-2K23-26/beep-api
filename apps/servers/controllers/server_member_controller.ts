@@ -5,7 +5,7 @@ import { updateMemberValidator } from '#apps/members/validators/member'
 import { JwtPayload } from 'jsonwebtoken'
 
 @inject()
-export default class MembersController {
+export default class ServerMembersController {
   constructor(protected memberService: MemberService) {}
   async udpate({ request, auth }: HttpContext) {
     const user = auth.user as JwtPayload
