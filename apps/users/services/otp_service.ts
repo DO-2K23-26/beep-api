@@ -2,7 +2,9 @@ import redis from '@adonisjs/redis/services/main'
 import MailService from '#apps/authentication/services/mail_service'
 import crypto from 'node:crypto'
 import { EmailUpdateValidator, OtpEmailValidator } from '#apps/users/validators/users'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class OtpService {
   private otpExpiry = 300 // OTP expires in 5 minutes
 
