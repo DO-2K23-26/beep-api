@@ -166,7 +166,6 @@ export default class ChannelService {
       .where('serverId', serverId)
       .orderBy('position')
       .first()
-    logger.info(`Creating channel ${newChannel.name}`)
     const position = firstChannel != null ? firstChannel.position - 1 : 0
     const channel = await Channel.create({
       name: newChannel.name,
@@ -175,6 +174,7 @@ export default class ChannelService {
       serialNumber: sn,
       position,
     })
+    logger.info('Created new channel : ', channel)
     await channel.related('users').attach([userId])
     return channel
   }
