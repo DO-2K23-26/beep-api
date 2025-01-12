@@ -77,8 +77,7 @@ export default class MessagesChannelsController {
    * Handle form submission for the update action
    */
   async update({ request, params, bouncer }: HttpContext) {
-    const messageId = params.messageId
-    const channelId = params.channelId
+    const { messageId, channelId } = params
     await bouncer.with(MessageChannelPolicy).authorize('update' as never, channelId, messageId)
     const receivedMessage = await request.validateUsing(updateMessageValidator)
     return this.messageService.update(receivedMessage, messageId)

@@ -52,9 +52,9 @@ export default class ServersController {
    */
   async store({ auth, request, response }: HttpContext) {
     const payload = await request.validateUsing(createServerValidator)
-    logger.info('before jwt')
+    logger.debug('before jwt')
     const userPayload = auth.use('jwt').payload as Payload
-    console.log('after jwt')
+    logger.debug('after jwt')
     const server = await this.serverService.create(payload, userPayload.sub)
     return response.created(server)
   }

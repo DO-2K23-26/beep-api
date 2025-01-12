@@ -11,5 +11,6 @@ test.group('Channels find', () => {
     const channel = await channelService.findByIdOrFail(channelCreated.id)
     expect(channel.id).toBe(channelCreated.id)
     expect(channel.name).toBe(channelCreated.name)
+    expect(channel.position).toBe(0)
   })
 })
