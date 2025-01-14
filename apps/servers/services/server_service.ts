@@ -189,4 +189,12 @@ export default class ServerService {
       builder.where('user_id', userId)
     })
   }
+
+  async findMember(serverId: string, userId: string) {
+    const server = await this.findById(serverId)
+    await server.load('members', (query) => {
+      query.where('user_id', userId).preload('roles')
+    })
+    return server.members[0]
+  }
 }

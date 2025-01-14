@@ -85,8 +85,7 @@ export default class MemberService {
   }
 
   async getMemberByUserIdAndServerId(userId: string, serverId: string): Promise<Member> {
-    const members = await Member.query().where('user_id', userId).where('server_id', serverId)
-    return members[0]
+    return this.serverService.findMember(serverId, userId)
   }
 
   async findAllByServerId(serverId: string): Promise<Member[]> {
