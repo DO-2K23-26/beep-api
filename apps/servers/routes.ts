@@ -24,7 +24,7 @@ router
             router.post('invitation', [ServerInvitationsController, 'createInvitation'])
             router
               .group(() => {
-                router.put(':memberId', [ServerMembersController, 'udpate'])
+                router.put(':memberId/nickname', [ServerMembersController, 'udpateNickname'])
                 router.get(':userId', [ServerMembersController, 'show'])
               })
               .prefix('members')

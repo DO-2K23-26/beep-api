@@ -15,7 +15,6 @@ import ServerService from '#apps/servers/services/server_service'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
-import { UpdateMembersSchema } from '#apps/members/validators/member'
 
 @inject()
 export default class MemberService {
@@ -108,7 +107,7 @@ export default class MemberService {
     return this.getPermissions(userId, channel.serverId)
   }
 
-  async update(id: string, member: UpdateMembersSchema): Promise<Member> {
+  async update(id: string, member: Partial<Member>): Promise<Member> {
     const updatedMember = await Member.findOrFail(id)
     await updatedMember.merge(member).save()
     return updatedMember

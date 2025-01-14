@@ -15,11 +15,11 @@ export const createMemberValidator = vine.compile(
  * Validator to validate the payload when updating
  * an existing member.ts.
  */
-export const updateMemberValidator = vine.compile(
+export const updateNicknameMemberValidator = vine.compile(
   vine.object({
     nickname: vine.string().trim().optional(),
   })
 )
 
 export type CreateMembersSchema = Infer<typeof createMemberValidator>
-export type UpdateMembersSchema = Infer<typeof updateMemberValidator>
+export type UpdateNicknameMembersSchema = Infer<typeof updateNicknameMemberValidator>

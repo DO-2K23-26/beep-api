@@ -4,7 +4,7 @@ import { HttpContext } from '@adonisjs/core/http'
 import ServerMemberPolicy from '#apps/servers/policies/server_member_policy'
 import ServerService from '#apps/servers/services/server_service'
 import { Payload } from '#apps/authentication/contracts/payload'
-import { updateMemberValidator } from '#apps/members/validators/member'
+import { updateNicknameMemberValidator } from '#apps/members/validators/member'
 
 @inject()
 export default class ServerMembersController {
@@ -38,10 +38,10 @@ export default class ServerMembersController {
     const member = await this.memberService.createFromInvitation(invitationId, userPayload.sub)
     return response.created(member)
   }
-  async udpate({ request, bouncer, params }: HttpContext) {
+  async udpateNickname({ request, bouncer, params }: HttpContext) {
     const { serverId, memberId } = params
-    await bouncer.with(ServerMemberPolicy).authorize('update' as never, serverId, memberId)
-    const data = await request.validateUsing(updateMemberValidator)
+    await bouncer.with(ServerMemberPolicy).authorize('updateNickname' as never, serverId, memberId)
+    const data = await request.validateUsing(updateNicknameMemberValidator)
     return this.memberService.update(memberId, data)
   }
 }

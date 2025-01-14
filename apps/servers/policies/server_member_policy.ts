@@ -36,7 +36,7 @@ export default class ServerMemberPolicy extends BasePolicy {
     return true
   }
 
-  async update(payload: JwtPayload, serverId: string, memberId: string) {
+  async updateNickname(payload: JwtPayload, serverId: string, memberId: string) {
     const permissions = await this.memberService.getPermissions(payload.sub!, serverId!)
     const canManageNicknames = this.permissionsService.has_permission(
       permissions,
