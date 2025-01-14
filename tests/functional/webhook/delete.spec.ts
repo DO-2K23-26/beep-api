@@ -24,8 +24,11 @@ test.group('Webhook delete', () => {
       .loginAs(user)
     result.assertStatus(200)
 
+    console.log(webhook.id)
+
     const messages = await Message.query().where('webhookId', webhook.id).first()
-    expect(messages).toBeNull()
+    console.log(messages)
+    expect(messages).not.toBeNull()
   }).tags(['webhook:delete'])
 
   test('must return a 403 if user not in the server', async ({ client }) => {

@@ -7,7 +7,6 @@ import Webhook from '#apps/webhooks/models/webhook'
 import WebhookAlreadyExistsException from '../exceptions/webhook_already_exists_exception.js'
 import WebhookNotFoundException from '../exceptions/webhook_not_found_exception.js'
 import Message from '#apps/messages/models/message'
-import { ActionSignalMessage, SignalMessage } from '#apps/messages/models/signaling'
 import env from '#start/env'
 import jwt from 'jsonwebtoken'
 import WebhookJwtInvalidException from '#apps/webhooks/exceptions/webhook_jwt_invalid_exception'
@@ -129,25 +128,32 @@ export default class WebhookService {
     return webhook
   }
 
-  // Supprime un webhook et tous les messages associés
+  // Supprime un webhook et garder les messages
   async delete(webhookId: string) {
-    // Trouver le webhook
-    const webhook = await Webhook.findOrFail(webhookId)
+    const webhook = await Webhook.find(webhookId)
 
-    // Supprimer les messages associés
-    // const messages = await Message.query().where('webhookId', webhookId)
-    const messages = await Message.findManyBy('webhookId', webhookId)
-    for (const message of messages) {
-      const signalMessage: SignalMessage = {
-        message: message,
-        action: ActionSignalMessage.delete,
-      }
-      transmit.broadcast(`channels/${message.channelId}/messages`, JSON.stringify(signalMessage))
-      await message.delete()
+    if (!webhook) {
+      throw new WebhookNotFoundException('Webhook not found', {
+        status: 404,
+        code: 'E_WEBHOOK_NOT_FOUND',
+      })
     }
 
-    // Supprimer le webhook
+    let messages = await Message.query().where('webhookId', webhook.id).first()
+    console.log(messages)
+
     await webhook.delete()
+
+    const signalWebhook: SignalWebhook = {
+      webhook: webhook,
+      action: ActionSignalWebhook.delete,
+    }
+
+    transmit.broadcast(`channels/${webhook.channelId}/webhook`, JSON.stringify(signalWebhook))
+
+    messages = await Message.query().where('webhookId', webhook.id).first()
+    console.log('messages : ', messages)
+
     return webhook
   }
 
