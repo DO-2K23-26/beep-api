@@ -139,9 +139,6 @@ export default class WebhookService {
       })
     }
 
-    let messages = await Message.query().where('webhookId', webhook.id).first()
-    console.log(messages)
-
     await webhook.delete()
 
     const signalWebhook: SignalWebhook = {
@@ -150,9 +147,6 @@ export default class WebhookService {
     }
 
     transmit.broadcast(`channels/${webhook.channelId}/webhook`, JSON.stringify(signalWebhook))
-
-    messages = await Message.query().where('webhookId', webhook.id).first()
-    console.log('messages : ', messages)
 
     return webhook
   }
