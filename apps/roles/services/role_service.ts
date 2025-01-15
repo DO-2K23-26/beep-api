@@ -1,4 +1,3 @@
-import RoleNotFoundException from '#apps/roles/exceptions/role_not_found_exception'
 import Role from '#apps/roles/models/role'
 import { CreateRoleSchema, UpdateRoleSchema } from '#apps/roles/validators/role'
 import Server from '#apps/servers/models/server'
@@ -7,9 +6,7 @@ import { inject } from '@adonisjs/core'
 @inject()
 export default class RoleService {
   async findById(roleId: string): Promise<Role> {
-    return Role.findOrFail(roleId).catch((error) => {
-      throw error
-    })
+    return Role.findOrFail(roleId)
   }
 
   async findAllByServer(serverId: string): Promise<Role[]> {
@@ -29,23 +26,13 @@ export default class RoleService {
   }
 
   async update(id: string, payload: UpdateRoleSchema): Promise<Role> {
-    const role = await Role.findOrFail(id).catch(() => {
-      throw new RoleNotFoundException('Role not found', {
-        status: 404,
-        code: 'E_ROWNOTFOUND',
-      })
-    })
+    const role = await Role.findOrFail(id)
     role.merge(payload)
     return role.save()
   }
 
   async deleteById(roleId: string): Promise<void> {
-    const role: Role = await Role.findOrFail(roleId).catch(() => {
-      throw new RoleNotFoundException('Role not found', {
-        status: 404,
-        code: 'E_ROWNOTFOUND',
-      })
-    })
+    const role: Role = await Role.findOrFail(roleId)
     await role.delete()
   }
 }
