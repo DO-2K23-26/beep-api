@@ -25,7 +25,6 @@ test.group('Webhook delete', () => {
     result.assertStatus(200)
 
     const messages = await Message.query().where('webhookId', webhook.id).first()
-    console.log(messages)
     expect(messages).not.toBeNull()
   }).tags(['webhook:delete'])
 

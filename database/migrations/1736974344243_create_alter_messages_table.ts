@@ -7,17 +7,7 @@ export default class extends BaseSchema {
     this.schema.alterTable(this.tableName, (table) => {
       table.dropForeign(['webhookId'])
 
-      table
-        .string('webhookId')
-        .references('id')
-        .inTable('webhooks')
-        .onDelete('RESTRICT')
-        .nullable()
-        .alter()
+      table.string('webhookId').nullable().alter()
     })
   }
-
-  // async down() {
-  //   this.schema.dropTable(this.tableName)
-  // }
 }
