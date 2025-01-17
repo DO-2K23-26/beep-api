@@ -107,6 +107,12 @@ export default class MemberService {
     return this.getPermissions(userId, channel.serverId)
   }
 
+  async update(id: string, member: Partial<Member>): Promise<Member> {
+    const updatedMember = await Member.findOrFail(id)
+    await updatedMember.merge(member).save()
+    return updatedMember
+  }
+
   async getPermissions(userId: string, serverId: string) {
     const member = await Member.query()
       .where('user_id', userId)
@@ -121,17 +127,5 @@ export default class MemberService {
     })
 
     return permissions
-  }
-
-  addMemberRole(): Promise<void> {
-    throw new Error('Method not implemented.')
-  }
-
-  removeMemberRole(): Promise<void> {
-    throw new Error('Method not implemented.')
-  }
-
-  removeServerMember(): Promise<void> {
-    throw new Error('Method not implemented.')
   }
 }
