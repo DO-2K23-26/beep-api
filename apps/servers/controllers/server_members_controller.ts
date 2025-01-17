@@ -23,7 +23,14 @@ export default class ServerMembersController {
   async show({ params, bouncer }: HttpContext) {
     const { serverId, userId } = params
     await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
-    return this.memberService.getMemberByUserIdAndServerId(userId, serverId)
+    return this.serverService.getMember(serverId, userId)
+  }
+
+  async showMe({ params, bouncer, auth }: HttpContext) {
+    const { serverId } = params
+    const user = auth.user as Payload
+    await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
+    return this.serverService.getMember(serverId, user.sub!)
   }
 
   async joinPublic({ auth, params, response }: HttpContext) {

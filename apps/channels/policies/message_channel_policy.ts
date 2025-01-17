@@ -39,29 +39,25 @@ export default class MessageChannelPolicy extends BasePolicy {
       // then we will perform other authorization checks
       const isPresent = await this.serverService.userPartOfServer(payload.sub!, channel.serverId!)
       if (!isPresent) return false
+      const userPermissions = await this.memberService.getPermissionsFromChannel(
+        payload.sub!,
+        channelId
+      )
+      if (
+        !this.permissionsService.validate_permissions(userPermissions, [Permissions.VIEW_CHANNELS])
+      )
+        return false
     } else {
       return false
     }
   }
 
-  async show(payload: JwtPayload, channelId: string) {
-    const userPermissions = await this.memberService.getPermissionsFromChannel(
-      payload.sub!,
-      channelId
-    )
-    return this.permissionsService.validate_permissions(userPermissions, [
-      Permissions.VIEW_CHANNELS,
-    ])
+  async show() {
+    return true
   }
 
-  async index(payload: JwtPayload, channelId: string) {
-    const userPermissions = await this.memberService.getPermissionsFromChannel(
-      payload.sub!,
-      channelId
-    )
-    return this.permissionsService.validate_permissions(userPermissions, [
-      Permissions.VIEW_CHANNELS,
-    ])
+  async index() {
+    return true
   }
   async store(payload: JwtPayload, channelId: string) {
     const userPermissions = await this.memberService.getPermissionsFromChannel(
@@ -70,22 +66,13 @@ export default class MessageChannelPolicy extends BasePolicy {
     )
     return this.permissionsService.validate_permissions(userPermissions, [
       Permissions.SEND_MESSAGES,
-      Permissions.VIEW_CHANNELS,
     ])
   }
 
-  async pin(payload: JwtPayload, channelId: string) {
+  async pin(_payload: JwtPayload, channelId: string) {
     const channel = await this.channelService.findByIdOrFail(channelId)
     if (channel.type == ChannelType.PRIVATE_CHAT) return true
-
-    const userPermissions = await this.memberService.getPermissionsFromChannel(
-      payload.sub!,
-      channelId
-    )
-    return this.permissionsService.validate_permissions(userPermissions, [
-      Permissions.SEND_MESSAGES,
-      Permissions.VIEW_CHANNELS,
-    ])
+    return true
   }
 
   async update(payload: JwtPayload, channelId: string, messageId: string) {
@@ -97,7 +84,6 @@ export default class MessageChannelPolicy extends BasePolicy {
     )
     return this.permissionsService.validate_permissions(userPermissions, [
       Permissions.SEND_MESSAGES,
-      Permissions.VIEW_CHANNELS,
     ])
   }
 
@@ -109,14 +95,8 @@ export default class MessageChannelPolicy extends BasePolicy {
       channelId
     )
     return (
-      this.permissionsService.validate_permissions(userPermissions, [
-        Permissions.SEND_MESSAGES,
-        Permissions.VIEW_CHANNELS,
-      ]) ||
-      this.permissionsService.validate_permissions(userPermissions, [
-        Permissions.MANAGE_MESSAGES,
-        Permissions.VIEW_CHANNELS,
-      ])
+      this.permissionsService.validate_permissions(userPermissions, [Permissions.SEND_MESSAGES]) ||
+      this.permissionsService.validate_permissions(userPermissions, [Permissions.MANAGE_MESSAGES])
     )
   }
 }

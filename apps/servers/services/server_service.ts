@@ -2,7 +2,6 @@ import Member from '#apps/members/models/member'
 import Server from '#apps/servers/models/server'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import StorageService from '#apps/storage/services/storage_service'
-import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
 import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
 import ServerAlreadyExistsException from '../exceptions/server_already_exists_exception.js'
@@ -56,12 +55,7 @@ export default class ServerService {
       })
     }
 
-    const user = await User.findOrFail(ownerId).catch(() => {
-      throw new UserNotFoundException('User not found', {
-        status: 404,
-        code: 'E_ROWNOTFOUND',
-      })
-    })
+    const user = await User.findOrFail(ownerId)
 
     // check if user already has 100 servers or more as the owner (owner_id in servers table)
     const userServers = await this.findByUserId(ownerId, 1, 51)
@@ -178,15 +172,25 @@ export default class ServerService {
   }
 
   async userPartOfServer(userId: string, serverId: string): Promise<boolean> {
+    // console.log(serverId)
     const server = await this.findById(serverId)
     await server.load('members')
-
-    return server.members.some((m) => m.userId === userId)
+    const isMember = server.members.some((m) => m.userId === userId)
+    return isMember
   }
 
   async getByUserId(userId: string): Promise<Server[]> {
     return Server.query().whereHas('members', (builder) => {
       builder.where('user_id', userId)
     })
+  }
+
+  async getMember(serverId: string, userId: string) {
+    const server = await this.findById(serverId)
+    await server.load('members', (query) => {
+      query.where('user_id', userId).preload('roles')
+    })
+
+    return server.members[0]
   }
 }
