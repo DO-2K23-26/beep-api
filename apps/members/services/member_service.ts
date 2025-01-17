@@ -84,10 +84,6 @@ export default class MemberService {
     return this.create(server.id, userId)
   }
 
-  async getMemberByUserIdAndServerId(userId: string, serverId: string): Promise<Member> {
-    return this.serverService.findMember(serverId, userId)
-  }
-
   async findAllByServerId(serverId: string): Promise<Member[]> {
     const server = await this.serverService.findById(serverId)
     const members = await server.related('members').query().paginate(1, 1000)
