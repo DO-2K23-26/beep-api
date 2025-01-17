@@ -1,6 +1,0 @@
-apiVersion: v2
-name: beep-api
-description: A Helm chart for the api of beep
-type: application
-version: 0.0.0
-appVersion: "0.0.0"
