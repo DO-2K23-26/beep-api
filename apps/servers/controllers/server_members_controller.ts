@@ -38,7 +38,7 @@ export default class ServerMembersController {
     const member = await this.memberService.createFromInvitation(invitationId, userPayload.sub)
     return response.created(member)
   }
-  async udpateNickname({ request, bouncer, params }: HttpContext) {
+  async updateNickname({ request, bouncer, params }: HttpContext) {
     const { serverId, memberId } = params
     await bouncer.with(ServerMemberPolicy).authorize('updateNickname' as never, serverId, memberId)
     const data = await request.validateUsing(updateNicknameMemberValidator)
