@@ -172,10 +172,11 @@ export default class ServerService {
   }
 
   async userPartOfServer(userId: string, serverId: string): Promise<boolean> {
+    // console.log(serverId)
     const server = await this.findById(serverId)
     await server.load('members')
-
-    return server.members.some((m) => m.userId === userId)
+    const isMember = server.members.some((m) => m.userId === userId)
+    return isMember
   }
 
   async getByUserId(userId: string): Promise<Server[]> {

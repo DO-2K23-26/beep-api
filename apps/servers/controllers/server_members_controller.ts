@@ -22,16 +22,14 @@ export default class ServerMembersController {
 
   async show({ params, bouncer }: HttpContext) {
     const { serverId, userId } = params
-    const members = await this.memberService.findAllByServerId(serverId)
-    await bouncer.with(ServerMemberPolicy).authorize('view' as never, members)
+    await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
     return this.serverService.getMember(serverId, userId)
   }
 
   async showMe({ params, bouncer, auth }: HttpContext) {
     const { serverId } = params
     const user = auth.user as Payload
-    const members = await this.memberService.findAllByServerId(serverId)
-    await bouncer.with(ServerMemberPolicy).authorize('view' as never, members)
+    await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
     return this.serverService.getMember(serverId, user.sub!)
   }
 

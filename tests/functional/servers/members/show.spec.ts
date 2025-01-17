@@ -13,6 +13,7 @@ test.group('Servers members show', () => {
     const response = await client
       .get(`/v1/servers/${member.serverId}/members/${member.userId}`)
       .loginAs(member.user)
+
     response.assertStatus(200)
     response.assertBodyContains({
       avatar: member.avatar,
@@ -41,6 +42,7 @@ test.group('Servers members show', () => {
       .get(`/v1/servers/${member.serverId}/members/@me`)
       .loginAs(member.user)
     response.assertStatus(200)
+
     response.assertBodyContains({
       avatar: member.avatar,
       nickname: member.nickname,

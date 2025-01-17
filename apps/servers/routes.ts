@@ -23,6 +23,7 @@ router
             router.post('invitation', [ServerInvitationsController, 'createInvitation'])
             router
               .group(() => {
+                router.put(':memberId/nickname', [ServerMembersController, 'updateNickname'])
                 router.get('', [ServerMembersController, 'index'])
                 router.get('@me', [ServerMembersController, 'showMe'])
                 router.get(':userId', [ServerMembersController, 'show'])
