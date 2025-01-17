@@ -18,8 +18,6 @@ import {
   resetPasswordValidator,
   signinAuthenticationValidator,
 } from '../validators/authentication.js'
-import { Authenticator } from '@adonisjs/auth'
-import { Authenticators } from '@adonisjs/auth/types'
 import { Payload } from '../contracts/payload.js'
 import { SignIn } from '../contracts/signin.js'
 import transmit from '@adonisjs/transmit/services/main'
@@ -89,37 +87,12 @@ export default class AuthenticationController {
 
     if (!refreshToken) return response.status(401).send({ message: 'Unauthorized' })
 
-    const tokens = await this.getTokens(refreshToken, auth)
+    const tokens = await this.authenticationService.getTokens(refreshToken, auth)
 
     response.cookie('beep.access_token', tokens.accessToken)
     response.cookie('beep.refresh_token', tokens.refreshToken)
 
     return response.send(tokens)
-  }
-
-  async getTokens(refreshToken: string, auth: Authenticator<Authenticators>) {
-    const payload = await this.authenticationService.verifyToken(refreshToken)
-
-    const user = await User.query()
-      .where('id', payload.sub as string)
-      //.preload('roles')
-      .firstOrFail()
-
-    await redis.hset(
-      'userStates',
-      payload.sub as string,
-      JSON.stringify({
-        id: payload.sub,
-        username: user.username,
-        expiresAt: Date.now() + 1200 * 1000, // Nouveau timestamp d'expiration
-      })
-    )
-
-    const tokens = await auth.use('jwt').generate(user)
-
-    return {
-      ...tokens,
-    }
   }
 
   async sendEmail({ auth, response }: HttpContext) {

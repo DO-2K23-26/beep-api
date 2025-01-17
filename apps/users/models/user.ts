@@ -92,6 +92,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   })
   declare TOTPSecret: string
 
+  @column()
+  declare refreshToken: string
+
   @hasMany(() => Token)
   declare tokens: HasMany<typeof Token>
 

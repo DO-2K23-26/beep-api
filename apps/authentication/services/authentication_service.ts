@@ -191,6 +191,10 @@ export default class AuthenticationService {
   async handleSignIn(user: User, auth: Authenticator<Authenticators>) {
     const tokens = await auth.use('jwt').generate(user)
 
+    // Store the refresh token for invalidation
+    user.refreshToken = tokens.refreshToken
+    await user.save()
+
     await redis.hset(
       'userStates',
       user.id,
@@ -209,6 +213,39 @@ export default class AuthenticationService {
       user,
       tokens,
     }
+  }
+
+  async getTokens(refreshToken: string, auth: Authenticator<Authenticators>) {
+    const payload = await this.verifyToken(refreshToken)
+
+    const user = await User.query()
+      .where('id', payload.sub as string)
+      //.preload('roles')
+      .firstOrFail()
+
+    if (user.refreshToken !== refreshToken) {
+      throw new errors.E_UNAUTHORIZED_ACCESS('Unauthorized access', {
+        guardDriverName: 'jwt',
+      })
+    }
+
+    // Dectecting if the user is connected
+    await redis.hset(
+      'userStates',
+      payload.sub as string,
+      JSON.stringify({
+        id: payload.sub,
+        username: user.username,
+        expiresAt: Date.now() + 1200 * 1000, // Nouveau timestamp d'expiration
+      })
+    )
+
+    const tokens = await auth.use('jwt').generate(user)
+
+    user.refreshToken = tokens.refreshToken
+    await user.save()
+
+    return tokens
   }
 
   async checkPassword(userId: string, password: string): Promise<boolean> {
