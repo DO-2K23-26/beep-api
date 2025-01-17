@@ -159,7 +159,7 @@ export default class AuthenticationController {
 
     await this.authenticationService.updateNewPassword(payload.email, validator).catch(() => {
       throw new CurrentPasswordMismatchException(
-        'The inserterd password is not matching the current one',
+        'The inserted password is not matching the current one',
         {
           code: 'E_CURRENT_PASSWORD_MISMATCHING',
           status: 400,
