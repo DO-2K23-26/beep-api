@@ -28,7 +28,7 @@ export default class RoleService extends BasePolicy {
     if (!this.permissionsService.isValidMask(permissions)) {
       throw new InvalidPermissionsMaskException('Invalid permissions mask', {
         status: 400,
-        code: 'E_INVALIDPERMISSIONSMASK',
+        code: 'E_INVALID_PERMISSIONS_MASK',
       })
     }
 
@@ -45,7 +45,7 @@ export default class RoleService extends BasePolicy {
     if (!this.permissionsService.isValidMask(payload.permissions)) {
       throw new InvalidPermissionsMaskException('Invalid permissions mask', {
         status: 400,
-        code: 'E_INVALIDPERMISSIONSMASK',
+        code: 'E_INVALID_PERMISSIONS_MASK',
       })
     }
 
