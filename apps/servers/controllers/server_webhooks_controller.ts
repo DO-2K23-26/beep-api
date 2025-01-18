@@ -1,8 +1,8 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import WebhookService from '#apps/webhooks/service/webhook_service'
-import ServerWebhookPolicy from '../policies/server_webhook_policy.js'
-import { createWebhookValidator } from '#apps/webhooks/validators/webhook'
+import WebhookService from '#apps/webhooks/services/webhook_service'
+import ServerWebhookPolicy from '#apps/servers/policies/server_webhook_policy'
+import { createWebhookValidator, triggerWebhookValidator } from '#apps/webhooks/validators/webhook'
 @inject()
 export default class ServerWebhooksController {
   constructor(private webhookService: WebhookService) {}
@@ -52,5 +52,24 @@ export default class ServerWebhooksController {
     const webhookId = params.webhookId
     const webhook = await this.webhookService.findById(webhookId)
     return webhook
+  }
+
+  // Deletes a webhook in a channel
+  async deleteWebhook({ params, bouncer }: HttpContext) {
+    await bouncer.with(ServerWebhookPolicy).authorize('delete' as never, params.serverId)
+
+    const webhookId = params.webhookId
+    await this.webhookService.delete(webhookId)
+  }
+
+  //Trigger a webhook
+  async triggerWebhook({ params, request, response }: HttpContext) {
+    const receivedWebhook = await request.validateUsing(triggerWebhookValidator)
+
+    const { webhookId } = params
+
+    const payload = { data: receivedWebhook.data }
+    const result = await this.webhookService.trigger(webhookId, JSON.stringify(payload.data))
+    return response.ok(result)
   }
 }

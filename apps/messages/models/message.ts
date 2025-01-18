@@ -5,6 +5,7 @@ import User from '#apps/users/models/user'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Attachment from '#apps/storage/models/attachment'
 import Channel from '#apps/channels/models/channel'
+import Webhook from '#apps/webhooks/models/webhook'
 
 export default class Message extends BaseModel {
   // Column for message ID
@@ -39,6 +40,10 @@ export default class Message extends BaseModel {
   @column()
   declare parentMessageId: string | null
 
+  // Column for webhook ID
+  @column({ columnName: 'webhookId' })
+  declare webhookId: string
+
   // Define the parent relationship (a message belongs to a user)
   @belongsTo(() => User, {
     foreignKey: 'ownerId',
@@ -58,6 +63,10 @@ export default class Message extends BaseModel {
     foreignKey: 'parentMessageId',
   })
   declare parentMessage: BelongsTo<typeof Message>
+
+  // Define the parent relationship (a message can belong to a webhook)
+  @belongsTo(() => Webhook)
+  declare webhook: BelongsTo<typeof Webhook>
 
   // Generate a UUID for the message ID before creating
   @beforeCreate()

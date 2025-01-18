@@ -24,7 +24,7 @@ export default class Webhook extends BaseModel {
 
   // Column for channel ID (nullable)
   @column({ columnName: 'channel_id' })
-  declare channelId: string | null
+  declare channelId: string
 
   // Column for user ID (nullable)
   @column({ columnName: 'user_id' })
@@ -40,7 +40,7 @@ export default class Webhook extends BaseModel {
 
   // Column for the secure token
   @column()
-  declare token: string
+  declare token: string | null
 
   // Define the parent relationship (a webhook belongs to a user)
   @belongsTo(() => User, {

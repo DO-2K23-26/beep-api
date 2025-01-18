@@ -9,15 +9,15 @@ import WebhookNotFoundException from '../exceptions/webhook_not_found_exception.
 import Message from '#apps/messages/models/message'
 import env from '#start/env'
 import jwt from 'jsonwebtoken'
-import WebhookJwtInvalidException from '../exceptions/webhook_jwt_invalid_exception.js'
+import WebhookJwtInvalidException from '#apps/webhooks/exceptions/webhook_jwt_invalid_exception'
 import AuthenticationService from '#apps/authentication/services/authentication_service'
 import User from '#apps/users/models/user'
+import WebhookUserIdMissing from '#apps/users/exceptions/webhook_userId_missing_exception'
+import WebhookTokenEmpty from '#apps/webhooks/exceptions/webhook_token_empty_exception'
+import WebhookAppKeyMissing from '#apps/webhooks/exceptions/webhook_app_key_missing_exception'
+import WebhookProcessingException from '#apps/webhooks/exceptions/webhook_processing_exception'
 import UserNotFoundException from '#apps/users/exceptions/user_not_found_exception'
-import TokenService from '../services/token_service.js'
-import WebhookAppKeyMissing from '../exceptions/webhook_app_key_missing_exception.js'
-import WebhookTokenEmpty from '../exceptions/webhook_token_empty_exception.js'
-import WebhookProcessingException from '../exceptions/webhook_processing_exception.js'
-import WebhookUserIdMissing from '../../users/exceptions/webhook_userId_missing_exception.js'
+import TokenService from '#apps/webhooks/services/token_service'
 
 export interface PayloadJWTSFUConnection {
   name?: string
@@ -147,6 +147,7 @@ export default class WebhookService {
     }
 
     transmit.broadcast(`channels/${webhook.channelId}/webhook`, JSON.stringify(signalWebhook))
+
     return webhook
   }
 
