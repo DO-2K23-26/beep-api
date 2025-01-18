@@ -191,6 +191,16 @@ export default class ServerService {
       query.where('user_id', userId).preload('roles')
     })
 
-    return server.members[0]
+    // Load the roles with the member
+    const member = server.members[0]
+    await member.load('roles')
+
+    // Add the default role to the member's roles if the server has a default role (which should always be the case)
+    const defaultRole = await Role.findBy('server_id', serverId) // Default role's ID = server ID.
+    if (defaultRole) {
+      member.roles.push(defaultRole)
+    }
+
+    return member
   }
 }
