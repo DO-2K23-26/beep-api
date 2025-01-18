@@ -17,7 +17,7 @@ import TokenService from '../services/token_service.js'
 import WebhookAppKeyMissing from '../exceptions/webhook_app_key_missing_exception.js'
 import WebhookTokenEmpty from '../exceptions/webhook_token_empty_exception.js'
 import WebhookProcessingException from '../exceptions/webhook_processing_exception.js'
-import WebhookUserIdMissing from '../exceptions/webhook_userId_missing_exception.js'
+import WebhookUserIdMissing from '../../users/exceptions/webhook_userId_missing_exception.js'
 
 export interface PayloadJWTSFUConnection {
   name?: string
