@@ -33,7 +33,7 @@ export const updateWebhookValidator = vine.compile(
 export const triggerWebhookValidator = vine.compile(
   vine.object({
     data: vine.object({
-      // Add the required properties here
+      message: vine.string(),
     }),
   })
 )
