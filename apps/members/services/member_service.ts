@@ -15,6 +15,7 @@ import ServerService from '#apps/servers/services/server_service'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
+import { Permissions } from '#apps/shared/enums/permissions'
 
 @inject()
 export default class MemberService {
@@ -114,12 +115,21 @@ export default class MemberService {
       .where('server_id', serverId)
       .preload('roles')
       .firstOrFail()
-    const role = await this.roleService.findById(serverId)
-    let permissions = role.permissions
 
-    member.roles.forEach((r) => {
-      permissions |= r.permissions
+    // Calculate the permissions from member's custom roles
+    let permissions = 0
+    member.roles.forEach((role) => {
+      permissions |= role.permissions
     })
+
+    // Get the default role. It has roleId equal to serverId
+    const defaultRole = await this.roleService.findById(serverId)
+    permissions |= defaultRole.permissions
+
+    // If member is owner, OR the administrator permissions
+    if (member.userId === (await this.serverService.getOwner(serverId))) {
+      permissions |= Permissions.ADMINISTRATOR
+    }
 
     return permissions
   }
