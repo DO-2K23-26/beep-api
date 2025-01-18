@@ -15,9 +15,9 @@ test.group('Servers members list', () => {
     const response = await client.get(`/v1/servers/${server.id}/members`).loginAs(user)
 
     response.assertStatus(200)
-    expect(response.body().data).toHaveLength(5)
+    expect(response.body()).toHaveLength(5)
 
-    response.body().data.forEach((member: Member) => {
+    response.body().forEach((member: Member) => {
       const attemptMember = [...members, firstMember].find((m) => m.id === member.id)
       expect(member).toEqual(expect.objectContaining(attemptMember!.toJSON()))
     })

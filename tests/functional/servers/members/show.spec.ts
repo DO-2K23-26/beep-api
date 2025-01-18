@@ -1,3 +1,5 @@
+import { DEFAULT_ROLE_SERVER } from '#apps/shared/constants/default_role_server'
+import { DEFAULT_ROLE_SERVER_PERMISSION } from '#apps/shared/constants/default_role_permission'
 import { MemberFactory } from '#database/factories/member_factory'
 import { RoleFactory } from '#database/factories/role_factory'
 import { UserFactory } from '#database/factories/user_factory'
@@ -21,13 +23,19 @@ test.group('Servers members show', () => {
       serverId: member.serverId,
       userId: member.userId,
     })
-    assert.lengthOf(response.body().roles, 1)
+    assert.lengthOf(response.body().roles, 2) // 2 roles: the default role and the role we created
     assert.containsSubset(response.body().roles, [
       {
         id: role.id,
         name: role.name,
         permissions: role.permissions,
         serverId: role.serverId,
+      },
+      {
+        id: member.serverId,
+        name: DEFAULT_ROLE_SERVER,
+        permissions: DEFAULT_ROLE_SERVER_PERMISSION,
+        serverId: member.serverId,
       },
     ])
   }).tags(['servers:members'])
@@ -49,13 +57,19 @@ test.group('Servers members show', () => {
       serverId: member.serverId,
       userId: member.userId,
     })
-    assert.lengthOf(response.body().roles, 1)
+    assert.lengthOf(response.body().roles, 2)
     assert.containsSubset(response.body().roles, [
       {
         id: role.id,
         name: role.name,
         permissions: role.permissions,
         serverId: role.serverId,
+      },
+      {
+        id: member.serverId,
+        name: DEFAULT_ROLE_SERVER,
+        permissions: DEFAULT_ROLE_SERVER_PERMISSION,
+        serverId: member.serverId,
       },
     ])
   }).tags(['servers:members'])

@@ -34,12 +34,22 @@ test.group('Servers create', () => {
       .get(`/v1/servers/${resultServerCreation.body().id}/members`)
       .loginAs(user)
     resultMember.assertStatus(200)
-    expect(resultMember.body().data[0]).toEqual(
-      expect.objectContaining({
-        nickname: user.username,
-        serverId: resultServerCreation.body().id,
-        userId: user.id,
-      })
+    expect(resultMember.body()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          nickname: user.username,
+          serverId: resultServerCreation.body().id,
+          userId: user.id,
+          roles: [
+            expect.objectContaining({
+              id: resultServerCreation.body().id,
+              name: DEFAULT_ROLE_SERVER,
+              permissions: DEFAULT_ROLE_SERVER_PERMISSION,
+              serverId: resultServerCreation.body().id,
+            }),
+          ],
+        }),
+      ])
     )
   }).tags(['servers:create'])
 
