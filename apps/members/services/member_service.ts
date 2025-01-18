@@ -12,10 +12,11 @@ import UserAlreadyMember from '#apps/members/exceptions/user_already_member_exce
 import Member from '#apps/members/models/member'
 import RoleService from '#apps/roles/services/role_service'
 import ServerService from '#apps/servers/services/server_service'
+import { Permissions } from '#apps/shared/enums/permissions'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
-import { Permissions } from '#apps/shared/enums/permissions'
+import NoMembersFoundException from '../exceptions/no_members_found_exception.js'
 
 @inject()
 export default class MemberService {
@@ -88,6 +89,13 @@ export default class MemberService {
   async findAllByServerId(serverId: string): Promise<Member[]> {
     const server = await this.serverService.findById(serverId)
     const members = await server.related('members').query().preload('roles')
+
+    if (members.length === 0) {
+      throw new NoMembersFoundException('No members found', {
+        status: 404,
+        code: 'E_NO_MEMBERS_FOUND',
+      })
+    }
 
     const defaultRole = await this.roleService.findById(serverId) // Default role has roleId = serverId
     if (defaultRole) {

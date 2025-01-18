@@ -1,16 +1,17 @@
 import Member from '#apps/members/models/member'
+import Role from '#apps/roles/models/role'
 import Server from '#apps/servers/models/server'
+import { DEFAULT_ROLE_SERVER_PERMISSION } from '#apps/shared/constants/default_role_permission'
+import { DEFAULT_ROLE_SERVER } from '#apps/shared/constants/default_role_server'
 import { generateSnowflake } from '#apps/shared/services/snowflake'
 import StorageService from '#apps/storage/services/storage_service'
 import User from '#apps/users/models/user'
 import { inject } from '@adonisjs/core'
+import db from '@adonisjs/lucid/services/db'
+import MemberNotFoundException from '../exceptions/member_not_found_exception.js'
 import ServerAlreadyExistsException from '../exceptions/server_already_exists_exception.js'
 import ServerCountLimitReachedException from '../exceptions/server_count_limit_reached_exception.js'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
-import Role from '#apps/roles/models/role'
-import { DEFAULT_ROLE_SERVER } from '#apps/shared/constants/default_role_server'
-import { DEFAULT_ROLE_SERVER_PERMISSION } from '#apps/shared/constants/default_role_permission'
-import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export default class ServerService {
@@ -57,7 +58,7 @@ export default class ServerService {
 
     const user = await User.findOrFail(ownerId)
 
-    // check if user already has 100 servers or more as the owner (owner_id in servers table)
+    // check if user already has 50 servers or more as the owner (owner_id in servers table)
     const userServers = await this.findByUserId(ownerId, 1, 51)
     if (userServers.length >= 50) {
       throw new ServerCountLimitReachedException('User has reached the limit of servers', {
@@ -172,7 +173,6 @@ export default class ServerService {
   }
 
   async userPartOfServer(userId: string, serverId: string): Promise<boolean> {
-    // console.log(serverId)
     const server = await this.findById(serverId)
     await server.load('members')
     const isMember = server.members.some((m) => m.userId === userId)
@@ -191,8 +191,16 @@ export default class ServerService {
       query.where('user_id', userId).preload('roles')
     })
 
-    // Load the roles with the member
+    // Check if member exists
     const member = server.members[0]
+    if (!member) {
+      throw new MemberNotFoundException('Member not found', {
+        status: 404,
+        code: 'E_MEMBER_NOT_FOUND',
+      })
+    }
+
+    // Load the roles with the member
     await member.load('roles')
 
     // Add the default role to the member's roles if the server has a default role (which should always be the case)
