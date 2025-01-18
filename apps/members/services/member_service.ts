@@ -87,7 +87,15 @@ export default class MemberService {
 
   async findAllByServerId(serverId: string): Promise<Member[]> {
     const server = await this.serverService.findById(serverId)
-    const members = await server.related('members').query().paginate(1, 1000)
+    const members = await server.related('members').query().preload('roles')
+
+    const defaultRole = await this.roleService.findById(serverId) // Default role has roleId = serverId
+    if (defaultRole) {
+      // Default role should always exist, this is in case it doesn't
+      members.forEach((member) => {
+        member.roles.push(defaultRole)
+      })
+    }
 
     return members
   }
