@@ -2,7 +2,11 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import WebhookService from '#apps/webhooks/services/webhook_service'
 import ServerWebhookPolicy from '#apps/servers/policies/server_webhook_policy'
-import { createWebhookValidator, triggerWebhookValidator } from '#apps/webhooks/validators/webhook'
+import {
+  createWebhookValidator,
+  triggerWebhookValidator,
+  updateWebhookPictureValidator,
+} from '#apps/webhooks/validators/webhook'
 @inject()
 export default class ServerWebhooksController {
   constructor(private webhookService: WebhookService) {}
@@ -14,8 +18,9 @@ export default class ServerWebhooksController {
     await bouncer.with(ServerWebhookPolicy).authorize('create' as never, params.serverId)
     const ownerId = params.ownerId
     const channelId = params.channelId
-    const channel = await this.webhookService.create(receivedWebhook, ownerId, channelId)
-    return response.created(channel)
+    const serverId = params.serverId
+    const webhook = await this.webhookService.create(receivedWebhook, ownerId, channelId, serverId)
+    return response.created(webhook)
   }
 
   // Updates a webhook in a channel
@@ -60,6 +65,14 @@ export default class ServerWebhooksController {
 
     const webhookId = params.webhookId
     await this.webhookService.delete(webhookId)
+  }
+
+  // Update the webhook picture
+  async updateWebhookPicture({ request, bouncer }: HttpContext) {
+    const data = await request.validateUsing(updateWebhookPictureValidator)
+    const server = await this.webhookService.findById(data.params.serverId)
+    await bouncer.with(ServerWebhookPolicy).authorize('edit' as never, server)
+    return this.webhookService.updateWebhookPicture(data)
   }
 
   //Trigger a webhook

@@ -4,6 +4,7 @@ import StoragePolicy from '#apps/storage/policies/storage_policy'
 import StorageService from '#apps/storage/services/storage_service'
 import { updateStorageValidator } from '#apps/storage/validators/storage'
 import User from '#apps/users/models/user'
+import Webhook from '#apps/webhooks/models/webhook'
 import { inject } from '@adonisjs/core'
 import { type HttpContext, type Response } from '@adonisjs/core/http'
 
@@ -49,6 +50,11 @@ export default class StoragesController {
   async transmitPicture({ params, response }: HttpContext) {
     const server = await Server.findByOrFail('id', params.serverId)
     return await this.transmit(response, server.icon)
+  }
+
+  async transmitWebhookPicture({ params, response }: HttpContext) {
+    const webhook = await Webhook.findByOrFail('id', params.webhookId)
+    return await this.transmit(response, webhook.webhookPicture)
   }
 
   async transmit(response: Response, id: string) {
