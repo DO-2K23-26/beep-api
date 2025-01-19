@@ -15,7 +15,7 @@ test.group('Webhook update', () => {
 
     const updatePayload = {
       name: 'updated string',
-      profilePicture: 'https://beep.baptistebronsin.be/logo.png',
+      webhookPicture: 'https://beep.baptistebronsin.be/logo.png',
       serverId: server.id,
       channelId: 'string',
       token: 'string',
@@ -29,7 +29,7 @@ test.group('Webhook update', () => {
     result.assertStatus(200)
     result.assertBodyContains({
       name: updatePayload.name,
-      profilePicture: updatePayload.profilePicture,
+      webhookPicture: updatePayload.webhookPicture,
     })
   }).tags(['webhook:update'])
 
@@ -42,7 +42,7 @@ test.group('Webhook update', () => {
 
     const updatePayload = {
       name: 'updated string',
-      profilePicture: 'https://beep.baptistebronsin.be/logo.png',
+      webhookPicture: 'https://beep.baptistebronsin.be/logo.png',
       serverId: server.id,
       channelId: channelId,
       token: 'string',

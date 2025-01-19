@@ -8,7 +8,7 @@ export const WebhookFactory = factory
     const name = faker.lorem.words(2)
     return Webhook.create({
       name,
-      profilePicture: faker.image.avatar(),
+      webhookPicture: faker.image.avatar(),
       userId: faker.lorem.word(),
       token: jwt.sign({ name }, env.get('APP_KEY')),
       channelId: faker.lorem.word(),
