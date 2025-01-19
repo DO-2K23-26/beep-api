@@ -12,10 +12,14 @@ import MemberNotFoundException from '../exceptions/member_not_found_exception.js
 import ServerAlreadyExistsException from '../exceptions/server_already_exists_exception.js'
 import ServerCountLimitReachedException from '../exceptions/server_count_limit_reached_exception.js'
 import { CreateServerSchema, UpdateBannerSchema, UpdateServerSchema } from '../validators/server.js'
+import RoleService from '#apps/roles/services/role_service'
 
 @inject()
 export default class ServerService {
-  constructor(private storageService: StorageService) {}
+  constructor(
+    private storageService: StorageService,
+    private roleService: RoleService
+  ) {}
 
   async findAll(page: number = 1, limit: number = 10): Promise<Server[]> {
     const pageServers = await Server.query().paginate(page, limit)
@@ -204,7 +208,7 @@ export default class ServerService {
     await member.load('roles')
 
     // Add the default role to the member's roles if the server has a default role (which should always be the case)
-    const defaultRole = await Role.findBy('server_id', serverId) // Default role's ID = server ID.
+    const defaultRole = await this.roleService.findById(serverId) // Default role has roleId = serverId
     if (defaultRole) {
       member.roles.push(defaultRole)
     }
