@@ -70,8 +70,8 @@ export default class ServerWebhooksController {
   // Update the webhook picture
   async updateWebhookPicture({ request, bouncer }: HttpContext) {
     const data = await request.validateUsing(updateWebhookPictureValidator)
-    const server = await this.webhookService.findById(data.params.serverId)
-    await bouncer.with(ServerWebhookPolicy).authorize('edit' as never, server)
+    const webhook = await this.webhookService.findById(data.params.webhookId)
+    await bouncer.with(ServerWebhookPolicy).authorize('edit' as never, webhook)
     return this.webhookService.updateWebhookPicture(data)
   }
 
