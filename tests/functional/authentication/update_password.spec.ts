@@ -1,21 +1,24 @@
-import { UserFactory } from '#database/factories/user_factory'
+import { UserFactoryWithPassord } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
 // TEST : RETURN OK
 test.group('Authentication updatePassword', () => {
   test('Must return 200 when password is updated successfully', async ({ client, expect }) => {
-    const user = await UserFactory.create()
+    const password = 'password123'
+    const user = await UserFactoryWithPassord(password).create()
+
     const payload = {
-      currentPassword: 'password123',
+      oldPassword: password,
       newPassword: 'newPassword123',
     }
+
     const token = await client
       .post('/authentication/signin')
       .json({
         email: user.email,
-        password: payload.currentPassword,
+        password: payload.oldPassword,
       })
-      .then((res) => res.body().token)
+      .then((res) => res.body().tokens.accessToken)
 
     const result = await client
       .patch('/authentication/password')
@@ -30,20 +33,23 @@ test.group('Authentication updatePassword', () => {
     )
   }).tags(['authentication:updatePassword'])
 
-  // TEST : RETURN 400 - PARRWORD NOT MATCH
+  // TEST : RETURN 400 - PASSWORD NOT MATCH
   test('Must return 400 when current password does not match', async ({ client }) => {
-    const user = await UserFactory.create()
+    const password = 'password123'
+    const user = await UserFactoryWithPassord(password).create()
+
     const payload = {
-      currentPassword: 'wrongPassword',
+      oldPassword: 'wrongPassword',
       newPassword: 'newPassword123',
     }
+
     const token = await client
       .post('/authentication/signin')
       .json({
         email: user.email,
-        password: 'password123',
+        password: password,
       })
-      .then((res) => res.body().token)
+      .then((res) => res.body().tokens.accessToken)
 
     const result = await client
       .patch('/authentication/password')
@@ -57,7 +63,7 @@ test.group('Authentication updatePassword', () => {
   // TEST : RETURN 401 - UNAUTHORIZED
   test('Must return 401 when unauthorized', async ({ client }) => {
     const payload = {
-      currentPassword: 'password123',
+      oldPassword: 'wrongPassword',
       newPassword: 'newPassword123',
     }
 
