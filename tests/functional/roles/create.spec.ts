@@ -4,7 +4,7 @@ import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
 test.group('Roles create', () => {
-  test('must return a 201 when creating a role', async ({ client }) => {
+  test('must return a 201 when creating a role with 1 permission', async ({ client }) => {
     const server = await ServerFactory.with('members').create()
     await server.load('members')
 
@@ -13,6 +13,29 @@ test.group('Roles create', () => {
     const payload = {
       name: 'My role',
       permissions: Permissions.MANAGE_MESSAGES,
+    }
+    const result = await client
+      .post(`/servers/${server.id}/roles`)
+      .json(payload)
+      .loginAs(member.user)
+    result.assertStatus(201)
+    result.assertBodyContains({
+      name: payload.name,
+      permissions: payload.permissions,
+      serverId: server.id,
+    })
+  }).tags(['roles:create'])
+
+  test('must return a 201 when creating a role with some permissions', async ({ client }) => {
+    const server = await ServerFactory.with('members').create()
+    await server.load('members')
+
+    const member = server.members[0]
+    await member.load('user')
+    const payload = {
+      name: 'My role',
+      permissions:
+        Permissions.MANAGE_MESSAGES + Permissions.SEND_MESSAGES + Permissions.ATTACH_FILES,
     }
     const result = await client
       .post(`/servers/${server.id}/roles`)

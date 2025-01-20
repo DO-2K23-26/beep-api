@@ -5,9 +5,9 @@ import { Permissions } from '#apps/shared/enums/permissions'
 /**
  * Calculate the maximum value in the Permissions enum.
  */
-const maxPermValue = Math.max(
-  ...(Object.values(Permissions).filter((value) => typeof value === 'number') as number[])
-)
+const maxPermValue = Object.values(Permissions)
+  .filter((value) => typeof value === 'number')
+  .reduce((sum, permission) => sum + permission, 0)
 
 /**
  * Validator to validate the payload when creating
