@@ -18,6 +18,7 @@ import { Authenticators } from '@adonisjs/auth/types'
 import { authenticator } from 'otplib'
 import InvalidQRCodeException from '#apps/users/exceptions/invalid_qrcode_exception'
 import TotpMissingException from '#apps/users/exceptions/totp_missing_exception'
+import CurrentPasswordMismatchException from '../exceptions/current_password_mismatch_exception.js'
 
 export default class AuthenticationService {
   DEFAULT_PP_URL = 'default_profile_picture.png'
@@ -114,7 +115,15 @@ export default class AuthenticationService {
 
   async updateNewPassword(email: string, validator: UpdatePasswordValidator) {
     // On vérifie les mots de passes
-    const user = await User.verifyCredentials(email, validator.oldPassword)
+    const user = await User.verifyCredentials(email, validator.oldPassword).catch(() => {
+      throw new CurrentPasswordMismatchException(
+        'The inserted password is not matching the current one',
+        {
+          code: 'E_CURRENT_PASSWORD_MISMATCHING',
+          status: 400,
+        }
+      )
+    })
 
     // Si les mdp correspondent on maj
     user.password = validator.newPassword

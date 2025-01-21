@@ -24,7 +24,6 @@ import { Payload } from '../contracts/payload.js'
 import { SignIn } from '../contracts/signin.js'
 import transmit from '@adonisjs/transmit/services/main'
 import logger from '@adonisjs/core/services/logger'
-import CurrentPasswordMismatchException from '#apps/authentication/exceptions/current_password_mismatch_exception'
 
 @inject()
 export default class AuthenticationController {
@@ -157,15 +156,7 @@ export default class AuthenticationController {
     const validator = await request.validateUsing(updatePasswordValidator)
     const payload = auth.use('jwt').payload!
 
-    await this.authenticationService.updateNewPassword(payload.email, validator).catch(() => {
-      throw new CurrentPasswordMismatchException(
-        'The inserted password is not matching the current one',
-        {
-          code: 'E_CURRENT_PASSWORD_MISMATCHING',
-          status: 400,
-        }
-      )
-    })
+    await this.authenticationService.updateNewPassword(payload.email, validator)
 
     return response.send({ message: 'Password updated successfully.' })
   }
