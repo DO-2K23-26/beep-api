@@ -1,4 +1,5 @@
 import { Payload } from '#apps/authentication/contracts/payload'
+import Channel from '#apps/channels/models/channel'
 import ChannelService from '#apps/channels/services/channel_service'
 import { createChannelValidator, updateChannelValidator } from '#apps/channels/validators/channel'
 import ServerChannelPolicy from '#apps/servers/policies/server_channel_policy'
@@ -13,8 +14,12 @@ export default class ServerChannelsController {
   //recupere les channels d'un server
   async findByServerId({ params, bouncer }: HttpContext) {
     await bouncer.with(ServerChannelPolicy).authorize('view' as never, params.serverId)
-    const channels = await this.channelService.findAllByServer(params.serverId)
-    //const rootLevelChannels = channels.filter((channel) => channel.parentId === null)
+    let channels: Channel[]
+    if (params.group) {
+      channels = await this.channelService.findAsGroupAllByServer(params.serverId)
+    } else {
+      channels = await this.channelService.findAllByServer(params.serverId)
+    }
     return channels
   }
 
