@@ -55,6 +55,14 @@ export default class ChannelService {
     return server.channels
   }
 
+  async findAsGroupAllByServer(serverId: string): Promise<Channel[]> {
+    const channels = await Channel.query().whereNull('parentId').where('serverId', serverId)
+    for (const channel of channels) {
+      channel.load('childrens')
+    }
+    return channels
+  }
+
   async findPrivateOrderedForUserOrFail(userId: string): Promise<Channel[]> {
     await User.findOrFail(userId).catch(() => {
       throw new UserNotFoundException('User not found', { status: 404, code: 'E_ROW_NOT_FOUND' })
@@ -197,7 +205,7 @@ export default class ChannelService {
 
     const sn = generateSnowflake()
     const firstChannel = await Channel.query()
-      .where('serverId', serverId)
+      .where('server_id', serverId)
       .orderBy('position')
       .first()
     const position = firstChannel != null ? firstChannel.position - 1 : 0
