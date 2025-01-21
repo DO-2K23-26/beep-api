@@ -120,6 +120,7 @@ router
                       ServerWebhooksController,
                       'updateWebhookPicture',
                     ])
+                    router.post('/webhook', [ServerWebhooksController, 'createWebhook'])
                   })
                   .prefix('/:channelId')
               })
@@ -144,7 +145,6 @@ router
             router.delete('/', [ServerController, 'destroy'])
             router.post('/mic', [ServerChannelsController, 'changeMutedStatus']).prefix('users')
             router.get('/webhooks', [ServerWebhooksController, 'findByServerId'])
-            router.post('/webhook', [ServerWebhooksController, 'createWebhook'])
           })
           .prefix('/:serverId')
       })
