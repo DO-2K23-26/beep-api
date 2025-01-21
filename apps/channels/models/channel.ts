@@ -36,6 +36,9 @@ export default class Channel extends BaseModel {
   @column()
   declare position: number
 
+  @column()
+  declare parentId: string
+
   @manyToMany(() => User, {
     pivotTable: 'channels_users',
   })
@@ -46,6 +49,12 @@ export default class Channel extends BaseModel {
 
   @belongsTo(() => Server)
   declare server: BelongsTo<typeof Server>
+
+  @belongsTo(() => Channel)
+  declare parent: BelongsTo<typeof Channel>
+
+  @hasMany(() => Channel)
+  declare childrens: HasMany<typeof Channel>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

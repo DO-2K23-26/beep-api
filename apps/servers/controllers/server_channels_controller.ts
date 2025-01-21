@@ -13,7 +13,9 @@ export default class ServerChannelsController {
   //recupere les channels d'un server
   async findByServerId({ params, bouncer }: HttpContext) {
     await bouncer.with(ServerChannelPolicy).authorize('view' as never, params.serverId)
-    return this.channelService.findAllByServer(params.serverId)
+    const channels = await this.channelService.findAllByServer(params.serverId)
+    //const rootLevelChannels = channels.filter((channel) => channel.parentId === null)
+    return channels
   }
 
   async findByChannelId({ params, bouncer }: HttpContext) {

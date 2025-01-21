@@ -20,6 +20,7 @@ import logger from '@adonisjs/core/services/logger'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 import jwt from 'jsonwebtoken'
+import ChannelWithIncoherentHierarchyException from '../exceptions/channel_cant_be_children_exception.js'
 
 export interface PayloadJWTSFUConnection {
   channelSn?: string
@@ -160,20 +161,63 @@ export default class ChannelService {
     serverId: string,
     userId: string
   ): Promise<Channel> {
-    const sn = generateSnowflake()
     const type = newChannel.type as ChannelType
+    if (newChannel.parentId) {
+      if (type === ChannelType.PRIVATE_CHAT || type === ChannelType.FOLDER_SERVER) {
+        throw new ChannelWithIncoherentHierarchyException(
+          `Channel is of type PRIVATE_CHAT or FOLDER_SERVER and thus can't have a parent`,
+          {
+            status: 422,
+            code: 'E_WRONG_HIERARCHY',
+          }
+        )
+      }
+
+      let parent: Channel
+      try {
+        parent = await Channel.findOrFail(newChannel.parentId)
+      } catch (e) {
+        logger.error(e)
+        throw new ChannelNotFoundException('Parent channel not found', {
+          status: 404,
+          code: 'E_ROWNOTFOUND',
+        })
+      }
+
+      if ((parent.type as ChannelType) !== ChannelType.FOLDER_SERVER) {
+        throw new ChannelWithIncoherentHierarchyException(
+          'Parent channel is not of type FOLDER_SERVER',
+          {
+            status: 422,
+            code: 'E_WRONG_HIERARCHY',
+          }
+        )
+      }
+    }
+
+    const sn = generateSnowflake()
     const firstChannel = await Channel.query()
       .where('serverId', serverId)
       .orderBy('position')
       .first()
     const position = firstChannel != null ? firstChannel.position - 1 : 0
-    const channel = await Channel.create({
-      name: newChannel.name,
-      type: type,
-      serverId: serverId,
-      serialNumber: sn,
-      position,
-    })
+
+    const channel = newChannel.parentId
+      ? await Channel.create({
+          name: newChannel.name,
+          type: type,
+          serverId: serverId,
+          serialNumber: sn,
+          position,
+          parentId: newChannel.parentId,
+        })
+      : await Channel.create({
+          name: newChannel.name,
+          type: type,
+          serverId: serverId,
+          serialNumber: sn,
+          position,
+        })
     logger.info('Created new channel : ', channel)
     await channel.related('users').attach([userId])
     return channel

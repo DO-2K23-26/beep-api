@@ -33,6 +33,56 @@ test.group('Channels create', () => {
       })
     )
   }).tags(['channels:create'])
+  test('must return a 201 when creating a folder channel', async ({ client, expect }) => {
+    const user = await UserFactory.make()
+    const server = await ServerFactory.make()
+    await MemberFromFactory(server.id, user.id).create()
+    const payload = {
+      name: 'My Channel',
+      type: ChannelType.FOLDER_SERVER,
+    }
+    const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
+    result.assertStatus(201)
+    expect(result.body()).toEqual(
+      expect.objectContaining({
+        name: payload.name,
+        type: payload.type,
+        serverId: server.id,
+      })
+    )
+  }).tags(['channels:create'])
+  test('must return 201 when creating a channel directly into a folder channel', async ({
+    client,
+    expect,
+  }) => {
+    const user = await UserFactory.make()
+    const server = await ServerFactory.make()
+    await MemberFromFactory(server.id, user.id).create()
+    const parentPayload = {
+      name: 'My Folder',
+      type: ChannelType.FOLDER_SERVER,
+    }
+    const parent = await client
+      .post(`/servers/${server.id}/channels`)
+      .json(parentPayload)
+      .loginAs(user)
+    parent.assertStatus(201)
+    const payload = {
+      name: 'My Channel',
+      type: ChannelType.TEXT_SERVER,
+      parentId: parent.body().id,
+    }
+    const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
+    result.assertStatus(201)
+    expect(result.body()).toEqual(
+      expect.objectContaining({
+        name: payload.name,
+        type: payload.type,
+        serverId: server.id,
+        parentId: parent.body().id,
+      })
+    )
+  }).tags(['channels:create'])
   test('when creating multiple channels, must return ordered positions', async ({
     client,
     expect,
