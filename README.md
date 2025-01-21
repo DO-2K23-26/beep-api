@@ -115,6 +115,12 @@ Launch all seeders
 node ace db:seed
 ```
 
+If you want development data, run :
+
+```bash
+node ace db:seed --files "./database/seeders/main/dev_seeder.ts"
+```
+
 ## Pre-commit with husky
 
 ### What's husky?
