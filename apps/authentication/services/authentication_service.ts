@@ -56,8 +56,8 @@ export default class AuthenticationService {
 
     const user = await User.create({
       username: schemaUser.username,
-      firstName: schemaUser.firstname,
-      lastName: schemaUser.lastname,
+      firstName: schemaUser.firstName,
+      lastName: schemaUser.lastName,
       email: schemaUser.email.toLowerCase(),
       password: schemaUser.password,
       profilePicture: this.DEFAULT_PP_URL,
