@@ -5,8 +5,8 @@ test.group('Authentication signup', () => {
   test('Must return 201 when signing up for the first time', async ({ client, expect }) => {
     const payload = {
       username: 'Testusername',
-      firstname: 'Testfirstname',
-      lastname: 'lastname',
+      firstName: 'Testfirstname',
+      lastName: 'lastname',
       email: 'testuser@example.com',
       password: 'password123',
     }
@@ -16,8 +16,8 @@ test.group('Authentication signup', () => {
     expect(result.body()).toEqual(
       expect.objectContaining({
         username: payload.username,
-        firstName: payload.firstname,
-        lastName: payload.lastname,
+        firstName: payload.firstName,
+        lastName: payload.lastName,
         email: payload.email,
       })
     )
@@ -27,8 +27,8 @@ test.group('Authentication signup', () => {
     const user = await UserFactory.make()
     const payload = {
       username: user.username,
-      firstname: user.firstName,
-      lastname: user.lastName,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       password: 'password123',
     }
@@ -42,8 +42,8 @@ test.group('Authentication signup', () => {
     const user = await UserFactory.make()
     const payload = {
       username: 'Testusername2',
-      firstname: 'Testfirstname',
-      lastname: 'lastname',
+      firstName: 'Testfirstname',
+      lastName: 'lastname',
       email: user.email,
       password: 'password123',
     }
