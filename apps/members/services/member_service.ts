@@ -1,5 +1,3 @@
-import WrongChannelTypeException from '#apps/channels/exceptions/wrong_channel_type'
-import { ChannelType } from '#apps/channels/models/channel_type'
 import ChannelService from '#apps/channels/services/channel_service'
 import ExpiredInvitationException from '#apps/invitations/exceptions/expired_invitation_exception'
 import PrivateServerException from '#apps/invitations/exceptions/private_server_exception'
@@ -10,7 +8,6 @@ import { InvitationType } from '#apps/invitations/models/type'
 import InvitationService from '#apps/invitations/services/invitation_service'
 import UserAlreadyMember from '#apps/members/exceptions/user_already_member_exception'
 import Member from '#apps/members/models/member'
-import RoleService from '#apps/roles/services/role_service'
 import ServerService from '#apps/servers/services/server_service'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
@@ -22,8 +19,7 @@ export default class MemberService {
     protected userService: UserService,
     protected serverService: ServerService,
     protected invitationService: InvitationService,
-    protected channelService: ChannelService,
-    protected roleService: RoleService
+    protected channelService: ChannelService
   ) {}
 
   async create(serverId: string, userId: string): Promise<Member> {
@@ -45,6 +41,9 @@ export default class MemberService {
     return Member.query().whereIn('id', memberIds)
   }
 
+  async findById(memberId: string) {
+    return Member.findOrFail(memberId)
+  }
   async createFromInvitation(invitationId: string, userId: string): Promise<Member> {
     const invitation = await this.invitationService.findById(invitationId)
     if (invitation.status !== InvitationStatus.Pending && invitation.status !== null) {
@@ -91,36 +90,9 @@ export default class MemberService {
     return members
   }
 
-  async getPermissionsFromChannel(userId: string, channelId: string): Promise<number> {
-    const channel = await this.channelService.findByIdOrFail(channelId)
-
-    if (channel.serverId === null || channel.type !== ChannelType.TEXT_SERVER)
-      throw new WrongChannelTypeException('Wrong channel type', {
-        status: 400,
-        code: 'E_WRONG_CHANNEL_TYPE',
-      })
-    return this.getPermissions(userId, channel.serverId)
-  }
-
   async update(id: string, member: Partial<Member>): Promise<Member> {
     const updatedMember = await Member.findOrFail(id)
     await updatedMember.merge(member).save()
     return updatedMember
-  }
-
-  async getPermissions(userId: string, serverId: string) {
-    const member = await Member.query()
-      .where('user_id', userId)
-      .where('server_id', serverId)
-      .preload('roles')
-      .firstOrFail()
-    const role = await this.roleService.findById(serverId)
-    let permissions = role.permissions
-
-    member.roles.forEach((r) => {
-      permissions |= r.permissions
-    })
-
-    return permissions
   }
 }

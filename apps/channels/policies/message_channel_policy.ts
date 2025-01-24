@@ -1,8 +1,8 @@
 import Channel from '#apps/channels/models/channel'
 import { ChannelType } from '#apps/channels/models/channel_type'
 import ChannelService from '#apps/channels/services/channel_service'
-import MemberService from '#apps/members/services/member_service'
 import MessageService from '#apps/messages/services/message_service'
+import RoleService from '#apps/roles/services/role_service'
 import ServerService from '#apps/servers/services/server_service'
 import { Permissions } from '#apps/shared/enums/permissions'
 import PermissionsService from '#apps/shared/services/permissions/permissions_service'
@@ -15,8 +15,8 @@ export default class MessageChannelPolicy extends BasePolicy {
     protected channelService: ChannelService,
     protected serverService: ServerService,
     protected messageService: MessageService,
-    protected memberService: MemberService,
-    protected permissionsService: PermissionsService
+    protected permissionsService: PermissionsService,
+    protected roleService: RoleService
   ) {
     super()
   }
@@ -39,7 +39,7 @@ export default class MessageChannelPolicy extends BasePolicy {
       // then we will perform other authorization checks
       const isPresent = await this.serverService.userPartOfServer(payload.sub!, channel.serverId!)
       if (!isPresent) return false
-      const userPermissions = await this.memberService.getPermissionsFromChannel(
+      const userPermissions = await this.roleService.getMemberPermissionsFromChannel(
         payload.sub!,
         channelId
       )
@@ -60,7 +60,7 @@ export default class MessageChannelPolicy extends BasePolicy {
     return true
   }
   async store(payload: JwtPayload, channelId: string) {
-    const userPermissions = await this.memberService.getPermissionsFromChannel(
+    const userPermissions = await this.roleService.getMemberPermissionsFromChannel(
       payload.sub!,
       channelId
     )
@@ -78,7 +78,7 @@ export default class MessageChannelPolicy extends BasePolicy {
   async update(payload: JwtPayload, channelId: string, messageId: string) {
     const isUserOwner = await this.messageService.isUserAuthor(messageId, payload.sub!)
     if (isUserOwner) return true
-    const userPermissions = await this.memberService.getPermissionsFromChannel(
+    const userPermissions = await this.roleService.getMemberPermissionsFromChannel(
       payload.sub!,
       channelId
     )
@@ -90,7 +90,7 @@ export default class MessageChannelPolicy extends BasePolicy {
   async destroy(payload: JwtPayload, channelId: string, messageId: string) {
     const isUserOwner = await this.messageService.isUserAuthor(messageId, payload.sub!)
     if (isUserOwner) return true
-    const userPermissions = await this.memberService.getPermissionsFromChannel(
+    const userPermissions = await this.roleService.getMemberPermissionsFromChannel(
       payload.sub!,
       channelId
     )
