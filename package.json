@@ -7,13 +7,31 @@
   "scripts": {
     "start": "node bin/server.js",
     "build": "node ace build",
-    "dev": "node ace serve --watch",
+    "dev": "node ace serve --hmr",
     "test": "node ace test",
     "lint": "eslint .",
     "prettier": "prettier --check .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
+  },
+  "hotHook": {
+    "boundaries": [
+      "./apps/authentication/**/*.ts",
+      "./apps/channels/**/*.ts",
+      "./apps/friends/**/*.ts",
+      "./apps/healthcheck/**/*.ts",
+      "./apps/invitations/**/*.ts",
+      "./apps/members/**/*.ts",
+      "./apps/messages/**/*.ts",
+      "./apps/notification/**/*.ts",
+      "./apps/roles/**/*.ts",
+      "./apps/servers/**/*.ts",
+      "./apps/shared/**/*.ts",
+      "./apps/storage/**/*.ts",
+      "./apps/users/**/*.ts",
+      "./apps/webhooks/**/*.ts"
+    ]
   },
   "imports": {
     "#apps/*": "./apps/*.js",
@@ -51,6 +69,7 @@
     "@types/qrcode": "^1.5.5",
     "eslint": "^9.13.0",
     "globals": "^15.11.0",
+    "hot-hook": "^0.4.0",
     "husky": "^9.1.6",
     "prettier": "^3.2.4",
     "ts-node": "^10.9.2",
