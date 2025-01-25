@@ -118,4 +118,10 @@ export default class RoleService extends BasePolicy {
 
     return permissions
   }
+
+  async getAssignedMembers(roleId: string) {
+    const role = await this.findById(roleId)
+    await role.load('members')
+    return role.members
+  }
 }

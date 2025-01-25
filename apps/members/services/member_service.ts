@@ -85,15 +85,16 @@ export default class MemberService {
 
   async findAllByServerId(serverId: string): Promise<Member[]> {
     const server = await this.serverService.findById(serverId)
-    const members = await server.related('members').query().paginate(1, 1000)
-
-    return members
+    await server.load('members', (query) => {
+      query.preload('user')
+    })
+    return server.members
   }
 
   async findFromNickname(serverId: string, nickname: string): Promise<Member[]> {
     const server = await this.serverService.findById(serverId)
     await server.load('members', (query) => {
-      query.whereILike('nickname', `${nickname}%`)
+      query.whereILike('nickname', `${nickname}%`).preload('user')
     })
     return server.members
   }

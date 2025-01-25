@@ -22,7 +22,7 @@ export default class ServerMembersController {
     await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
     const { nickname_starts_with } = await request.validateUsing(getMemberByNicknameValidator)
     let members: Member[] = []
-    if (nickname_starts_with) {
+    if (nickname_starts_with !== undefined) {
       members = await this.memberService.findFromNickname(serverId, nickname_starts_with)
     } else {
       members = await this.memberService.findAllByServerId(serverId)

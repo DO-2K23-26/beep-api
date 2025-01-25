@@ -21,26 +21,19 @@ test.group('Servers create', () => {
       })
     )
   }).tags(['servers:create'])
-  test('must add the user creating the server as member', async ({ client, expect }) => {
+  test('must add the user creating the server as member', async ({ client, assert }) => {
     const payload = {
       name: 'My Server 2',
       visibility: 'public',
       icon: null,
       description: 'This is a test server',
     }
-    const user = await UserFactory.make()
+    const user = await UserFactory.create()
     const resultServerCreation = await client.post('/servers').json(payload).loginAs(user)
-    const resultMember = await client
-      .get(`/v1/servers/${resultServerCreation.body().id}/members`)
-      .loginAs(user)
-    resultMember.assertStatus(200)
-    expect(resultMember.body().data[0]).toEqual(
-      expect.objectContaining({
-        nickname: user.username,
-        serverId: resultServerCreation.body().id,
-        userId: user.id,
-      })
-    )
+    const server = await Server.findOrFail(resultServerCreation.body().id)
+    await server.load('members')
+    assert.equal(server.members.length, 1)
+    assert.equal(server.members[0].userId, user.id)
   }).tags(['servers:create'])
 
   test('must return 201 and create the BasicRole', async ({ client, expect }) => {
