@@ -56,8 +56,8 @@ export const resetPasswordValidator = vine.compile(
 export const createAuthenticationValidator = vine.compile(
   vine.object({
     username: vine.string(),
-    firstname: vine.string(),
-    lastname: vine.string(),
+    firstName: vine.string(),
+    lastName: vine.string(),
     email: vine.string(),
     password: vine.string(),
     profilePicture: vine.file().nullable().optional(),
