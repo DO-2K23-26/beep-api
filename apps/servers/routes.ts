@@ -42,7 +42,17 @@ router
             router.post('invitation', [ServerInvitationsController, 'createInvitation'])
             router
               .group(() => {
-                router.put(':memberId/nickname', [ServerMembersController, 'updateNickname'])
+                router
+                  .group(() => {
+                    router
+                      .group(() => {
+                        router.post(':roleId', [ServerRolesController, 'assignRole'])
+                        router.delete(':roleId', [ServerRolesController, 'unassignRole'])
+                      })
+                      .prefix('roles')
+                    router.put(':nickname', [ServerMembersController, 'updateNickname'])
+                  })
+                  .prefix(':memberId')
                 router.get('', [ServerMembersController, 'index'])
                 router.get('@me', [ServerMembersController, 'showMe'])
                 router.get(':userId', [ServerMembersController, 'show'])

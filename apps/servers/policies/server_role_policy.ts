@@ -38,4 +38,8 @@ export default class ServerRolePolicy extends BasePolicy {
   async destroy(_payload: JwtPayload, _serverId: string) {
     return true
   }
+
+  async assignation() {
+    return true
+  }
 }

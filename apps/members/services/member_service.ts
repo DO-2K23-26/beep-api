@@ -90,6 +90,14 @@ export default class MemberService {
     return members
   }
 
+  async findFromNickname(serverId: string, nickname: string): Promise<Member[]> {
+    const server = await this.serverService.findById(serverId)
+    await server.load('members', (query) => {
+      query.whereILike('nickname', `${nickname}%`)
+    })
+    return server.members
+  }
+
   async update(id: string, member: Partial<Member>): Promise<Member> {
     const updatedMember = await Member.findOrFail(id)
     await updatedMember.merge(member).save()

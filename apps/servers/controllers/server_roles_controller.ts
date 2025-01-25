@@ -54,4 +54,17 @@ export default class ServerRolesController {
     await this.roleService.deleteById(roleId)
     return { message: 'Role deleted successfully' }
   }
+
+  async assignRole({ params, bouncer, response }: HttpContext) {
+    await bouncer.with(ServerRolePolicy).authorize('assignation' as never, params.serverId)
+    const { memberId } = params
+    await this.roleService.assign(params.roleId, memberId)
+    return response.created()
+  }
+
+  async unassignRole({ params, bouncer }: HttpContext) {
+    await bouncer.with(ServerRolePolicy).authorize('assignation' as never, params.serverId)
+    const { memberId } = params
+    return this.roleService.unassign(params.roleId, memberId)
+  }
 }
