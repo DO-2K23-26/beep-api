@@ -67,4 +67,9 @@ export default class ServerRolesController {
     const { memberId } = params
     return this.roleService.unassign(params.roleId, memberId)
   }
+
+  async getAssignedMembers({ params, bouncer }: HttpContext) {
+    await bouncer.with(ServerRolePolicy).authorize('assignation' as never, params.serverId)
+    return this.roleService.getAssignedMembers(params.roleId)
+  }
 }

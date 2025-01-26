@@ -124,4 +124,15 @@ export default class RoleService extends BasePolicy {
     await role.load('members')
     return role.members
   }
+
+  async assignToMembers(roleId: string, memberIds: string[]) {
+    const role = await Role.findOrFail(roleId)
+    const members = await this.memberService.findFrom(memberIds)
+    if (!members.every((m) => m.serverId === role.serverId))
+      throw new MemberNotInServerException('Member is not in the server', {
+        code: 'E_MEMBER_NOT_IN_SERVER',
+        status: 400,
+      })
+    await role.related('members').attach(memberIds)
+  }
 }

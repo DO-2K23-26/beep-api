@@ -58,6 +58,11 @@ router
                 router.get(':userId', [ServerMembersController, 'show'])
               })
               .prefix('members')
+            router
+              .group(() => {
+                router.get(':roleId/members', [ServerRolesController, 'getAssignedMembers'])
+              })
+              .prefix('roles')
           })
           .prefix(':serverId')
         router.post('join/:invitationId', [ServerMembersController, 'joinPrivate'])
