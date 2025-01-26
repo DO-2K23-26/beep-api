@@ -1,3 +1,4 @@
+import { Payload } from '#apps/authentication/contracts/payload'
 import BadPinningException from '#apps/channels/exceptions/bad_pinning_exception'
 import ChannelNotFoundException from '#apps/channels/exceptions/channel_not_found_exception'
 import Channel from '#apps/channels/models/channel'
@@ -13,12 +14,27 @@ import {
 import StorageService from '#apps/storage/services/storage_service'
 import { CreateStorageSchema } from '#apps/storage/validators/storage'
 import { inject } from '@adonisjs/core'
+import emitter from '@adonisjs/core/services/emitter'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 
 @inject()
 export default class MessageService {
   constructor(protected storageService: StorageService) {}
+
+  async notifyFriendMessage(payload: Payload, channelId: string) {
+    const channel: Channel = await Channel.findOrFail(channelId)
+    if (channel.serverId == null) {
+      const channelName = channel.name
+      const [idUser1, idUser2] = channelName.split(',').map((id) => id.trim())
+      const receiverId: string = idUser1 !== payload.sub ? idUser1 : idUser2
+      const event = {
+        receiverId: receiverId,
+        senderName: payload.username,
+      }
+      await emitter.emit('friend:message', event)
+    }
+  }
 
   extractMentionsFromMessage(message: string): string[] {
     const mentions = message.match(/@(\S+)/g)
