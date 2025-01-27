@@ -60,7 +60,7 @@ export default class WebhookService {
     // Création du webhook
     const createdWebhook = await Webhook.create({
       name: webhook.name,
-      webhookPicture: webhook.webhookPicture || 'https://beep.baptistebronsin.be/logo.png',
+      webhookPicture: webhook.webhookPicture,
       token: this.tokenService.generateToken({ name: webhook.name }),
       userId: ownerId,
       channelId: channelId,
