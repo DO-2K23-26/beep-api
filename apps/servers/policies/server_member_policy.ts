@@ -21,7 +21,6 @@ export default class ServerMemberPolicy extends BasePolicy {
   }
   async before(payload: JwtPayload, _action: string, ...params: never[]) {
     const serverId: string | undefined = params[0]
-    // console.log(serverId)
     const isPresent = await this.serverService.userPartOfServer(payload.sub!, serverId!)
     if (!isPresent) return false
 

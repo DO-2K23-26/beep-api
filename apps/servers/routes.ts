@@ -60,7 +60,12 @@ router
               .prefix('members')
             router
               .group(() => {
-                router.get(':roleId/members', [ServerRolesController, 'getAssignedMembers'])
+                router
+                  .group(() => {
+                    router.get('members', [ServerRolesController, 'getAssignedMembers'])
+                    router.post('assignation', [ServerRolesController, 'assignToMembers'])
+                  })
+                  .prefix(':roleId')
               })
               .prefix('roles')
           })

@@ -172,7 +172,6 @@ export default class ServerService {
   }
 
   async userPartOfServer(userId: string, serverId: string): Promise<boolean> {
-    // console.log(serverId)
     const server = await this.findById(serverId)
     await server.load('members')
     const isMember = server.members.some((m) => m.userId === userId)

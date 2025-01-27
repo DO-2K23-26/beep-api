@@ -1,5 +1,9 @@
 import RoleService from '#apps/roles/services/role_service'
-import { createRoleValidator, updateRoleValidator } from '#apps/roles/validators/role'
+import {
+  assignRoleValidator,
+  createRoleValidator,
+  updateRoleValidator,
+} from '#apps/roles/validators/role'
 import ServerRolePolicy from '#apps/servers/policies/server_role_policy'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -71,5 +75,12 @@ export default class ServerRolesController {
   async getAssignedMembers({ params, bouncer }: HttpContext) {
     await bouncer.with(ServerRolePolicy).authorize('assignation' as never, params.serverId)
     return this.roleService.getAssignedMembers(params.roleId)
+  }
+
+  async assignToMembers({ params, request, bouncer, response }: HttpContext) {
+    await bouncer.with(ServerRolePolicy).authorize('assignation' as never, params.serverId)
+    const { memberIds } = await request.validateUsing(assignRoleValidator)
+    await this.roleService.assignToMembers(params.roleId, memberIds)
+    return response.created()
   }
 }
