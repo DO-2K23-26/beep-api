@@ -54,7 +54,8 @@ export default class StoragesController {
 
   async transmitWebhookPicture({ params, response }: HttpContext) {
     const webhook = await Webhook.findByOrFail('id', params.webhookId)
-    return await this.transmit(response, webhook.webhookPicture)
+    if (webhook.webhookPicture) return await this.transmit(response, webhook.webhookPicture)
+    else return response.notFound()
   }
 
   async transmit(response: Response, id: string) {
