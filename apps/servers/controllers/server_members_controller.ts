@@ -4,7 +4,11 @@ import { HttpContext } from '@adonisjs/core/http'
 import ServerMemberPolicy from '#apps/servers/policies/server_member_policy'
 import ServerService from '#apps/servers/services/server_service'
 import { Payload } from '#apps/authentication/contracts/payload'
-import { updateNicknameMemberValidator } from '#apps/members/validators/member'
+import {
+  getMemberByNicknameValidator,
+  updateNicknameMemberValidator,
+} from '#apps/members/validators/member'
+import Member from '#apps/members/models/member'
 
 @inject()
 export default class ServerMembersController {
@@ -13,10 +17,16 @@ export default class ServerMembersController {
     protected serverService: ServerService
   ) {}
 
-  async index({ params, bouncer }: HttpContext) {
+  async index({ params, bouncer, request }: HttpContext) {
     const { serverId } = params
     await bouncer.with(ServerMemberPolicy).authorize('view' as never, serverId)
-    const members = await this.memberService.findAllByServerId(serverId)
+    const { nickname_starts_with } = await request.validateUsing(getMemberByNicknameValidator)
+    let members: Member[] = []
+    if (nickname_starts_with !== undefined) {
+      members = await this.memberService.findFromNickname(serverId, nickname_starts_with)
+    } else {
+      members = await this.memberService.findAllByServerId(serverId)
+    }
     return members
   }
 

@@ -21,5 +21,11 @@ export const updateNicknameMemberValidator = vine.compile(
   })
 )
 
+export const getMemberByNicknameValidator = vine.compile(
+  vine.object({
+    nickname_starts_with: vine.string().optional(),
+  })
+)
+
 export type CreateMembersSchema = Infer<typeof createMemberValidator>
 export type UpdateNicknameMembersSchema = Infer<typeof updateNicknameMemberValidator>

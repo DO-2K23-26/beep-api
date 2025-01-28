@@ -5,10 +5,21 @@ import PermissionsService from '#apps/shared/services/permissions/permissions_se
 import Server from '#apps/servers/models/server'
 import { inject } from '@adonisjs/core'
 import { BasePolicy } from '@adonisjs/bouncer'
+import Member from '#apps/members/models/member'
+import MemberService from '#apps/members/services/member_service'
+import MemberNotInServerException from '#apps/members/exceptions/member_not_in_server_exception'
+import WrongChannelTypeException from '#apps/channels/exceptions/wrong_channel_type'
+import { ChannelType } from '#apps/channels/models/channel_type'
+import ChannelService from '#apps/channels/services/channel_service'
+import CannotEditDefaultRoleException from '../exceptions/cannot_edit_default_role_exception.js'
 
 @inject()
 export default class RoleService extends BasePolicy {
-  constructor(protected permissionsService: PermissionsService) {
+  constructor(
+    protected permissionsService: PermissionsService,
+    protected memberService: MemberService,
+    protected channelService: ChannelService
+  ) {
     super()
   }
 
@@ -50,12 +61,97 @@ export default class RoleService extends BasePolicy {
     }
 
     const role = await Role.findOrFail(id)
-    role.merge(payload)
+    if (role.id === role.serverId) role.merge({ permissions: payload.permissions })
+    else role.merge(payload)
+
     return role.save()
   }
 
   async deleteById(roleId: string): Promise<void> {
     const role: Role = await Role.findOrFail(roleId)
+    if (role.id === role.serverId)
+      throw new CannotEditDefaultRoleException('Cannot delete the default role of the server', {
+        status: 400,
+        code: 'E_CANNOT_EDIT_DEFAULT_ROLE',
+      })
+
     await role.delete()
+  }
+
+  async assign(roleId: string, memberId: string): Promise<void> {
+    const role = await Role.findOrFail(roleId)
+    if (role.id === role.serverId)
+      throw new CannotEditDefaultRoleException('Cannot assign members to the default role', {
+        status: 400,
+        code: 'E_CANNOT_EDIT_DEFAULT_ROLE',
+      })
+    const member = await this.memberService.findById(memberId)
+    if (member.serverId != role.serverId)
+      throw new MemberNotInServerException('Member is not in the server', {
+        code: 'E_MEMBER_NOT_IN_SERVER',
+        status: 400,
+      })
+    await role.related('members').attach([memberId])
+  }
+
+  async unassign(roleId: string, memberId: string): Promise<void> {
+    const role = await Role.findOrFail(roleId)
+    await role.related('members').detach([memberId])
+  }
+
+  async findMembersByRoleId(roleId: string): Promise<Member[]> {
+    const role = await Role.query().where('id', roleId).preload('members').firstOrFail()
+    return role.members
+  }
+
+  async getMemberPermissionsFromChannel(userId: string, channelId: string): Promise<number> {
+    const channel = await this.channelService.findByIdOrFail(channelId)
+
+    if (channel.serverId === null || channel.type !== ChannelType.TEXT_SERVER)
+      throw new WrongChannelTypeException('Wrong channel type', {
+        status: 400,
+        code: 'E_WRONG_CHANNEL_TYPE',
+      })
+    return this.getMemberPermissions(userId, channel.serverId)
+  }
+
+  async getMemberPermissions(userId: string, serverId: string) {
+    const member = await Member.query()
+      .where('user_id', userId)
+      .where('server_id', serverId)
+      .preload('roles')
+      .firstOrFail()
+
+    // Get the default role of the server
+    const role = await Role.findOrFail(serverId)
+    let permissions = role.permissions
+
+    member.roles.forEach((r) => {
+      permissions |= r.permissions
+    })
+
+    return permissions
+  }
+
+  async getAssignedMembers(roleId: string) {
+    const role = await this.findById(roleId)
+    await role.load('members')
+    return role.members
+  }
+
+  async assignToMembers(roleId: string, memberIds: string[]) {
+    const role = await Role.findOrFail(roleId)
+    if (role.id === role.serverId)
+      throw new CannotEditDefaultRoleException('Cannot assign members to the default role', {
+        status: 400,
+        code: 'E_CANNOT_EDIT_DEFAULT_ROLE',
+      })
+    const members = await this.memberService.findFrom(memberIds)
+    if (!members.every((m) => m.serverId === role.serverId))
+      throw new MemberNotInServerException('Member is not in the server', {
+        code: 'E_MEMBER_NOT_IN_SERVER',
+        status: 400,
+      })
+    await role.related('members').attach(memberIds)
   }
 }

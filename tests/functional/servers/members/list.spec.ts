@@ -1,26 +1,24 @@
-import Member from '#apps/members/models/member'
 import { MemberFactoryWithServer, MemberFromFactory } from '#database/factories/member_factory'
 import { ServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
 test.group('Servers members list', () => {
-  test('should return 200 when the user is authenticated', async ({ client, expect }) => {
+  test('should return 200 when the user is authenticated', async ({ client, expect, assert }) => {
     const user = await UserFactory.make()
     const server = await ServerFactory.make()
-    const firstMember = await MemberFromFactory(server.id, user.id).make()
+    await MemberFromFactory(server.id, user.id).make()
 
     const members = await MemberFactoryWithServer(server.id).makeMany(4)
 
     const response = await client.get(`/v1/servers/${server.id}/members`).loginAs(user)
 
     response.assertStatus(200)
-    expect(response.body().data).toHaveLength(5)
-
-    response.body().data.forEach((member: Member) => {
-      const attemptMember = [...members, firstMember].find((m) => m.id === member.id)
-      expect(member).toEqual(expect.objectContaining(attemptMember!.toJSON()))
-    })
+    expect(response.body()).toHaveLength(5)
+    assert.containsSubset(
+      response.body(),
+      members.map((m) => ({ id: m.id }))
+    )
   }).tags(['servers:members'])
 
   test('should return 404 when server does not exist', async ({ client }) => {

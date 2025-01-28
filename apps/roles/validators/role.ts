@@ -46,6 +46,12 @@ export const updateRoleValidator = vine.compile(
   })
 )
 
+export const assignRoleValidator = vine.compile(
+  vine.object({
+    memberIds: vine.array(vine.string()),
+  })
+)
+
 export type CreateRoleSchema = Infer<typeof createRoleValidator>
 export type ShowRoleSchema = Infer<typeof showRoleValidator>
 export type UpdateRoleSchema = Infer<typeof updateRoleValidator>
