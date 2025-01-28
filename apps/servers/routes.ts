@@ -125,7 +125,7 @@ router
                               'updateWebhookPicture',
                             ])
                           })
-                          .prefix(':/webhookId')
+                          .prefix('/:webhookId')
                       })
                       .prefix('webhook')
                   })
