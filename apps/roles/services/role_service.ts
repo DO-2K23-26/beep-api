@@ -11,6 +11,7 @@ import MemberNotInServerException from '#apps/members/exceptions/member_not_in_s
 import WrongChannelTypeException from '#apps/channels/exceptions/wrong_channel_type'
 import { ChannelType } from '#apps/channels/models/channel_type'
 import ChannelService from '#apps/channels/services/channel_service'
+import CannotEditDefaultRoleException from '../exceptions/cannot_edit_default_role_exception.js'
 
 @inject()
 export default class RoleService extends BasePolicy {
@@ -60,12 +61,20 @@ export default class RoleService extends BasePolicy {
     }
 
     const role = await Role.findOrFail(id)
-    role.merge(payload)
+    if (role.id === role.serverId) role.merge({ permissions: payload.permissions })
+    else role.merge(payload)
+
     return role.save()
   }
 
   async deleteById(roleId: string): Promise<void> {
     const role: Role = await Role.findOrFail(roleId)
+    if (role.id === role.serverId)
+      throw new CannotEditDefaultRoleException('Cannot delete the default role of the server', {
+        status: 400,
+        code: 'E_CANNOT_EDIT_DEFAULT_ROLE',
+      })
+
     await role.delete()
   }
 
