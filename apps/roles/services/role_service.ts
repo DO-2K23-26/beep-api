@@ -80,6 +80,11 @@ export default class RoleService extends BasePolicy {
 
   async assign(roleId: string, memberId: string): Promise<void> {
     const role = await Role.findOrFail(roleId)
+    if (role.id === role.serverId)
+      throw new CannotEditDefaultRoleException('Cannot assign members to the default role', {
+        status: 400,
+        code: 'E_CANNOT_EDIT_DEFAULT_ROLE',
+      })
     const member = await this.memberService.findById(memberId)
     if (member.serverId != role.serverId)
       throw new MemberNotInServerException('Member is not in the server', {
@@ -136,6 +141,11 @@ export default class RoleService extends BasePolicy {
 
   async assignToMembers(roleId: string, memberIds: string[]) {
     const role = await Role.findOrFail(roleId)
+    if (role.id === role.serverId)
+      throw new CannotEditDefaultRoleException('Cannot assign members to the default role', {
+        status: 400,
+        code: 'E_CANNOT_EDIT_DEFAULT_ROLE',
+      })
     const members = await this.memberService.findFrom(memberIds)
     if (!members.every((m) => m.serverId === role.serverId))
       throw new MemberNotInServerException('Member is not in the server', {
