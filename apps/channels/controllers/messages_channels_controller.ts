@@ -70,6 +70,8 @@ export default class MessagesChannelsController {
       channelId
     )
 
+    await this.messageService.notifyFriendMessage(auth.user as Payload, channelId)
+
     return response.created(newMessage)
   }
 
