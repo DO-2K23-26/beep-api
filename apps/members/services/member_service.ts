@@ -1,5 +1,3 @@
-import WrongChannelTypeException from '#apps/channels/exceptions/wrong_channel_type'
-import { ChannelType } from '#apps/channels/models/channel_type'
 import ChannelService from '#apps/channels/services/channel_service'
 import ExpiredInvitationException from '#apps/invitations/exceptions/expired_invitation_exception'
 import PrivateServerException from '#apps/invitations/exceptions/private_server_exception'
@@ -10,9 +8,7 @@ import { InvitationType } from '#apps/invitations/models/type'
 import InvitationService from '#apps/invitations/services/invitation_service'
 import UserAlreadyMember from '#apps/members/exceptions/user_already_member_exception'
 import Member from '#apps/members/models/member'
-import RoleService from '#apps/roles/services/role_service'
 import ServerService from '#apps/servers/services/server_service'
-import { Permissions } from '#apps/shared/enums/permissions'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
@@ -23,9 +19,8 @@ export default class MemberService {
     protected userService: UserService,
     protected serverService: ServerService,
     protected invitationService: InvitationService,
-    protected channelService: ChannelService,
-    protected roleService: RoleService,
-  ) { }
+    protected channelService: ChannelService
+  ) {}
 
   async create(serverId: string, userId: string): Promise<Member> {
     const user = await this.userService.findById(userId)
@@ -95,36 +90,6 @@ export default class MemberService {
     })
 
     return server.members
-  }
-
-  async getPermissionsFromChannel(userId: string, channelId: string): Promise<number> {
-    const channel = await this.channelService.findByIdOrFail(channelId)
-
-    if (channel.serverId === null || channel.type !== ChannelType.TEXT_SERVER)
-      throw new WrongChannelTypeException('Wrong channel type', {
-        status: 400,
-        code: 'E_WRONG_CHANNEL_TYPE',
-      })
-    return this.getPermissions(userId, channel.serverId)
-  }
-
-  async getPermissions(userId: string, serverId: string) {
-    const member = await Member.query()
-      .where('user_id', userId)
-      .where('server_id', serverId)
-      .preload('roles')
-      .firstOrFail()
-
-    const isOwner = (await this.serverService.findOwner(serverId)) == userId
-    let permissions: number = 0
-    if (isOwner) permissions = Permissions.ADMINISTRATOR
-    const role = await this.roleService.findById(serverId)
-    permissions |= role.permissions
-
-    member.roles.forEach((r) => {
-      permissions |= r.permissions
-    })
-    return permissions
   }
 
   async findFromNickname(serverId: string, nickname: string): Promise<Member[]> {

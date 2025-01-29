@@ -14,7 +14,7 @@ import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export default class ServerService {
-  constructor(private storageService: StorageService) { }
+  constructor(private storageService: StorageService) {}
 
   async findAll(page: number = 1, limit: number = 10): Promise<Server[]> {
     const pageServers = await Server.query().paginate(page, limit)
@@ -192,7 +192,7 @@ export default class ServerService {
 
     return server.members[0]
   }
-  
+
   async findOwner(serverId: string): Promise<string> {
     const server = await Server.findOrFail(serverId)
     return server.ownerId
