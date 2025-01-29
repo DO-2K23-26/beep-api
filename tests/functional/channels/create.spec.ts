@@ -39,7 +39,12 @@ test.group('Channels create', () => {
   }) => {
     const user = await UserFactory.make()
     const server = await ServerFactory.make()
-    await MemberFromFactory(server.id, user.id).create()
+    const member = await MemberFromFactory(server.id, user.id).create()
+    const role = await RoleFactory.merge({
+      permissions: Permissions.MANAGE_CHANNELS,
+      serverId: server.id,
+    }).create()
+    await role.related('members').attach([member.id])
     const payloads = [
       {
         name: 'Channel 1', //first to be created

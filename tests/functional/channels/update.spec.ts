@@ -32,7 +32,12 @@ test.group('Channels update', () => {
   test('must return 200 when update description successfully', async ({ assert, client }) => {
     const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()
-    await MemberFromFactory(channel.serverId, user.id).create()
+    const member = await MemberFromFactory(channel.serverId, user.id).create()
+    const role = await RoleFactory.merge({
+      permissions: Permissions.MANAGE_CHANNELS,
+      serverId: channel.serverId,
+    }).create()
+    await role.related('members').attach([member.id])
     const data = { description: 'new description' }
     const response = await client
       .put(`/servers/${channel.serverId}/channels/${channel.id}`)
@@ -45,7 +50,12 @@ test.group('Channels update', () => {
   test('must return 200 when update position successfully', async ({ assert, client }) => {
     const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()
-    await MemberFromFactory(channel.serverId, user.id).create()
+    const member = await MemberFromFactory(channel.serverId, user.id).create()
+    const role = await RoleFactory.merge({
+      permissions: Permissions.MANAGE_CHANNELS,
+      serverId: channel.serverId,
+    }).create()
+    await role.related('members').attach([member.id])
     const data = { position: 1 }
     const response = await client
       .put(`/servers/${channel.serverId}/channels/${channel.id}`)
@@ -58,7 +68,12 @@ test.group('Channels update', () => {
   test('must return 200 when update name successfully', async ({ assert, client }) => {
     const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()
-    await MemberFromFactory(channel.serverId, user.id).create()
+    const member = await MemberFromFactory(channel.serverId, user.id).create()
+    const role = await RoleFactory.merge({
+      permissions: Permissions.MANAGE_CHANNELS,
+      serverId: channel.serverId,
+    }).create()
+    await role.related('members').attach([member.id])
     const data = { name: 'new name' }
     const response = await client
       .put(`/servers/${channel.serverId}/channels/${channel.id}`)

@@ -48,7 +48,10 @@ export default class MessageChannelPolicy extends BasePolicy {
         Permissions.ADMINISTRATOR
       )
       if (isAdmin) return true
-      if (!this.permissionsService.validate_permissions(userPermissions, [Permissions.VIEW_CHANNELS])) return false
+      if (
+        !this.permissionsService.validate_permissions(userPermissions, [Permissions.VIEW_CHANNELS])
+      )
+        return false
     } else {
       return false
     }
