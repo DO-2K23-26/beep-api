@@ -31,6 +31,7 @@ export default class MessageService {
       const event = {
         receiverId: receiverId,
         senderName: payload.username,
+        channelId: channelId,
       }
       await emitter.emit('friend:message', event)
     }
