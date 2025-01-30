@@ -20,7 +20,6 @@ export default class ServerRolePolicy extends BasePolicy {
     const serverId: string | undefined = params[0]
     const isPresent = await this.serverService.userPartOfServer(payload.sub!, serverId!)
     if (!isPresent) return false
-
     const permissions = await this.roleService.getMemberPermissions(payload.sub!, serverId!)
     const isAdministrator = this.permissionsService.has_permission(
       permissions,
