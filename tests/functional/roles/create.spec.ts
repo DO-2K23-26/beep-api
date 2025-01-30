@@ -1,36 +1,19 @@
 import { Permissions } from '#apps/shared/enums/permissions'
+import { MemberFactory } from '#database/factories/member_factory'
+import { RoleFactory } from '#database/factories/role_factory'
 import { ServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
-test.group('Roles create', () => {
-  test('must return a 201 when creating a role with 1 permission', async ({ client }) => {
-    const server = await ServerFactory.with('members').create()
-    await server.load('members')
-
-    const member = server.members[0]
-    await member.load('user')
-    const payload = {
-      name: 'My role',
-      permissions: Permissions.MANAGE_MESSAGES,
-    }
-    const result = await client
-      .post(`/servers/${server.id}/roles`)
-      .json(payload)
-      .loginAs(member.user)
-    result.assertStatus(201)
-    result.assertBodyContains({
-      name: payload.name,
-      permissions: payload.permissions,
+test.group('Roles create', async () => {
+  test('must return a 201 when creating a role with permission MANAGE_ROLE', async ({ client }) => {
+    const server = await ServerFactory.create()
+    const member = await MemberFactory.merge({ serverId: server.id }).create()
+    const role = await RoleFactory.merge({
+      permissions: Permissions.MANAGE_ROLES,
       serverId: server.id,
-    })
-  }).tags(['roles:create'])
-
-  test('must return a 201 when creating a role with some permissions', async ({ client }) => {
-    const server = await ServerFactory.with('members').create()
-    await server.load('members')
-
-    const member = server.members[0]
+    }).create()
+    await role.related('members').attach([member.id])
     await member.load('user')
     const payload = {
       name: 'My role',
@@ -71,12 +54,30 @@ test.group('Roles create', () => {
     const result = await client.post(`/servers/${server.id}/roles`).json(payload).loginAs(user)
     result.assertStatus(403)
   }).tags(['roles:create'])
+  test('must return 403 if the member has not the permission MANAGE_ROLE', async ({ client }) => {
+    const server = await ServerFactory.create()
+    const member = await MemberFactory.merge({ serverId: server.id }).create()
+    await member.load('user')
+
+    const payload = {
+      name: 'My role',
+      permissions: Permissions.MANAGE_MESSAGES,
+    }
+    const result = await client
+      .post(`/servers/${server.id}/roles`)
+      .json(payload)
+      .loginAs(member.user)
+    result.assertStatus(403)
+  }).tags(['roles:create'])
 
   test('must return 422 when creating a role without name', async ({ client }) => {
-    const server = await ServerFactory.with('members').create()
-    await server.load('members')
-
-    const member = server.members[0]
+    const server = await ServerFactory.create()
+    const member = await MemberFactory.merge({ serverId: server.id }).create()
+    const role = await RoleFactory.merge({
+      permissions: Permissions.MANAGE_ROLES,
+      serverId: server.id,
+    }).create()
+    await role.related('members').attach([member.id])
     await member.load('user')
 
     const payload = {
@@ -90,10 +91,13 @@ test.group('Roles create', () => {
   }).tags(['roles:create'])
 
   test('must return 422 when creating a role without permissions', async ({ client }) => {
-    const server = await ServerFactory.with('members').create()
-    await server.load('members')
-
-    const member = server.members[0]
+    const server = await ServerFactory.create()
+    const member = await MemberFactory.merge({ serverId: server.id }).create()
+    const role = await RoleFactory.merge({
+      permissions: Permissions.MANAGE_ROLES,
+      serverId: server.id,
+    }).create()
+    await role.related('members').attach([member.id])
     await member.load('user')
 
     const payload = {
