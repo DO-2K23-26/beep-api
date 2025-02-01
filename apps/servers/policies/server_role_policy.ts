@@ -26,30 +26,30 @@ export default class ServerRolePolicy extends BasePolicy {
       Permissions.ADMINISTRATOR
     )
     if (isAdministrator) return true
-    const canManageRoles = this.permissionsService.has_permission(
-      permissions,
-      Permissions.MANAGE_ROLES
-    )
-    if (!canManageRoles) return false
   }
 
-  async view() {
-    return true
+  async view(payload: JwtPayload, serverId: string) {
+    const permissions = await this.roleService.getMemberPermissions(payload.sub!, serverId!)
+    return this.permissionsService.has_permission(permissions, Permissions.MANAGE_ROLES)
   }
 
-  async create() {
-    return true
+  async create(payload: JwtPayload, serverId: string) {
+    const permissions = await this.roleService.getMemberPermissions(payload.sub!, serverId!)
+    return this.permissionsService.has_permission(permissions, Permissions.MANAGE_ROLES)
   }
 
-  async update() {
-    return true
+  async update(payload: JwtPayload, serverId: string) {
+    const permissions = await this.roleService.getMemberPermissions(payload.sub!, serverId!)
+    return this.permissionsService.has_permission(permissions, Permissions.MANAGE_ROLES)
   }
 
-  async destroy() {
-    return true
+  async destroy(payload: JwtPayload, serverId: string) {
+    const permissions = await this.roleService.getMemberPermissions(payload.sub!, serverId!)
+    return this.permissionsService.has_permission(permissions, Permissions.MANAGE_ROLES)
   }
 
-  async assignation() {
-    return true
+  async assignation(payload: JwtPayload, serverId: string) {
+    const permissions = await this.roleService.getMemberPermissions(payload.sub!, serverId!)
+    return this.permissionsService.has_permission(permissions, Permissions.MANAGE_ROLES)
   }
 }
