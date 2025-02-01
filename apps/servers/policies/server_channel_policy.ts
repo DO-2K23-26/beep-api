@@ -1,13 +1,18 @@
-import UserService from '#apps/users/services/user_service'
+import RoleService from '#apps/roles/services/role_service'
+import ServerService from '#apps/servers/services/server_service'
+import { Permissions } from '#apps/shared/enums/permissions'
+import PermissionsService from '#apps/shared/services/permissions/permissions_service'
 import { BasePolicy } from '@adonisjs/bouncer'
 import { inject } from '@adonisjs/core'
 import { JwtPayload } from 'jsonwebtoken'
-import Server from '#apps/servers/models/server'
-import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
 
 @inject()
 export default class ServerChannelPolicy extends BasePolicy {
-  constructor(protected userService: UserService) {
+  constructor(
+    protected serverService: ServerService,
+    protected roleService: RoleService,
+    protected permissionsService: PermissionsService
+  ) {
     super()
   }
 
@@ -16,31 +21,42 @@ export default class ServerChannelPolicy extends BasePolicy {
     const serverId = params[0] as string | null | undefined
 
     if (serverId && serverId !== undefined) {
-      const server = await Server.findOrFail(serverId).catch(() => {
-        throw new ServerNotFoundException('Server not found', {
-          status: 404,
-          code: 'E_SERVER_NOT_FOUND',
-        })
-      })
-      await server.load('members')
-      const member = server.members.find((m) => m.userId === payload.sub)
-      if (!member) return false
-      return true
+      const isPresent = await this.serverService.userPartOfServer(payload.sub!, serverId)
+      if (!isPresent) return false
+      const userPermissions = await this.roleService.getMemberPermissions(payload.sub!, serverId)
+      const isAdmin = this.permissionsService.has_permission(
+        userPermissions,
+        Permissions.ADMINISTRATOR
+      )
+      if (isAdmin) return true
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async view(_payload: JwtPayload, _serverId: string) {
-    return true
+  async view(payload: JwtPayload, serverId: string) {
+    const userPermissions = await this.roleService.getMemberPermissions(payload.sub!, serverId)
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.VIEW_CHANNELS,
+    ])
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async create(_payload: JwtPayload, _serverId: string) {
-    return true
+  async create(payload: JwtPayload, serverId: string) {
+    const userPermissions = await this.roleService.getMemberPermissions(payload.sub!, serverId)
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.MANAGE_CHANNELS,
+    ])
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(_payload: JwtPayload, _serverId: string) {
-    return true
+  async update(payload: JwtPayload, serverId: string) {
+    const userPermissions = await this.roleService.getMemberPermissions(payload.sub!, serverId)
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.MANAGE_CHANNELS,
+    ])
+  }
+
+  async delete(payload: JwtPayload, serverId: string) {
+    const userPermissions = await this.roleService.getMemberPermissions(payload.sub!, serverId)
+    return this.permissionsService.validate_permissions(userPermissions, [
+      Permissions.MANAGE_CHANNELS,
+    ])
   }
 }

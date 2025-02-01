@@ -43,6 +43,11 @@ export default class MessageChannelPolicy extends BasePolicy {
         payload.sub!,
         channelId
       )
+      const isAdmin = this.permissionsService.has_permission(
+        userPermissions,
+        Permissions.ADMINISTRATOR
+      )
+      if (isAdmin) return true
       if (
         !this.permissionsService.validate_permissions(userPermissions, [Permissions.VIEW_CHANNELS])
       )

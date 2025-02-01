@@ -88,6 +88,7 @@ export default class MemberService {
     await server.load('members', (query) => {
       query.preload('user')
     })
+
     return server.members
   }
 

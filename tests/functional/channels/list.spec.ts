@@ -5,7 +5,9 @@ import { UserFactory } from '#database/factories/user_factory'
 import { test } from '@japa/runner'
 
 test.group('Channels list', () => {
-  test('must return 200 and channels of the user if the user is a member', async ({ client }) => {
+  test('must return 200 and channels of the user if the user is a member and has VIEW_CHANNEL permission', async ({
+    client,
+  }) => {
     const channel = await ChannelFactory.with('server').create()
     const user = await UserFactory.create()
     const member = await MemberFromFactory(channel.serverId, user.id).create()

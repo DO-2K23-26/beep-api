@@ -12,13 +12,16 @@ import WrongChannelTypeException from '#apps/channels/exceptions/wrong_channel_t
 import { ChannelType } from '#apps/channels/models/channel_type'
 import ChannelService from '#apps/channels/services/channel_service'
 import CannotEditDefaultRoleException from '../exceptions/cannot_edit_default_role_exception.js'
+import { Permissions } from '#apps/shared/enums/permissions'
+import ServerService from '#apps/servers/services/server_service'
 
 @inject()
 export default class RoleService extends BasePolicy {
   constructor(
     protected permissionsService: PermissionsService,
     protected memberService: MemberService,
-    protected channelService: ChannelService
+    protected channelService: ChannelService,
+    protected serverService: ServerService
   ) {
     super()
   }
@@ -122,14 +125,15 @@ export default class RoleService extends BasePolicy {
       .preload('roles')
       .firstOrFail()
 
-    // Get the default role of the server
-    const role = await Role.findOrFail(serverId)
-    let permissions = role.permissions
+    const isOwner = (await this.serverService.findOwner(serverId)) == userId
+    let permissions: number = 0
+    if (isOwner) permissions = Permissions.ADMINISTRATOR
+    const role = await this.findById(serverId)
+    permissions |= role.permissions
 
     member.roles.forEach((r) => {
       permissions |= r.permissions
     })
-
     return permissions
   }
 

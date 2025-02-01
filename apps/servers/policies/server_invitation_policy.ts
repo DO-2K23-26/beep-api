@@ -1,26 +1,36 @@
 import { BasePolicy } from '@adonisjs/bouncer'
 import { inject } from '@adonisjs/core'
-import { HttpContext } from '@adonisjs/core/http'
 import { JwtPayload } from 'jsonwebtoken'
-import Server from '#apps/servers/models/server'
-import ServerNotFoundException from '#apps/servers/exceptions/server_not_found_exception'
+import ServerService from '../services/server_service.js'
+import RoleService from '#apps/roles/services/role_service'
+import PermissionsService from '#apps/shared/services/permissions/permissions_service'
+import { Permissions } from '#apps/shared/enums/permissions'
 
 @inject()
 export default class ServerInvitationPolicy extends BasePolicy {
-  constructor(protected ctx: HttpContext) {
+  constructor(
+    protected serverService: ServerService,
+    protected roleService: RoleService,
+    protected permissionsService: PermissionsService
+  ) {
     super()
   }
+  async before(payload: JwtPayload, _action: string, ...params: unknown[]) {
+    const serverId = params[0] as string | null | undefined
 
-  async create(user: JwtPayload, serverId: number) {
-    const server = await Server.findOrFail(serverId).catch(() => {
-      throw new ServerNotFoundException('Server does not exist pouette/', {
-        code: 'E_SERVER_NOT_FOUND',
-        status: 404,
-      })
-    })
-
-    await server.load('members')
-    const member = server.members.find((member) => member.userId === user.sub)
-    return member !== undefined
+    if (serverId && serverId !== undefined) {
+      const isPresent = await this.serverService.userPartOfServer(payload.sub!, serverId)
+      if (!isPresent) return false
+      const userPermissions = await this.roleService.getMemberPermissions(payload.sub!, serverId)
+      const isAdmin = this.permissionsService.has_permission(
+        userPermissions,
+        Permissions.ADMINISTRATOR
+      )
+      if (isAdmin) return true
+    }
+  }
+  async create(payload: JwtPayload, serverId: string) {
+    const userPermissions = await this.roleService.getMemberPermissions(payload.sub!, serverId)
+    return this.permissionsService.has_permission(userPermissions, Permissions.CREATE_INVITATION)
   }
 }

@@ -192,4 +192,9 @@ export default class ServerService {
 
     return server.members[0]
   }
+
+  async findOwner(serverId: string): Promise<string> {
+    const server = await Server.findOrFail(serverId)
+    return server.ownerId
+  }
 }
