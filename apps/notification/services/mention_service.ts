@@ -33,7 +33,9 @@ export default class MentionService {
           serverName: channel.server.name,
         }
 
-        await emitter.emit('user:mentioned', msg)
+        if (user.id !== senderId) {
+          await emitter.emit('user:mentioned', msg)
+        }
       })
     )
   }
