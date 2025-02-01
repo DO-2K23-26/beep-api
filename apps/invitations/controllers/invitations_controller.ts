@@ -23,7 +23,7 @@ export default class InvitationsController {
       receiverId: invitation.targetId as string,
       senderName: userPayload.username,
     }
-
+    console.log('before emit')
     // emit the event
     await emitter.emit('friend:request', event)
 

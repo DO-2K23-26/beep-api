@@ -48,6 +48,7 @@ emitter.on('user:mentioned', (mention) => {
 })
 
 emitter.on('friend:request', (friendRequest) => {
+  console.log('friend:request', friendRequest)
   const notification: Notification = {
     type: NOTIFICATION_TYPE.FRIEND_REQUEST,
     payload: friendRequest,
