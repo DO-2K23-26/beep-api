@@ -61,6 +61,6 @@ test.group('Servers members update', () => {
       .put(`v1/servers/${member.serverId}/members/nonexistentMemberId/nickname`)
       .json(data)
       .loginAs(member.user)
-    response.assertStatus(403)
+    response.assertStatus(404)
   }).tags(['update:members'])
 })
