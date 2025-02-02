@@ -29,7 +29,7 @@ test.group('Channels find', () => {
       owner.id
     )
 
-    const channels = await channelService.findAsGroupAllByServer(channelCreated.id)
+    const channels = await channelService.findAllByServerWithChildren(channelCreated.id)
     console.log(channels.length)
     const channel = channels[0]
     expect(channel.id).toBe(channelCreated.id)

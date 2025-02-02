@@ -6,17 +6,21 @@ import ServerChannelPolicy from '#apps/servers/policies/server_channel_policy'
 import { mutedValidator } from '#apps/users/validators/muted_validator'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import { findChannelServerValidator } from '../validators/server.js'
+import logger from '@adonisjs/core/services/logger'
 
 @inject()
 export default class ServerChannelsController {
   constructor(private channelService: ChannelService) {}
 
   //recupere les channels d'un server
-  async findByServerId({ params, bouncer }: HttpContext) {
+  async findByServerId({ request, params, bouncer }: HttpContext) {
+    const { group } = await request.validateUsing(findChannelServerValidator)
     await bouncer.with(ServerChannelPolicy).authorize('view' as never, params.serverId)
     let channels: Channel[]
-    if (params.group) {
-      channels = await this.channelService.findAsGroupAllByServer(params.serverId)
+    console.log(params)
+    if (group) {
+      channels = await this.channelService.findAllByServerWithChildren(params.serverId)
     } else {
       channels = await this.channelService.findAllByServer(params.serverId)
     }
@@ -41,8 +45,11 @@ export default class ServerChannelsController {
   // Updates a chan (name, description...)
   async updateChannel({ request, params, response, bouncer }: HttpContext) {
     const receivedChannel = await request.validateUsing(updateChannelValidator)
+    logger.info('Received channel : ', receivedChannel)
+    logger.info(receivedChannel)
     await bouncer.with(ServerChannelPolicy).authorize('update' as never, params.serverId)
     const channel = await this.channelService.update(params.channelId, receivedChannel)
+    logger.info(channel)
     return response.send(channel)
   }
 

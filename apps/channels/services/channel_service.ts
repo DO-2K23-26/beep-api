@@ -55,11 +55,11 @@ export default class ChannelService {
     return server.channels
   }
 
-  async findAsGroupAllByServer(serverId: string): Promise<Channel[]> {
-    const channels = await Channel.query().whereNull('parentId').where('serverId', serverId)
-    for (const channel of channels) {
-      channel.load('childrens')
-    }
+  async findAllByServerWithChildren(serverId: string): Promise<Channel[]> {
+    const channels = await Channel.query()
+      .whereNull('parentId')
+      .where('serverId', serverId)
+      .preload('childrens')
     return channels
   }
 
@@ -238,7 +238,9 @@ export default class ChannelService {
         code: 'E_ROWNOTFOUND',
       })
     })
+    logger.info('Updating channel : ', payload)
     channel.merge(payload)
+    logger.info(channel.toJSON())
     await redis.del(`channel:${id}`)
     return channel.save()
   }

@@ -24,7 +24,7 @@ export const updateChannelValidator = vine.compile(
     name: vine.string().minLength(1).optional(), // The name is optional for the update, but if provided, it must be non-empty
     description: vine.string().minLength(1).optional(), // Same principle applies to the description
     position: vine.number().optional(),
-    parentId: vine.string().optional(), // Set the parent id but only if type is TEXT_SERVER or VOICE_SERVER and parent is FOLDER_SERVER
+    parentId: vine.string().optional().nullable(), // Set the parent id but only if type is TEXT_SERVER or VOICE_SERVER and parent is FOLDER_SERVER
   })
 )
 
