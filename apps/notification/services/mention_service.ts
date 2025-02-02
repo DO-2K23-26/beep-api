@@ -34,6 +34,7 @@ export default class MentionService {
         }
 
         if (user.id !== senderId) {
+          // test if the user is not the sender
           await emitter.emit('user:mentioned', msg)
         }
       })
