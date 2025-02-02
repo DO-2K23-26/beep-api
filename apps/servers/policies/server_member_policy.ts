@@ -49,8 +49,8 @@ export default class ServerMemberPolicy extends BasePolicy {
       permissions,
       Permissions.CHANGE_NICKNAME
     )
-    const members = await this.memberService.findFrom([memberId])
-    if (canChangeNickname && payload.sub === members[0].userId) return true
+    const members = await this.memberService.findById(memberId)
+    if (canChangeNickname && payload.sub === members.userId) return true
 
     return false
   }
