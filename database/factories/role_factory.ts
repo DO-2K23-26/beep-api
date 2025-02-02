@@ -3,6 +3,7 @@ import factory from '@adonisjs/lucid/factories'
 import { ServerFactory } from '#database/factories/server_factory'
 import { DEFAULT_ROLE_SERVER_PERMISSION } from '#apps/shared/constants/default_role_permission'
 import { DEFAULT_ROLE_SERVER } from '#apps/shared/constants/default_role_server'
+import { Permissions } from '#apps/shared/enums/permissions'
 
 export const RoleFactory = factory
   .define(Role, async ({ faker }) => {
@@ -17,6 +18,10 @@ export const RoleFactory = factory
     role.id = role.serverId
     role.permissions = DEFAULT_ROLE_SERVER_PERMISSION
     role.name = DEFAULT_ROLE_SERVER
+  })
+  .state('admin_role', async (role) => {
+    role.permissions = Permissions.ADMINISTRATOR
+    role.name = 'Admin'
   })
   .build()
 

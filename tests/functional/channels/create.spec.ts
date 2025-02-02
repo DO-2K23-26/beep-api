@@ -1,10 +1,14 @@
 import { ChannelType } from '#apps/channels/models/channel_type'
+import RoleService from '#apps/roles/services/role_service'
 import { Permissions } from '#apps/shared/enums/permissions'
-import { MemberFromFactory } from '#database/factories/member_factory'
+import { MemberFactoryWithUser, MemberFromFactory } from '#database/factories/member_factory'
 import { RoleFactory } from '#database/factories/role_factory'
 import { ServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
+import app from '@adonisjs/core/services/app'
 import { test } from '@japa/runner'
+
+const roleService = await app.container.make(RoleService)
 
 test.group('Channels create', () => {
   test('must return a 201 when creating a text channel with role MANAGE_CHANNEL in server', async ({
@@ -34,20 +38,24 @@ test.group('Channels create', () => {
     )
   }).tags(['channels:create'])
   test('must return a 201 when creating a folder channel', async ({ client, expect }) => {
+    const role = await RoleFactory.apply('admin_role').create()
     const user = await UserFactory.make()
-    const server = await ServerFactory.make()
-    await MemberFromFactory(server.id, user.id).create()
+    const member = await MemberFactoryWithUser(user.id).merge({ serverId: role.serverId }).create()
+    await roleService.assign(role.id, member.id)
     const payload = {
       name: 'My Channel',
       type: ChannelType.FOLDER_SERVER,
     }
-    const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
+    const result = await client
+      .post(`/servers/${role.serverId}/channels`)
+      .json(payload)
+      .loginAs(user)
     result.assertStatus(201)
     expect(result.body()).toEqual(
       expect.objectContaining({
         name: payload.name,
         type: payload.type,
-        serverId: server.id,
+        serverId: role.serverId,
       })
     )
   }).tags(['channels:create'])
@@ -56,14 +64,15 @@ test.group('Channels create', () => {
     expect,
   }) => {
     const user = await UserFactory.make()
-    const server = await ServerFactory.make()
-    await MemberFromFactory(server.id, user.id).create()
+    const role = await RoleFactory.apply('admin_role').create()
+    const member = await MemberFactoryWithUser(user.id).merge({ serverId: role.serverId }).create()
+    await roleService.assign(role.id, member.id)
     const parentPayload = {
       name: 'My Folder',
       type: ChannelType.FOLDER_SERVER,
     }
     const parent = await client
-      .post(`/servers/${server.id}/channels`)
+      .post(`/servers/${role.serverId}/channels`)
       .json(parentPayload)
       .loginAs(user)
     parent.assertStatus(201)
@@ -72,13 +81,16 @@ test.group('Channels create', () => {
       type: ChannelType.TEXT_SERVER,
       parentId: parent.body().id,
     }
-    const result = await client.post(`/servers/${server.id}/channels`).json(payload).loginAs(user)
+    const result = await client
+      .post(`/servers/${role.serverId}/channels`)
+      .json(payload)
+      .loginAs(user)
     result.assertStatus(201)
     expect(result.body()).toEqual(
       expect.objectContaining({
         name: payload.name,
         type: payload.type,
-        serverId: server.id,
+        serverId: role.serverId,
         parentId: parent.body().id,
       })
     )

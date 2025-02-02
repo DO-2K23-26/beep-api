@@ -39,4 +39,7 @@ export const ChannelFactoryWithServer = (serverId: string) =>
         serverId: serverId,
       })
     })
+    .state('folder_channel', async (channel) => {
+      channel.type = ChannelType.FOLDER_SERVER
+    })
     .build()
