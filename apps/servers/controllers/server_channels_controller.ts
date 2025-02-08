@@ -17,7 +17,7 @@ export default class ServerChannelsController {
     await bouncer.with(ServerChannelPolicy).authorize('view' as never, params.serverId)
     let channels: Channel[]
     if (group) {
-      channels = await this.channelService.findAllByServerWithChildren(params.serverId)
+      channels = await this.channelService.findAllChannelsByServerWithChildren(params.serverId)
     } else {
       channels = await this.channelService.findAllByServer(params.serverId)
     }

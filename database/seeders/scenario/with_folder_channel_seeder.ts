@@ -6,7 +6,6 @@ import Channel from '#apps/channels/models/channel'
 
 export default class extends BaseSeeder {
   async run() {
-    // Write your database queries inside the run method
     const server = await Server.findBy('name', 'Beep')
 
     const channel = await Channel.findBy('name', 'Folder Channel')

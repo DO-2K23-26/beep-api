@@ -33,7 +33,7 @@ test.group('Channels find', () => {
       owner.id
     )
 
-    const channels = await channelService.findAllByServerWithChildren(server.id)
+    const channels = await channelService.findAllChannelsByServerWithChildren(server.id)
     const channel = channels[0]
     expect(channel.id).toBe(channelCreated.id)
     expect(channel.name).toBe(channelCreated.name)

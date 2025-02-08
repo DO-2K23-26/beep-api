@@ -9,7 +9,6 @@ const serverService = await app.container.make(ServerService)
 export default class extends BaseSeeder {
   static environment: string[] = ['development']
   async run() {
-    // Write your database queries inside the run method
     //remove all servers before seeding
     await Server.query().delete()
     const admin = await User.findByOrFail('username', 'admin')

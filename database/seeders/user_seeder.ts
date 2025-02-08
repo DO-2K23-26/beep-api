@@ -5,7 +5,6 @@ import { DateTime } from 'luxon'
 export default class extends BaseSeeder {
   static environment: string[] = ['development']
   async run() {
-    // Write your database queries inside the run method
     const users = [
       {
         username: 'admin',

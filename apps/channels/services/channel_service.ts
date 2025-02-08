@@ -55,7 +55,7 @@ export default class ChannelService {
     return server.channels
   }
 
-  async findAllByServerWithChildren(serverId: string): Promise<Channel[]> {
+  async findAllChannelsByServerWithChildren(serverId: string): Promise<Channel[]> {
     const channels = await Channel.query()
       .whereNull('parentId')
       .where('serverId', serverId)
@@ -173,7 +173,7 @@ export default class ChannelService {
     if (newChannel.parentId) {
       if (type === ChannelType.PRIVATE_CHAT || type === ChannelType.FOLDER_SERVER) {
         throw new ChannelWithIncoherentHierarchyException(
-          `Channel is of type PRIVATE_CHAT or FOLDER_SERVER and thus can't have a parent`,
+          `Channel with type ${type} can't have a parent channel`,
           {
             status: 422,
             code: 'E_WRONG_HIERARCHY',
@@ -194,7 +194,7 @@ export default class ChannelService {
 
       if ((parent.type as ChannelType) !== ChannelType.FOLDER_SERVER) {
         throw new ChannelWithIncoherentHierarchyException(
-          'Parent channel is not of type FOLDER_SERVER',
+          `Parent channel is not of type FOLDER_SERVER`,
           {
             status: 422,
             code: 'E_WRONG_HIERARCHY',
