@@ -50,7 +50,7 @@ router
                         router.delete(':roleId', [ServerRolesController, 'unassignRole'])
                       })
                       .prefix('roles')
-                    router.put(':nickname', [ServerMembersController, 'updateNickname'])
+                    router.put('nickname', [ServerMembersController, 'updateNickname'])
                   })
                   .prefix(':memberId')
                 router.get('', [ServerMembersController, 'index'])
