@@ -59,6 +59,12 @@ export const updatePictureValidator = vine.compile(
   })
 )
 
+export const findChannelServerValidator = vine.compile(
+  vine.object({
+    group: vine.boolean().optional(),
+  })
+)
+
 export type UpdateBannerSchema = Infer<typeof updateBannerValidator>
 export type CreateServerSchema = Infer<typeof createServerValidator>
 export type UpdateServerSchema = Infer<typeof updateServerValidator>

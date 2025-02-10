@@ -1,6 +1,6 @@
 import ChannelNotFoundException from '#apps/channels/exceptions/channel_not_found_exception'
 import Channel from '#apps/channels/models/channel'
-import { ChannelType } from '#apps/channels/models/channel_type'
+import { ChannelType, channelTypeToString } from '#apps/channels/models/channel_type'
 import { CachedUser, OccupiedChannel } from '#apps/channels/models/occupied_channels'
 import {
   CreateChannelSchema,
@@ -20,6 +20,7 @@ import logger from '@adonisjs/core/services/logger'
 import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 import jwt from 'jsonwebtoken'
+import ChannelWithIncoherentHierarchyException from '../exceptions/channel_cant_be_children_exception.js'
 
 export interface PayloadJWTSFUConnection {
   channelSn?: string
@@ -52,6 +53,14 @@ export default class ChannelService {
     })
     await server.load('channels')
     return server.channels
+  }
+
+  async findAllChannelsByServerWithChildren(serverId: string): Promise<Channel[]> {
+    const channels = await Channel.query()
+      .whereNull('parentId')
+      .where('serverId', serverId)
+      .preload('childrens')
+    return channels
   }
 
   async findPrivateOrderedForUserOrFail(userId: string): Promise<Channel[]> {
@@ -160,20 +169,63 @@ export default class ChannelService {
     serverId: string,
     userId: string
   ): Promise<Channel> {
-    const sn = generateSnowflake()
     const type = newChannel.type as ChannelType
+    if (newChannel.parentId) {
+      if (type === ChannelType.PRIVATE_CHAT || type === ChannelType.FOLDER_SERVER) {
+        throw new ChannelWithIncoherentHierarchyException(
+          `Channel with type ${channelTypeToString(type)} can't have a parent channel`,
+          {
+            status: 422,
+            code: 'E_WRONG_HIERARCHY',
+          }
+        )
+      }
+
+      let parent: Channel
+      try {
+        parent = await Channel.findOrFail(newChannel.parentId)
+      } catch (e) {
+        logger.error(e)
+        throw new ChannelNotFoundException('Parent channel not found', {
+          status: 404,
+          code: 'E_ROWNOTFOUND',
+        })
+      }
+
+      if ((parent.type as ChannelType) !== ChannelType.FOLDER_SERVER) {
+        throw new ChannelWithIncoherentHierarchyException(
+          `Parent channel is not of type FOLDER_SERVER`,
+          {
+            status: 422,
+            code: 'E_WRONG_HIERARCHY',
+          }
+        )
+      }
+    }
+
+    const sn = generateSnowflake()
     const firstChannel = await Channel.query()
-      .where('serverId', serverId)
+      .where('server_id', serverId)
       .orderBy('position')
       .first()
     const position = firstChannel != null ? firstChannel.position - 1 : 0
-    const channel = await Channel.create({
-      name: newChannel.name,
-      type: type,
-      serverId: serverId,
-      serialNumber: sn,
-      position,
-    })
+
+    const channel = newChannel.parentId
+      ? await Channel.create({
+          name: newChannel.name,
+          type: type,
+          serverId: serverId,
+          serialNumber: sn,
+          position,
+          parentId: newChannel.parentId,
+        })
+      : await Channel.create({
+          name: newChannel.name,
+          type: type,
+          serverId: serverId,
+          serialNumber: sn,
+          position,
+        })
     logger.info('Created new channel : ', channel)
     await channel.related('users').attach([userId])
     return channel
@@ -186,7 +238,9 @@ export default class ChannelService {
         code: 'E_ROWNOTFOUND',
       })
     })
+    logger.info('Updating channel : ', payload)
     channel.merge(payload)
+    logger.info(channel.toJSON())
     await redis.del(`channel:${id}`)
     return channel.save()
   }

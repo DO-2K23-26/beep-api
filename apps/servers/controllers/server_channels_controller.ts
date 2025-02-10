@@ -1,19 +1,27 @@
 import { Payload } from '#apps/authentication/contracts/payload'
+import Channel from '#apps/channels/models/channel'
 import ChannelService from '#apps/channels/services/channel_service'
 import { createChannelValidator, updateChannelValidator } from '#apps/channels/validators/channel'
 import ServerChannelPolicy from '#apps/servers/policies/server_channel_policy'
 import { mutedValidator } from '#apps/users/validators/muted_validator'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import { findChannelServerValidator } from '../validators/server.js'
 
 @inject()
 export default class ServerChannelsController {
   constructor(private channelService: ChannelService) {}
 
-  //recupere les channels d'un server
-  async findByServerId({ params, bouncer }: HttpContext) {
+  async findByServerId({ request, params, bouncer }: HttpContext) {
+    const { group } = await request.validateUsing(findChannelServerValidator)
     await bouncer.with(ServerChannelPolicy).authorize('view' as never, params.serverId)
-    return this.channelService.findAllByServer(params.serverId)
+    let channels: Channel[]
+    if (group) {
+      channels = await this.channelService.findAllChannelsByServerWithChildren(params.serverId)
+    } else {
+      channels = await this.channelService.findAllByServer(params.serverId)
+    }
+    return channels
   }
 
   async findByChannelId({ params, bouncer }: HttpContext) {

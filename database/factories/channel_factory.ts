@@ -15,6 +15,16 @@ export const ChannelFactory = factory
   .state('private_channel', async (channel) => {
     channel.type = ChannelType.PRIVATE_CHAT
   })
+  .state('folder_channel', async (channel) => {
+    channel.type = ChannelType.FOLDER_SERVER
+  })
+  .state('voice_channel', async (channel) => {
+    channel.type = ChannelType.VOICE_SERVER
+  })
+  .state('text_channel', async (channel) => {
+    //for declarative setup
+    channel.type = ChannelType.TEXT_SERVER
+  })
   .relation('server', () => ServerFactory)
   .relation('users', () => UserFactory)
   .build()
@@ -28,5 +38,8 @@ export const ChannelFactoryWithServer = (serverId: string) =>
         type: ChannelType.TEXT_SERVER,
         serverId: serverId,
       })
+    })
+    .state('folder_channel', async (channel) => {
+      channel.type = ChannelType.FOLDER_SERVER
     })
     .build()

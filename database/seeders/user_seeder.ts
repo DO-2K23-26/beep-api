@@ -1,10 +1,10 @@
 import User from '#apps/users/models/user'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
+import { DateTime } from 'luxon'
 
 export default class extends BaseSeeder {
   static environment: string[] = ['development']
   async run() {
-    // Write your database queries inside the run method
     const users = [
       {
         username: 'admin',
@@ -13,6 +13,7 @@ export default class extends BaseSeeder {
         firstName: 'Admin',
         lastName: 'Beep',
         profilePicture: 'default_profile_picture.png',
+        verifiedAt: DateTime.now(),
       },
       {
         username: 'user',
@@ -21,6 +22,7 @@ export default class extends BaseSeeder {
         firstName: 'User',
         lastName: 'Beep',
         profilePicture: 'default_profile_picture.png',
+        verifiedAt: DateTime.now(),
       },
     ]
     for (const userPayload of users) {
