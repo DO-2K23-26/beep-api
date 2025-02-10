@@ -24,10 +24,7 @@ test.group('Channels create', () => {
         owner.id
       )
     } catch (e) {
-      assert.equal(
-        e.message,
-        "Channel is of type PRIVATE_CHAT or FOLDER_SERVER and thus can't have a parent"
-      )
+      assert.equal(e.message, "Channel with type folder_server can't have a parent channel")
     }
   })
 
@@ -45,10 +42,7 @@ test.group('Channels create', () => {
         owner.id
       )
     } catch (e) {
-      assert.equal(
-        e.message,
-        "Channel is of type PRIVATE_CHAT or FOLDER_SERVER and thus can't have a parent"
-      )
+      assert.equal(e.message, "Channel with type private_chat can't have a parent channel")
     }
   })
 

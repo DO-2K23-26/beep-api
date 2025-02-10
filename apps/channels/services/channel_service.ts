@@ -1,6 +1,6 @@
 import ChannelNotFoundException from '#apps/channels/exceptions/channel_not_found_exception'
 import Channel from '#apps/channels/models/channel'
-import { ChannelType } from '#apps/channels/models/channel_type'
+import { ChannelType, channelTypeToString } from '#apps/channels/models/channel_type'
 import { CachedUser, OccupiedChannel } from '#apps/channels/models/occupied_channels'
 import {
   CreateChannelSchema,
@@ -173,7 +173,7 @@ export default class ChannelService {
     if (newChannel.parentId) {
       if (type === ChannelType.PRIVATE_CHAT || type === ChannelType.FOLDER_SERVER) {
         throw new ChannelWithIncoherentHierarchyException(
-          `Channel with type ${type} can't have a parent channel`,
+          `Channel with type ${channelTypeToString(type)} can't have a parent channel`,
           {
             status: 422,
             code: 'E_WRONG_HIERARCHY',
