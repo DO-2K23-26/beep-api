@@ -6,6 +6,7 @@ import {
   createWebhookValidator,
   triggerWebhookValidator,
   updateWebhookPictureValidator,
+  updateWebhookValidator,
 } from '#apps/webhooks/validators/webhook'
 @inject()
 export default class ServerWebhooksController {
@@ -25,7 +26,7 @@ export default class ServerWebhooksController {
 
   // Updates a webhook in a channel
   async updateWebhook({ request, params, response, bouncer }: HttpContext) {
-    const receivedWebhook = await request.validateUsing(createWebhookValidator)
+    const receivedWebhook = await request.validateUsing(updateWebhookValidator)
     await bouncer.with(ServerWebhookPolicy).authorize('update' as never, params.serverId)
     const webhookId = params.webhookId
     const webhook = await this.webhookService.update(receivedWebhook, webhookId)
@@ -68,10 +69,9 @@ export default class ServerWebhooksController {
   }
 
   // Update the webhook picture
-  async updateWebhookPicture({ request, bouncer }: HttpContext) {
+  async updateWebhookPicture({ request, bouncer, params }: HttpContext) {
+    await bouncer.with(ServerWebhookPolicy).authorize('update' as never, params.serverId)
     const data = await request.validateUsing(updateWebhookPictureValidator)
-    const webhook = await this.webhookService.findById(data.params.webhookId)
-    await bouncer.with(ServerWebhookPolicy).authorize('edit' as never, webhook)
     return this.webhookService.updateWebhookPicture(data)
   }
 

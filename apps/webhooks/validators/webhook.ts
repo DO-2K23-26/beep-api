@@ -9,7 +9,7 @@ import { Infer } from '@vinejs/vine/types'
 export const createWebhookValidator = vine.compile(
   vine.object({
     name: vine.string(),
-    webhookPicture: vine.string().url().optional(),
+    webhookPicture: vine.file().optional().nullable(),
     token: vine.string().optional(),
   })
 )
@@ -20,8 +20,8 @@ export const createWebhookValidator = vine.compile(
  */
 export const updateWebhookValidator = vine.compile(
   vine.object({
+    id: vine.string().uuid({ version: [4] }),
     name: vine.string(),
-    webhookPicture: vine.string().url().optional(),
     token: vine.string().optional(),
   })
 )

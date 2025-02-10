@@ -36,7 +36,7 @@ export default class Webhook extends BaseModel {
 
   // Column for the webhook picture
   @column()
-  declare webhookPicture: string | null
+  declare webhookPicture: string
 
   // Column for the secure token
   @column()
