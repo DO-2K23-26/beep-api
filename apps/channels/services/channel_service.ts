@@ -21,10 +21,10 @@ import redis from '@adonisjs/redis/services/main'
 import transmit from '@adonisjs/transmit/services/main'
 import jwt from 'jsonwebtoken'
 import ChannelWithIncoherentHierarchyException from '../exceptions/channel_cant_be_children_exception.js'
+import { Payload } from '#apps/authentication/contracts/payload'
 
 export interface PayloadJWTSFUConnection {
-  channelSn?: string
-  userSn: string
+  serverId?: string
 }
 
 @inject()
@@ -298,34 +298,10 @@ export default class ChannelService {
     return occupiedChannels
   }
 
-  async joinVoiceChannel(
-    serverId: string,
-    channelId: string,
-    userId: string,
-    username: string,
-    payload: { muted: boolean; voiceMuted: boolean; camera: boolean }
-  ): Promise<string> {
+  async joinVoiceChannel(userPayload: Payload): Promise<string> {
     try {
-      const multi = redis.multi()
-      const userKey = `user:${userId}`
-      const channel = await redis.get(userKey)
-      if (channel) {
-        multi.hdel(channel, userId)
-      }
-
-      // on ajoute l'utilisateur dans le channel
-      multi.hset(`server:${serverId}:channel:${channelId}`, userId, username)
-      // on associe le channel au user
-      multi.set(userKey, `server:${serverId}:channel:${channelId}`)
-      await multi.exec()
-      transmit.broadcast(`servers/${serverId}/movement`, { message: 'user joined' })
-      const channelObject = await Channel.query().where('id', channelId).firstOrFail()
-      const channelSn = channelObject?.serialNumber
-      const userObject = await User.query().where('id', userId).firstOrFail()
-      const userSn = userObject?.serialNumber
-      this.changeMutedStatus(userId, serverId, payload)
-      const tokenPayload: PayloadJWTSFUConnection = { channelSn, userSn }
-      return this.generateToken(tokenPayload)
+      const token = this.generateToken(userPayload)
+      return token
     } catch {
       return ''
     }
@@ -343,28 +319,14 @@ export default class ChannelService {
   async quitVoiceChannel(userId: string): Promise<string> {
     // connaissant le channel surlequel se trouve le user on peut le retirer
     try {
-      const userKey = `user:${userId}`
-      const channel = await redis.get(userKey)
-      if (!channel) {
-        return ''
-      }
-      const multi = redis.multi()
-      multi.hdel(channel, userId)
-      multi.del(userKey)
-      await multi.exec()
-      const serverId = channel.split(':')[1]
-      const userObject = await User.query().where('id', userId).firstOrFail()
-      const userSn = userObject?.serialNumber
-      transmit.broadcast(`servers/${serverId}/movement`, { message: 'user left' })
-      const payload: PayloadJWTSFUConnection = { userSn }
-      return this.generateToken(payload)
+      return userId
     } catch {
       return ''
     }
   }
 
-  generateToken(payload: PayloadJWTSFUConnection): string {
-    return jwt.sign(payload, env.get('APP_KEY'), { expiresIn: '5m' })
+  generateToken(payload: Payload): string {
+    return jwt.sign(payload, env.get('APP_KEY'))
   }
 
   async isUserInChannel(channelId: string, userId: string): Promise<boolean> {

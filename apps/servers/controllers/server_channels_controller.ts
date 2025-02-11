@@ -55,18 +55,10 @@ export default class ServerChannelsController {
     return { message: 'Channel deleted successfully' }
   }
 
-  async joinChannel({ auth, params, request }: HttpContext): Promise<string> {
+  async joinChannel({ auth, request }: HttpContext): Promise<string> {
     const userPayload = auth.use('jwt').payload as Payload
-    const channelId = params.channelId
-    const serverId = params.serverId
-    const payload = await request.validateUsing(mutedValidator)
-    const token = await this.channelService.joinVoiceChannel(
-      serverId,
-      channelId,
-      userPayload.sub.toString(),
-      userPayload.username,
-      payload
-    )
+    await request.validateUsing(mutedValidator)
+    const token = await this.channelService.joinVoiceChannel(userPayload)
     return JSON.stringify({ token: token })
   }
 

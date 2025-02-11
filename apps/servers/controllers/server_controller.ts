@@ -60,7 +60,7 @@ export default class ServersController {
    * Show individual record
    */
   async show({ params, bouncer }: HttpContext) {
-    bouncer.with(ServerPolicy).authorize('view' as never, params.serverId)
+    await bouncer.with(ServerPolicy).authorize('view' as never, params.serverId)
     return this.serverService.findById(params.serverId)
   }
 
