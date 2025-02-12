@@ -28,11 +28,15 @@ lint:
     - beep-runner
   stage: test
   image: node:21.7.3
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .pnpm-store
   before_script:
     - corepack enable
     - pnpm config set store-dir .pnpm-store
+    - pnpm install --frozen-lockfile
   script:
-    - pnpm install
     - pnpm typecheck
     - pnpm lint
   rules:
@@ -46,6 +50,10 @@ test:
   tags:
     - beep-runner
   image: node:21.7.3
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .pnpm-store
   services:
     - name: postgres
       alias: postgres
@@ -60,12 +68,12 @@ test:
   before_script:
     - corepack enable
     - pnpm config set store-dir .pnpm-store
+    - pnpm install --frozen-lockfile
   script:
     - export $(cat .env.test | xargs)
     - export REDIS_HOST=$REDIS_PORT_6379_TCP_ADDR
     - export DB_HOST=$POSTGRES_PORT_5432_TCP_ADDR
     - export HOST=$HOSTNAME
-    - pnpm install
     - pnpm test
   rules:
     - if: $CI_COMMIT_TAG
@@ -87,6 +95,7 @@ build:
       --context "${CI_PROJECT_DIR}"
       --dockerfile $CI_PROJECT_DIR/Dockerfile
       --destination "$IMAGE_NAME:${VERSION}"
+      --cache=true
       --snapshot-mode=redo
   rules:
     - if: $CI_COMMIT_TAG
