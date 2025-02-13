@@ -298,12 +298,18 @@ export default class ChannelService {
     return occupiedChannels
   }
 
-  async joinVoiceChannel(userPayload: Payload): Promise<string> {
+  async joinVoiceChannel(userPayload: Payload): Promise<{ token: string; pcconfig: unknown }> {
     try {
+      const result = await fetch('http://stunner-auth.stunner-system:8088/ice?service=turn')
+      const json = await result.json()
+      if (!json) {
+        throw new Error('Failed to get ICE servers')
+      }
       const token = this.generateToken(userPayload)
-      return token
+      return { token: token, pcconfig: json }
     } catch {
-      return ''
+      const token = this.generateToken(userPayload)
+      return { token: token, pcconfig: {} }
     }
   }
 

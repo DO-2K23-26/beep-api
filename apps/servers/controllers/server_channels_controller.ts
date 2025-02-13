@@ -58,8 +58,8 @@ export default class ServerChannelsController {
   async joinChannel({ auth, request }: HttpContext): Promise<string> {
     const userPayload = auth.use('jwt').payload as Payload
     await request.validateUsing(mutedValidator)
-    const token = await this.channelService.joinVoiceChannel(userPayload)
-    return JSON.stringify({ token: token })
+    const response = await this.channelService.joinVoiceChannel(userPayload)
+    return JSON.stringify(response)
   }
 
   async leaveChannel({ auth }: HttpContext): Promise<string> {
