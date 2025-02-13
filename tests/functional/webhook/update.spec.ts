@@ -3,6 +3,7 @@ import { ServerFactory } from '#database/factories/server_factory'
 import { UserFactory } from '#database/factories/user_factory'
 import { WebhookFactory } from '#database/factories/webhook_factory'
 import { test } from '@japa/runner'
+import { randomUUID } from 'node:crypto'
 
 test.group('Webhook update', () => {
   test('must return a 200 when update', async ({ client }) => {
@@ -12,11 +13,12 @@ test.group('Webhook update', () => {
     await MemberFromFactory(server.id, user.id).make()
 
     const webhook = await WebhookFactory.make()
-
+    console.log(webhook)
     const updatePayload = {
+      id: webhook.id,
       name: 'updated string',
-      webhookPicture: 'https://beep.baptistebronsin.be/logo.png',
-      serverId: server.id,
+      webhookId: webhook.id,
+      serverId: webhook.serverId,
       channelId: 'string',
       token: 'string',
     }
@@ -29,7 +31,6 @@ test.group('Webhook update', () => {
     result.assertStatus(200)
     result.assertBodyContains({
       name: updatePayload.name,
-      webhookPicture: updatePayload.webhookPicture,
     })
   }).tags(['webhook:update'])
 
@@ -37,12 +38,12 @@ test.group('Webhook update', () => {
     const user = await UserFactory.make()
     const server = await ServerFactory.make()
     const channelId = 'nonexistent-channel'
-    const webhookId = 'nonexistent-id'
+    const webhookId = randomUUID()
     await MemberFromFactory(server.id, user.id).make()
 
     const updatePayload = {
+      id: webhookId,
       name: 'updated string',
-      webhookPicture: 'https://beep.baptistebronsin.be/logo.png',
       serverId: server.id,
       channelId: channelId,
       token: 'string',
