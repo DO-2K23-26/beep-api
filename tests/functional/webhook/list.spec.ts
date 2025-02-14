@@ -18,7 +18,7 @@ test.group('Webhook create', () => {
     result.assertBodyContains([
       {
         name: webhook.name,
-        profilePicture: webhook.profilePicture,
+        webhookPicture: webhook.webhookPicture,
         channelId: webhook.channelId,
         userId: webhook.userId,
         token: webhook.token,
@@ -39,7 +39,7 @@ test.group('Webhook create', () => {
     result.assertBodyContains([
       {
         name: webhook.name,
-        profilePicture: webhook.profilePicture,
+        webhookPicture: webhook.webhookPicture,
         channelId: webhook.channelId,
         userId: webhook.userId,
         token: webhook.token,
@@ -62,7 +62,7 @@ test.group('Webhook create', () => {
     result.assertStatus(200)
     result.assertBodyContains({
       name: webhook.name,
-      profilePicture: webhook.profilePicture,
+      webhookPicture: webhook.webhookPicture,
       channelId: webhook.channelId,
       userId: webhook.userId,
       token: webhook.token,

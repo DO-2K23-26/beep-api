@@ -1,5 +1,9 @@
 import { ActionSignalWebhook, SignalWebhook } from '#apps/webhooks/models/signaling'
-import { UpdateWebhookSchema, CreateWebhooksSchema } from '#apps/webhooks/validators/webhook'
+import {
+  UpdateWebhookSchema,
+  CreateWebhooksSchema,
+  UpdateWebhookPictureSchema,
+} from '#apps/webhooks/validators/webhook'
 import StorageService from '#apps/storage/services/storage_service'
 import { inject } from '@adonisjs/core'
 import transmit from '@adonisjs/transmit/services/main'
@@ -31,7 +35,12 @@ export default class WebhookService {
   ) {}
   authService = new AuthenticationService()
 
-  async create(webhook: CreateWebhooksSchema, ownerId: string, channelId: string) {
+  async create(
+    webhook: CreateWebhooksSchema,
+    ownerId: string,
+    channelId: string,
+    serverId: string
+  ) {
     // Vérifiez si un webhook avec le même nom existe déjà dans le canal
     const existingWebhook = await Webhook.query()
       .where('name', webhook.name)
@@ -51,11 +60,10 @@ export default class WebhookService {
     // Création du webhook
     const createdWebhook = await Webhook.create({
       name: webhook.name,
-      profilePicture: webhook.profilePicture || 'https://beep.baptistebronsin.be/logo.png',
       token: this.tokenService.generateToken({ name: webhook.name }),
       userId: ownerId,
       channelId: channelId,
-      serverId: webhook.serverId || null,
+      serverId: serverId || null,
     })
 
     // Diffusion de l'événement
@@ -236,5 +244,14 @@ export default class WebhookService {
       message: createdMessage,
       status: 'Webhook triggered and message created successfully',
     }
+  }
+
+  async updateWebhookPicture(payload: UpdateWebhookPictureSchema): Promise<void> {
+    const webhook = await Webhook.findOrFail(payload.params.webhookId)
+    webhook.webhookPicture = await new StorageService().updatePicture(
+      payload.attachment,
+      webhook.id
+    )
+    await webhook.save()
   }
 }

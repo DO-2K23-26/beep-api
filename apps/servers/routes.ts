@@ -105,14 +105,29 @@ router
                 router
                   .group(() => {
                     router.post('/join', [ServerChannelsController, 'joinChannel'])
-                    router.post('/webhook', [ServerWebhooksController, 'createWebhook'])
-                    router.put('/webhook/:webhookId', [ServerWebhooksController, 'updateWebhook'])
                     router.get('/webhooks', [ServerWebhooksController, 'findByChannelId'])
-                    router.get('/webhook/:webhookId', [ServerWebhooksController, 'findByWebhookId'])
-                    router.delete('/webhook/:webhookId', [
-                      ServerWebhooksController,
-                      'deleteWebhook',
-                    ])
+
+                    router
+                      .group(() => {
+                        router.post('/', [ServerWebhooksController, 'createWebhook'])
+
+                        router
+                          .group(() => {
+                            router.put('/', [ServerWebhooksController, 'updateWebhook'])
+                            router.get('/', [ServerWebhooksController, 'findByWebhookId'])
+                            router.delete('/', [ServerWebhooksController, 'deleteWebhook'])
+                            router.get('/webhookPicture', [
+                              StoragesController,
+                              'transmitWebhookPicture',
+                            ])
+                            router.put('/webhookPicture', [
+                              ServerWebhooksController,
+                              'updateWebhookPicture',
+                            ])
+                          })
+                          .prefix('/:webhookId')
+                      })
+                      .prefix('webhook')
                   })
                   .prefix('/:channelId')
               })
