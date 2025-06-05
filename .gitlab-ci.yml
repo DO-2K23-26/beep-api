@@ -44,17 +44,19 @@ lint:
 trivy:
   stage: test
   tags:
-    - beep-runner
-  image: docker:24.0.5
+    - shared-runner-2
+  image: docker:stable
   services:
-    - name: docker:24.0.5-dind
+    - name: docker:dind
       entrypoint: ['env', '-u', 'DOCKER_HOST']
       command: ['dockerd-entrypoint.sh']
   variables:
-    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_HOST: tcp://docker:2376/
     DOCKER_DRIVER: overlay2
     # See https://github.com/docker-library/docker/pull/166
-    DOCKER_TLS_CERTDIR: ''
+    DOCKER_TLS_CERTDIR: '/certs'
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: '$DOCKER_TLS_CERTDIR/client'
     IMAGE: trivy-ci-test:$CI_COMMIT_SHA
     TRIVY_NO_PROGRESS: 'true'
     TRIVY_CACHE_DIR: '.trivycache/'
