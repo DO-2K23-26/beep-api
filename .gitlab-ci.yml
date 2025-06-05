@@ -41,7 +41,7 @@ lint:
     - if: $CI_COMMIT_REF_NAME  == $CI_DEFAULT_BRANCH
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
 
-snyk:
+code-test:
   stage: test
   image: snyk/snyk:docker
   variables:
@@ -53,10 +53,31 @@ snyk:
     - ls
     - echo "Running Snyk tests..."
     - echo SNYK_TOKEN
-    - snyk code test --json-file-output=./snyk.json --severity-threshold=medium
+    - snyk code test --json-file-output=./code-test.json --severity-threshold=medium
   artifacts:
     paths:
-      - snyk.json
+      - code-test.json
+    when: always
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+deps-scan:
+  stage: test
+  image: snyk/snyk:docker
+  variables:
+    SNYK_TOKEN: $SNYK_TOKEN_HUGO
+  tags:
+    - beep-runner
+  script:
+    - cd $CI_PROJECT_DIR
+    - echo "Running Snyk tests..."
+    - snyk test --json-file-output=./deps-scan.json
+  artifacts:
+    paths:
+      - deps-scan.json
     when: always
   rules:
     - if: $CI_COMMIT_TAG

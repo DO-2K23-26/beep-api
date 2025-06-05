@@ -1,3 +1,0 @@
-pnpm run prettier
-pnpm run lint
-pnpm run typecheck
