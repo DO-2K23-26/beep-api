@@ -43,8 +43,6 @@ lint:
 
 trivy:
   stage: test
-  tags:
-    - shared-runner-2
   image: docker:stable
   services:
     - name: docker:dind
