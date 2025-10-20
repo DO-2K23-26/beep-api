@@ -8,7 +8,9 @@ import { InvitationType } from '#apps/invitations/models/type'
 import InvitationService from '#apps/invitations/services/invitation_service'
 import UserAlreadyMember from '#apps/members/exceptions/user_already_member_exception'
 import Member from '#apps/members/models/member'
+import Role from '#apps/roles/models/role'
 import ServerService from '#apps/servers/services/server_service'
+import { DEFAULT_ROLE_SERVER } from '#apps/shared/constants/default_role_server'
 import UserService from '#apps/users/services/user_service'
 import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
@@ -34,6 +36,17 @@ export default class MemberService {
         code: 'E_USER_ALREADY_MEMBER',
       })
     })
+
+    const defaultRole = await Role.query()
+      .where('name', DEFAULT_ROLE_SERVER)
+      .where('serverId', serverId)
+      .first()
+    if (!defaultRole) {
+      throw new Error('Default role not found for the server')
+    }
+
+    await member.related('roles').attach([defaultRole.id])
+
     return member
   }
 
