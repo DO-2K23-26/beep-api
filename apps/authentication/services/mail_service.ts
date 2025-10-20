@@ -13,7 +13,7 @@ export default class MailService {
   async sendMail(email: string, subject: string, htmlMessage: string) {
     const emailApp: string = env.get('SMTP_USERNAME')
 
-    const logoUrl: string = 'https://beep.baptistebronsin.be/logo.png'
+    const logoUrl: string = 'https://beep-image.baptistebronsin.be/logo.png'
     const heightLogo: number = 100
     // Car l'image fait 400px par 400px, dans d'autres cas cette règle de mathématique est nécessaire
     const widthLogo: number = (heightLogo * 400) / 400
@@ -86,7 +86,9 @@ export default class MailService {
       await mail.send((message) => {
         message.to(email).from(emailApp, 'Beep').subject(subject).html(emailBody)
       })
-    } catch {
+    } catch (err: unknown) {
+      console.error('Failed to send email to ' + email + " with subject '" + subject + "'")
+      console.error(err)
       // TODO: handle error
     }
   }
