@@ -8,7 +8,7 @@ networks:
 
 services:
   postgres:
-    image: postgres
+    image: postgres:17
     volumes:
       - postgres_volume:/var/lib/postgresql/data
     environment:
@@ -20,7 +20,7 @@ services:
     ports:
       - '5432:5432'
   redis:
-    image: bitnami/redis:latest
+    image: redis:8.2
     environment:
       - REDIS_REPLICATION_MODE=master
       - REDIS_PASSWORD=password
@@ -31,7 +31,7 @@ services:
     networks:
       - beep
   minio:
-    image: 'minio/minio:latest'
+    image: minio/minio:RELEASE.2024-09-13T20-26-02Z
     ports:
       - '9000:9000'
       - '9001:9001'
